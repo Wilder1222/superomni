@@ -127,7 +127,7 @@ super-omni --skip gemini
 Open your project in Claude Code. Skills activate automatically via session hooks.
 
 Start with:
-- `/superpower` — **activate the full framework** and launch the guided default workflow
+- `/supervibe` — **activate the full framework** and launch the guided default workflow
 - `/brainstorm` — design a feature from scratch
 - `/write-plan` — turn an idea into an executable plan
 - `/execute-plan` — run the plan step by step
@@ -341,7 +341,7 @@ super-omni/
 │   └── architect.md          ← Architecture reviewer
 │
 ├── commands/                 ← Slash command definitions
-│   ├── superpower.md         ← /superpower — activate full framework + guided workflow
+│   ├── supervibe.md          ← /supervibe — activate full framework + guided workflow
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md

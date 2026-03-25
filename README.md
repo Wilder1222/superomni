@@ -22,13 +22,40 @@ Plan only what you need. But what you decide to build — build it fully.
 
 ### Install
 
+**One-line install (recommended):**
+
+```bash
+# Inspect before running (recommended):
+curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | less
+# Then install:
+curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | bash
+```
+
+**Or clone and run setup manually:**
+
 ```bash
 git clone https://github.com/Wilder1222/super-omni.git ~/.claude/skills/super-omni
 cd ~/.claude/skills/super-omni
 ./setup
 ```
 
-The setup script auto-detects your platform and configures accordingly. Supported platforms: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **OpenCode**.
+The setup script auto-detects your platform and configures accordingly. Supported platforms: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **OpenCode**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**.
+
+### Install for a Specific Platform
+
+```bash
+# Claude Code only
+./setup --only claude
+
+# VS Code (Cline / Continue.dev)
+./setup --only vscode
+
+# JetBrains AI Assistant
+./setup --only jetbrains
+
+# Skip a platform
+./setup --skip gemini
+```
 
 ### Use in Claude Code
 
@@ -45,6 +72,9 @@ Start with:
 - `/workflow` — sprint pipeline orchestration
 - `/qa` — quality assurance pass
 - `/security` — security audit
+- `/list-agents` — list all available agents
+- `/install-agent <url>` — install an agent from GitHub
+- `/create-agent <name>` — create a custom agent
 
 ---
 
@@ -86,6 +116,46 @@ Start with:
 | `ship` | Releasing software | Release + changelog |
 | `writing-skills` | Creating new skills | New skill file |
 | `workflow` | Sprint pipeline orchestration | Workflow plan + status |
+| `agent-management` | Installing or creating agents | Agent installed/created |
+
+---
+
+## Agent Library
+
+super-omni ships with specialized agents you can spawn for focused tasks:
+
+| Agent | Specialty |
+|-------|-----------|
+| `code-reviewer` | Structured code review (P0/P1/P2) |
+| `planner` | Task decomposition and plan writing |
+| `debugger` | Root-cause analysis and bug resolution |
+| `test-writer` | Behavior-verifying test suites |
+| `security-auditor` | OWASP-aware vulnerability identification |
+| `architect` | System design and architecture review |
+
+### Managing Agents
+
+```bash
+# List all available agents
+bin/agent-manager list
+
+# Get details about an agent
+bin/agent-manager info debugger
+
+# Install an agent from GitHub
+bin/agent-manager install https://raw.githubusercontent.com/user/repo/main/agents/my-agent.md
+
+# Install from a local file
+bin/agent-manager install ./my-custom-agent.md
+
+# Create a new custom agent (interactive scaffold)
+bin/agent-manager create my-specialist
+
+# Remove a user-installed agent
+bin/agent-manager remove my-specialist
+```
+
+See [`docs/AGENTS.md`](docs/AGENTS.md) for the full agent library reference.
 
 ---
 
@@ -100,6 +170,9 @@ super-omni supports multiple AI coding platforms:
 | **Codex** | ✅ Full support | Auto-detected by `./setup` |
 | **Gemini CLI** | ✅ Full support | Auto-detected by `./setup` |
 | **OpenCode** | ✅ Full support | Auto-detected by `./setup` |
+| **VS Code (Cline)** | ✅ Full support | Auto-detected by `./setup` |
+| **VS Code (Continue.dev)** | ✅ Full support | Auto-detected by `./setup` |
+| **JetBrains AI Assistant** | ✅ Full support | Auto-detected by `./setup` |
 
 The setup script detects your platform and configures hooks, skills injection, and session management accordingly.
 
@@ -186,10 +259,16 @@ super-omni/
 │   ├── security-audit/       ← Security vulnerability audit
 │   ├── qa/                   ← Quality assurance
 │   ├── careful/              ← Safety guardrails
-│   └── workflow/             ← Sprint pipeline orchestration
+│   ├── workflow/             ← Sprint pipeline orchestration
+│   └── agent-management/     ← Install, create, and manage agents
 │
-├── agents/
-│   └── code-reviewer.md      ← Code reviewer agent definition
+├── agents/                   ← Specialized agent definitions
+│   ├── code-reviewer.md      ← Code reviewer agent
+│   ├── planner.md            ← Strategic task planner
+│   ├── debugger.md           ← Root-cause debugger
+│   ├── test-writer.md        ← Test suite writer
+│   ├── security-auditor.md   ← OWASP-aware security auditor
+│   └── architect.md          ← Architecture reviewer
 │
 ├── commands/                 ← Slash command definitions
 │   ├── brainstorm.md
@@ -201,16 +280,26 @@ super-omni/
 │   ├── review.md
 │   ├── workflow.md
 │   ├── qa.md
-│   └── security.md
+│   ├── security.md
+│   ├── list-agents.md        ← List all agents
+│   ├── install-agent.md      ← Install agent from URL/path
+│   └── create-agent.md       ← Scaffold a new agent
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills
 │   └── gen-skill-docs.sh     ← Builds SKILL.md from SKILL.md.tmpl
 │
 ├── bin/
+│   ├── install               ← One-line bootstrap installer
+│   ├── agent-manager         ← Agent lifecycle manager
 │   ├── config                ← Config management
 │   ├── slug                  ← Project identifier
 │   └── analytics-log         ← Local telemetry writer
+│
+├── docs/
+│   ├── AGENTS.md             ← Agent library reference
+│   ├── DESIGN.md             ← Architectural design
+│   └── IMPLEMENTATION.md     ← Implementation details
 │
 ├── ETHOS.md                  ← Core philosophy
 ├── CLAUDE.md                 ← Project config for Claude
@@ -225,6 +314,7 @@ super-omni/
 - [`ETHOS.md`](ETHOS.md) — Core philosophy: Plan Lean, Execute Complete
 - [`docs/DESIGN.md`](docs/DESIGN.md) — Architectural design and fusion strategy
 - [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) — Implementation details and development guide
+- [`docs/AGENTS.md`](docs/AGENTS.md) — Agent library reference
 
 ---
 
@@ -232,7 +322,7 @@ super-omni/
 
 ### Building Skills from Templates
 
-22 skills use `{{PREAMBLE}}` as a macro that gets expanded during build:
+23 skills use `{{PREAMBLE}}` as a macro that gets expanded during build:
 
 ```bash
 # Build all skills

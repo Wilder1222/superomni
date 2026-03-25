@@ -1,6 +1,6 @@
 {
   "name": "super-omni",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A fused AI coding skill framework combining methodology-driven practices with engineering completeness. Plan Lean, Execute Complete.",
   "license": "MIT",
   "author": "Wilder1222",
@@ -9,7 +9,11 @@
     "ai-skills",
     "coding-assistant",
     "superpowers",
-    "developer-productivity"
+    "developer-productivity",
+    "agents",
+    "vscode",
+    "jetbrains",
+    "cursor"
   ],
   "scripts": {
     "build": "bash lib/gen-skill-docs.sh",

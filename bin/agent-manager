@@ -1,0 +1,289 @@
+#!/usr/bin/env bash
+# bin/agent-manager — super-omni agent lifecycle manager
+#
+# Manages agents in the agents/ directory:
+#   list    — show all available agents
+#   install — install an agent from GitHub URL or local path
+#   create  — scaffold a new custom agent
+#   info    — show details about a specific agent
+#   remove  — remove an installed agent
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "${SCRIPT_DIR}")"
+AGENTS_DIR="${REPO_ROOT}/agents"
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+usage() {
+  cat <<USAGE
+super-omni agent-manager — manage AI agents
+
+Usage: bin/agent-manager <command> [args]
+
+Commands:
+  list                    List all available agents
+  install <source>        Install an agent from a URL or local path
+                          Examples:
+                            bin/agent-manager install ./my-agent.md
+                            bin/agent-manager install https://raw.githubusercontent.com/user/repo/main/agent.md
+  create <name>           Scaffold a new custom agent
+  info <name>             Show details about an agent
+  remove <name>           Remove an installed agent
+
+Examples:
+  bin/agent-manager list
+  bin/agent-manager info code-reviewer
+  bin/agent-manager create data-analyst
+  bin/agent-manager install ./agents/custom/my-agent.md
+  bin/agent-manager install https://raw.githubusercontent.com/obra/superpowers/main/agents/some-agent.md
+USAGE
+  exit "${1:-0}"
+}
+
+err() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+# ── Commands ──────────────────────────────────────────────────────────────────
+
+cmd_list() {
+  echo ""
+  echo "super-omni Agents"
+  echo "═════════════════════════════════════"
+  echo ""
+  echo "Built-in agents:"
+  local count=0
+  for f in "${AGENTS_DIR}"/*.md; do
+    [ -f "${f}" ] || continue
+    name="$(basename "${f}" .md)"
+    # Extract first heading as description
+    desc="$(grep -m1 '^# ' "${f}" 2>/dev/null | sed 's/^# //' || echo "(no description)")"
+    printf "  %-22s %s\n" "${name}" "${desc}"
+    count=$((count + 1))
+  done
+
+  # Show installed (user) agents
+  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+  if [ -d "${USER_AGENTS_DIR}" ] && [ "$(ls -A "${USER_AGENTS_DIR}" 2>/dev/null)" ]; then
+    echo ""
+    echo "Installed agents (~/.omni-skills/agents):"
+    for f in "${USER_AGENTS_DIR}"/*.md; do
+      [ -f "${f}" ] || continue
+      name="$(basename "${f}" .md)"
+      desc="$(grep -m1 '^# ' "${f}" 2>/dev/null | sed 's/^# //' || echo "(no description)")"
+      printf "  %-22s %s\n" "${name}" "${desc}"
+      count=$((count + 1))
+    done
+  fi
+
+  echo ""
+  echo "Total: ${count} agent(s)"
+  echo ""
+}
+
+cmd_info() {
+  local name="${1}"
+  [ -n "${name}" ] || err "Usage: bin/agent-manager info <name>"
+
+  # Search built-in first, then user agents
+  local agent_file=""
+  for search_dir in "${AGENTS_DIR}" "${HOME}/.omni-skills/agents"; do
+    if [ -f "${search_dir}/${name}.md" ]; then
+      agent_file="${search_dir}/${name}.md"
+      break
+    fi
+  done
+
+  if [ -z "${agent_file}" ]; then
+    err "Agent '${name}' not found. Run 'bin/agent-manager list' to see available agents."
+  fi
+
+  echo ""
+  echo "Agent: ${name}"
+  echo "File:  ${agent_file}"
+  echo "═════════════════════════════════════"
+  echo ""
+  head -30 "${agent_file}"
+  echo ""
+  echo "... (run 'cat ${agent_file}' to see full agent definition)"
+  echo ""
+}
+
+cmd_install() {
+  local source="${1}"
+  [ -n "${source}" ] || err "Usage: bin/agent-manager install <url-or-path>"
+
+  # Ensure user agents dir exists
+  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+  mkdir -p "${USER_AGENTS_DIR}"
+
+  # Determine if source is a URL or local path
+  if [[ "${source}" =~ ^https?:// ]]; then
+    # Download from URL
+    local filename
+    filename="$(basename "${source}")"
+    # Ensure it ends with .md
+    [[ "${filename}" == *.md ]] || filename="${filename}.md"
+
+    local dest="${USER_AGENTS_DIR}/${filename}"
+
+    echo "→ Downloading agent from ${source}..."
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsSL "${source}" -o "${dest}" || err "Failed to download agent from ${source}"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -q "${source}" -O "${dest}" || err "Failed to download agent from ${source}"
+    else
+      err "Neither curl nor wget is available. Please install one to download agents."
+    fi
+
+    echo "  ✓ Agent installed: ${dest}"
+    echo "  Agent name: $(basename "${filename}" .md)"
+  else
+    # Copy from local path
+    [ -f "${source}" ] || err "Local file not found: ${source}"
+
+    local filename
+    filename="$(basename "${source}")"
+    [[ "${filename}" == *.md ]] || filename="${filename}.md"
+    local dest="${USER_AGENTS_DIR}/${filename}"
+
+    cp "${source}" "${dest}"
+    echo "  ✓ Agent installed from ${source} → ${dest}"
+    echo "  Agent name: $(basename "${filename}" .md)"
+  fi
+
+  echo ""
+  echo "To use this agent, reference it in your skills or commands:"
+  echo "  See agents/ directory for examples"
+}
+
+cmd_create() {
+  local name="${1}"
+  [ -n "${name}" ] || err "Usage: bin/agent-manager create <name>"
+
+  # Validate name (lowercase, hyphens only)
+  if ! [[ "${name}" =~ ^[a-z][a-z0-9-]*$ ]]; then
+    err "Agent name must be lowercase letters, numbers, and hyphens only (e.g. 'my-agent')"
+  fi
+
+  # Determine output path
+  local out_file=""
+  # Ask whether to put in repo agents/ or user agents/
+  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+
+  if [ -t 0 ]; then
+    echo "Where should the agent be created?"
+    echo "  [1] ${AGENTS_DIR}/${name}.md  (project agents — tracked in git)"
+    echo "  [2] ${USER_AGENTS_DIR}/${name}.md  (user agents — personal)"
+    read -r -p "Choice [1/2]: " choice
+    if [ "${choice}" = "2" ]; then
+      mkdir -p "${USER_AGENTS_DIR}"
+      out_file="${USER_AGENTS_DIR}/${name}.md"
+    else
+      out_file="${AGENTS_DIR}/${name}.md"
+    fi
+  else
+    # Non-interactive: default to project agents/
+    out_file="${AGENTS_DIR}/${name}.md"
+  fi
+
+  if [ -f "${out_file}" ]; then
+    err "Agent '${name}' already exists at ${out_file}"
+  fi
+
+  # Derive a display name (capitalize first letter, replace hyphens with spaces)
+  local display_name
+  display_name="$(echo "${name}" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')"
+
+  cat > "${out_file}" <<TEMPLATE
+# ${display_name} Agent
+
+You are the **super-omni ${display_name}** — an AI agent specialized in [describe your agent's specialty here].
+
+## Your Identity
+
+[Describe the agent's role, expertise, and approach in 2-3 sentences.]
+
+## Iron Law
+
+[State the most important rule this agent must never violate.]
+
+## Your Process
+
+### Phase 1: [Phase Name]
+
+[Describe what the agent does in this phase.]
+
+\`\`\`bash
+# Example commands this agent uses
+\`\`\`
+
+### Phase 2: [Phase Name]
+
+[Describe what the agent does in this phase.]
+
+### Phase 3: Output
+
+[Describe the agent's output format.]
+
+## Output Format
+
+\`\`\`
+${display_name^^} REPORT
+════════════════════════════════════════
+Agent:    super-omni ${display_name}
+[Key metrics and results]
+
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+════════════════════════════════════════
+\`\`\`
+TEMPLATE
+
+  echo ""
+  echo "  ✓ Agent scaffolded: ${out_file}"
+  echo ""
+  echo "Next steps:"
+  echo "  1. Edit ${out_file} to define your agent's behavior"
+  echo "  2. Test by referencing it in a skill or command"
+  echo "  3. Add to skills/ if this agent has reusable protocols"
+  echo ""
+}
+
+cmd_remove() {
+  local name="${1}"
+  [ -n "${name}" ] || err "Usage: bin/agent-manager remove <name>"
+
+  # Only allow removing user-installed agents (not built-ins)
+  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+  local agent_file="${USER_AGENTS_DIR}/${name}.md"
+
+  if [ ! -f "${agent_file}" ]; then
+    # Check if it's a built-in
+    if [ -f "${AGENTS_DIR}/${name}.md" ]; then
+      err "Cannot remove built-in agent '${name}'. Built-in agents are part of the super-omni framework."
+    else
+      err "Agent '${name}' not found in user agents (~/.omni-skills/agents/)."
+    fi
+  fi
+
+  rm "${agent_file}"
+  echo "  ✓ Agent '${name}' removed from ${USER_AGENTS_DIR}"
+}
+
+# ── Dispatch ──────────────────────────────────────────────────────────────────
+
+COMMAND="${1:-}"
+[ -n "${COMMAND}" ] || usage
+
+case "${COMMAND}" in
+  list)    cmd_list ;;
+  info)    cmd_info "${2:-}" ;;
+  install) cmd_install "${2:-}" ;;
+  create)  cmd_create "${2:-}" ;;
+  remove)  cmd_remove "${2:-}" ;;
+  --help|-h|help) usage 0 ;;
+  *) echo "Unknown command: ${COMMAND}"; echo ""; usage 1 ;;
+esac

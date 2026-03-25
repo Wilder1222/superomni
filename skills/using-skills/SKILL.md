@@ -78,6 +78,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Quality assurance and testing | `qa` |
 | Safety guardrails for high-risk operations | `careful` |
 | Sprint pipeline orchestration | `workflow` |
+| Managing, installing, or creating agents | `agent-management` |
 
 ## The 6 Decision Principles
 

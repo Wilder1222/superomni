@@ -29,20 +29,26 @@ detect_platform() {
 # ── Help ──────────────────────────────────────────────────────────────────────
 show_help() {
   cat <<HELP
-super-omni v${VERSION} — Multi-platform AI skill framework installer
+super-omni v${VERSION} — AI skill framework setup
 
-Usage: ./setup [OPTIONS]
+Usage: setup [OPTIONS]
+
+  This script is run automatically by:
+    npm install -g super-omni   (global install)
+    npx super-omni              (project-level install)
+
+  For Claude Code, install via the marketplace instead:
+    /plugin marketplace add Wilder1222/super-omni
 
 Options:
   --help, -h        Show this help message
   --only <platform> Install for a single platform only
-                    (claude, cursor, codex, gemini, opencode, vscode, jetbrains)
+                    (cursor, codex, gemini, opencode, vscode, jetbrains)
   --skip <platform> Skip a specific platform (repeatable)
   --dry-run         Show what would be done without making changes
   --verbose         Show detailed output
 
 Supported platforms:
-  claude     Claude Code       (~/.claude/skills/)
   cursor     Cursor            (~/.cursor/skills/)
   codex      Codex CLI         (~/.agents/skills/)
   gemini     Gemini CLI        (~/.gemini/skills/)
@@ -51,11 +57,10 @@ Supported platforms:
   jetbrains  JetBrains AI Assistant (~/.jetbrains/super-omni/)
 
 Examples:
-  ./setup                     # Auto-detect and install all
-  ./setup --only claude       # Install for Claude Code only
-  ./setup --only vscode       # Install for VS Code only
-  ./setup --skip gemini       # Install for all except Gemini
-  ./setup --dry-run           # Preview what would happen
+  npm install -g super-omni   # Auto-detect and install all platforms
+  npx super-omni              # Same, without a permanent global install
+  npx super-omni --only vscode
+  npx super-omni --skip gemini
 HELP
   exit 0
 }
@@ -553,10 +558,10 @@ done
 
 echo ""
 echo "Next steps:"
-echo "  1. Open a project in Claude Code"
-echo "  2. All slash commands are immediately available:"
-echo "     /vibe  /brainstorm  /write-plan  /execute-plan  /review"
-echo "  3. Skills auto-activate via session hooks for other triggers"
+echo "  1. Open your project in your AI IDE"
+echo "  2. Skills activate automatically via session hooks"
+echo "  3. For Claude Code users: install via the marketplace instead:"
+echo "       /plugin marketplace add Wilder1222/super-omni"
 echo ""
 echo "To disable auto-skill triggers:"
 echo "  ${SCRIPT_DIR}/bin/config set proactive false"

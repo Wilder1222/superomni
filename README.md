@@ -22,95 +22,47 @@ Plan only what you need. But what you decide to build — build it fully.
 
 ### Install
 
-Choose the method that fits your workflow:
+---
+
+**① Claude Code — marketplace install (recommended):**
+
+Inside a Claude Code session, register and install the skill from GitHub:
+
+```
+/plugin marketplace add Wilder1222/super-omni
+```
+
+Claude Code will fetch the `claude-skill.json` manifest, install all skills, register slash commands, and set up session hooks automatically.
+
+Then start with:
+
+```
+/vibe
+```
 
 ---
 
-**① npm global install (recommended for regular use):**
+**② Other IDEs & CLIs — npm global install:**
+
+For **Cursor**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**, **Codex**, **Gemini CLI**, and **OpenCode**:
 
 ```bash
 npm install -g super-omni
 ```
 
-Setup runs automatically after install. To re-run at any time:
-
-```bash
-super-omni
-# or with options:
-super-omni --only claude
-super-omni --skip gemini
-super-omni --dry-run
-```
+The `postinstall` hook auto-detects your platform and links skills, commands, and hooks automatically.
 
 ---
 
-**② npx — run once without a permanent install:**
+**③ Project-level install (no global install):**
 
 ```bash
 npx super-omni
-# or with options:
-npx super-omni --only claude
 ```
+
+Runs the same auto-detection and linking as the global install, without installing anything permanently.
 
 ---
-
-**③ Claude Code marketplace / skill install:**
-
-Install the full framework via npm — the `postinstall` hook links skills automatically:
-
-```bash
-npm install -g super-omni   # auto-links skills to ~/.claude/skills/super-omni
-```
-
-The `claude-skill.json` manifest at the package root provides the metadata Claude Code needs to discover commands, agents, and hooks automatically.
-
-To add skills via the skill manager CLI:
-
-```bash
-bin/skill-manager install <url-or-path>
-bin/skill-manager list
-```
-
----
-
-**④ One-line curl install:**
-
-```bash
-# Inspect before running (recommended):
-curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | less
-# Then install:
-curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | bash
-```
-
----
-
-**⑤ Clone and run setup manually:**
-
-```bash
-git clone https://github.com/Wilder1222/super-omni.git ~/.claude/skills/super-omni
-cd ~/.claude/skills/super-omni
-./setup
-```
-
-The setup script auto-detects your platform and configures accordingly. Supported platforms: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **OpenCode**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**.
-
-### Install for a Specific Platform
-
-```bash
-# Claude Code only
-super-omni --only claude          # if installed globally
-npx super-omni --only claude      # via npx
-./setup --only claude             # manual clone
-
-# VS Code (Cline / Continue.dev)
-super-omni --only vscode
-
-# JetBrains AI Assistant
-super-omni --only jetbrains
-
-# Skip a platform
-super-omni --skip gemini
-```
 
 ### Use in Claude Code
 
@@ -329,7 +281,6 @@ super-omni/
 │   └── gen-skill-docs.sh     ← Builds SKILL.md from SKILL.md.tmpl
 │
 ├── bin/
-│   ├── install               ← One-line bootstrap installer
 │   ├── agent-manager         ← Agent lifecycle manager
 │   ├── config                ← Config management
 │   ├── slug                  ← Project identifier

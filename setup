@@ -1,81 +1,319 @@
 #!/usr/bin/env bash
 # super-omni setup script
-# Installs the skill framework for Claude Code
+# Installs the skill framework for Claude Code, Cursor, Codex CLI, Gemini CLI, and OpenCode
 
 set -e
 
+VERSION="0.2.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAUDE_SKILLS_DIR="${HOME}/.claude/skills"
-INSTALL_DIR="${CLAUDE_SKILLS_DIR}/super-omni"
 OMNI_STATE_DIR="${HOME}/.omni-skills"
 
+# ── Platform detection ────────────────────────────────────────────────────────
+IS_WSL=false
+IS_MACOS=false
+IS_LINUX=false
+
+detect_platform() {
+  case "$(uname -s)" in
+    Darwin)  IS_MACOS=true ;;
+    Linux)
+      IS_LINUX=true
+      if grep -qiE '(microsoft|wsl)' /proc/version 2>/dev/null; then
+        IS_WSL=true
+      fi
+      ;;
+  esac
+}
+
+# ── Help ──────────────────────────────────────────────────────────────────────
+show_help() {
+  cat <<HELP
+super-omni v${VERSION} — Multi-platform AI skill framework installer
+
+Usage: ./setup [OPTIONS]
+
+Options:
+  --help, -h        Show this help message
+  --only <platform> Install for a single platform only
+                    (claude, cursor, codex, gemini, opencode)
+  --skip <platform> Skip a specific platform (repeatable)
+  --dry-run         Show what would be done without making changes
+  --verbose         Show detailed output
+
+Supported platforms:
+  claude    Claude Code    (~/.claude/skills/)
+  cursor    Cursor         (~/.cursor/skills/)
+  codex     Codex CLI      (~/.agents/skills/)
+  gemini    Gemini CLI     (~/.gemini/skills/)
+  opencode  OpenCode       (~/.opencode/skills/)
+
+Examples:
+  ./setup                     # Auto-detect and install all
+  ./setup --only claude       # Install for Claude Code only
+  ./setup --skip gemini       # Install for all except Gemini
+  ./setup --dry-run           # Preview what would happen
+HELP
+  exit 0
+}
+
+# ── CLI argument parsing ──────────────────────────────────────────────────────
+ONLY_PLATFORM=""
+SKIP_PLATFORMS=""
+DRY_RUN=false
+VERBOSE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --help|-h)   show_help ;;
+    --only)      ONLY_PLATFORM="$2"; shift 2 ;;
+    --skip)      SKIP_PLATFORMS="${SKIP_PLATFORMS} $2"; shift 2 ;;
+    --dry-run)   DRY_RUN=true; shift ;;
+    --verbose)   VERBOSE=true; shift ;;
+    *)           echo "Unknown option: $1 (try --help)"; exit 1 ;;
+  esac
+done
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+INSTALLED_PLATFORMS=""
+
+# link_skills <skills_dir> <platform_label> <platform_key>
+#   Creates <skills_dir>/super-omni as a symlink to SCRIPT_DIR.
+#   Idempotent: re-creates stale symlinks, skips real directories.
+link_skills() {
+  local skills_dir="$1"
+  local label="$2"
+  local key="$3"
+  local target="${skills_dir}/super-omni"
+
+  if $DRY_RUN; then
+    echo "  [dry-run] Would link ${SCRIPT_DIR} → ${target}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
+    return
+  fi
+
+  mkdir -p "${skills_dir}"
+
+  # Remove existing symlink so we can refresh it
+  if [ -L "${target}" ]; then
+    rm "${target}"
+  fi
+
+  if [ -d "${target}" ]; then
+    echo "  ⚠ ${target} already exists (not a symlink). Skipping."
+    return
+  fi
+
+  ln -s "${SCRIPT_DIR}" "${target}"
+  echo "  ✓ ${label}: linked → ${target}"
+  INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
+}
+
+# has_cli <command>
+#   Returns 0 if the command exists on PATH.
+has_cli() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# should_install <platform_key>
+#   Returns 0 if we should install for the given platform.
+should_install() {
+  local key="$1"
+  # --only mode: only install the specified platform
+  if [ -n "${ONLY_PLATFORM}" ]; then
+    [ "${ONLY_PLATFORM}" = "${key}" ] && return 0 || return 1
+  fi
+  # --skip mode: skip the specified platforms
+  case "${SKIP_PLATFORMS}" in
+    *" ${key}"*) return 1 ;;
+  esac
+  return 0
+}
+
+# ── Banner ────────────────────────────────────────────────────────────────────
 echo ""
 echo "╔══════════════════════════════════════════╗"
-echo "║         super-omni  v0.1.0               ║"
+echo "║         super-omni  v${VERSION}               ║"
 echo "║   Plan Lean, Execute Complete            ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
+detect_platform
+
+if $IS_WSL; then
+  echo "  ℹ Windows/WSL detected"
+elif $IS_MACOS; then
+  echo "  ℹ macOS detected"
+elif $IS_LINUX; then
+  echo "  ℹ Linux detected"
+fi
+if $DRY_RUN; then
+  echo "  ℹ Dry-run mode — no changes will be made"
+fi
+echo ""
+
 # ── 1. Create state directories ──────────────────────────────────────────────
 echo "→ Creating state directories..."
-mkdir -p "${OMNI_STATE_DIR}/sessions"
-mkdir -p "${OMNI_STATE_DIR}/analytics"
-mkdir -p "${OMNI_STATE_DIR}/projects"
+if ! $DRY_RUN; then
+  mkdir -p "${OMNI_STATE_DIR}/sessions"
+  mkdir -p "${OMNI_STATE_DIR}/analytics"
+  mkdir -p "${OMNI_STATE_DIR}/projects"
+fi
 echo "  ✓ ${OMNI_STATE_DIR}"
 
 # ── 2. Build skill docs from templates ────────────────────────────────────────
 echo "→ Building skill docs from templates..."
-bash "${SCRIPT_DIR}/lib/gen-skill-docs.sh"
+if ! $DRY_RUN; then
+  bash "${SCRIPT_DIR}/lib/gen-skill-docs.sh"
+fi
 echo "  ✓ Skill docs generated"
 
-# ── 3. Link or copy into Claude skills directory ──────────────────────────────
-mkdir -p "${CLAUDE_SKILLS_DIR}"
+# ── 3. Detect platforms & install skills ──────────────────────────────────────
+echo "→ Detecting AI platforms..."
 
-if [ -L "${INSTALL_DIR}" ]; then
-  rm "${INSTALL_DIR}"
+# ── 3a. Claude Code (primary) ────────────────────────────────────────────────
+CLAUDE_SKILLS_DIR="${HOME}/.claude/skills"
+if should_install "claude"; then
+  if has_cli claude || [ -d "${HOME}/.claude" ]; then
+    echo "  ● Claude Code detected"
+    link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
+  elif [ -n "${ONLY_PLATFORM}" ]; then
+    echo "  ● Claude Code (forced via --only)"
+    link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
+  else
+    # Always install for Claude as primary even if CLI not found
+    echo "  ● Claude Code (primary — always installed)"
+    link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
+  fi
 fi
 
-if [ -d "${INSTALL_DIR}" ]; then
-  echo "  ⚠ ${INSTALL_DIR} already exists (not a symlink). Skipping link."
-else
-  ln -s "${SCRIPT_DIR}" "${INSTALL_DIR}"
-  echo "  ✓ Linked ${SCRIPT_DIR} → ${INSTALL_DIR}"
+# ── 3b. Cursor ────────────────────────────────────────────────────────────────
+CURSOR_SKILLS_DIR="${HOME}/.cursor/skills"
+if should_install "cursor"; then
+  if has_cli cursor || [ -d "${HOME}/.cursor" ]; then
+    echo "  ● Cursor detected"
+    link_skills "${CURSOR_SKILLS_DIR}" "Cursor" "cursor"
+  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "cursor" ]; then
+    echo "  ● Cursor (forced via --only)"
+    link_skills "${CURSOR_SKILLS_DIR}" "Cursor" "cursor"
+  else
+    $VERBOSE && echo "  ○ Cursor not detected (skipped)" || true
+  fi
 fi
 
-# ── 4. Register hooks ─────────────────────────────────────────────────────────
+# ── 3c. Codex CLI (OpenAI) ───────────────────────────────────────────────────
+CODEX_SKILLS_DIR="${HOME}/.agents/skills"
+if should_install "codex"; then
+  if has_cli codex || [ -d "${HOME}/.agents" ]; then
+    echo "  ● Codex CLI detected"
+    link_skills "${CODEX_SKILLS_DIR}" "Codex CLI" "codex"
+  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "codex" ]; then
+    echo "  ● Codex CLI (forced via --only)"
+    link_skills "${CODEX_SKILLS_DIR}" "Codex CLI" "codex"
+  else
+    $VERBOSE && echo "  ○ Codex CLI not detected (skipped)" || true
+  fi
+fi
+
+# ── 3d. Gemini CLI ───────────────────────────────────────────────────────────
+GEMINI_SKILLS_DIR="${HOME}/.gemini/skills"
+if should_install "gemini"; then
+  if has_cli gemini || [ -d "${HOME}/.gemini" ]; then
+    echo "  ● Gemini CLI detected"
+    link_skills "${GEMINI_SKILLS_DIR}" "Gemini CLI" "gemini"
+  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "gemini" ]; then
+    echo "  ● Gemini CLI (forced via --only)"
+    link_skills "${GEMINI_SKILLS_DIR}" "Gemini CLI" "gemini"
+  else
+    $VERBOSE && echo "  ○ Gemini CLI not detected (skipped)" || true
+  fi
+fi
+
+# ── 3e. OpenCode ─────────────────────────────────────────────────────────────
+OPENCODE_SKILLS_DIR="${HOME}/.opencode/skills"
+if should_install "opencode"; then
+  if has_cli opencode || [ -d "${HOME}/.opencode" ]; then
+    echo "  ● OpenCode detected"
+    link_skills "${OPENCODE_SKILLS_DIR}" "OpenCode" "opencode"
+  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "opencode" ]; then
+    echo "  ● OpenCode (forced via --only)"
+    link_skills "${OPENCODE_SKILLS_DIR}" "OpenCode" "opencode"
+  else
+    $VERBOSE && echo "  ○ OpenCode not detected (skipped)" || true
+  fi
+fi
+
+# ── 4. Register hooks (Claude Code specific) ─────────────────────────────────
 HOOKS_SOURCE="${SCRIPT_DIR}/hooks/hooks.json"
 CLAUDE_HOOKS_DIR="${HOME}/.claude/hooks"
-mkdir -p "${CLAUDE_HOOKS_DIR}"
 
-if [ -f "${HOOKS_SOURCE}" ]; then
-  cp "${HOOKS_SOURCE}" "${CLAUDE_HOOKS_DIR}/super-omni-hooks.json"
-  echo "  ✓ Hooks registered"
+if should_install "claude"; then
+  echo "→ Registering Claude Code hooks..."
+  if ! $DRY_RUN; then
+    mkdir -p "${CLAUDE_HOOKS_DIR}"
+    if [ -f "${HOOKS_SOURCE}" ]; then
+      cp "${HOOKS_SOURCE}" "${CLAUDE_HOOKS_DIR}/super-omni-hooks.json"
+      echo "  ✓ Hooks registered"
+    fi
+  else
+    echo "  [dry-run] Would copy hooks.json → ${CLAUDE_HOOKS_DIR}"
+  fi
 fi
 
 # ── 5. Make bin scripts executable ────────────────────────────────────────────
-chmod +x "${SCRIPT_DIR}/bin/config" 2>/dev/null || true
-chmod +x "${SCRIPT_DIR}/bin/slug" 2>/dev/null || true
-chmod +x "${SCRIPT_DIR}/bin/analytics-log" 2>/dev/null || true
-chmod +x "${SCRIPT_DIR}/lib/gen-skill-docs.sh" 2>/dev/null || true
+echo "→ Setting executable permissions..."
+if ! $DRY_RUN; then
+  chmod +x "${SCRIPT_DIR}/bin/config" 2>/dev/null || true
+  chmod +x "${SCRIPT_DIR}/bin/slug" 2>/dev/null || true
+  chmod +x "${SCRIPT_DIR}/bin/analytics-log" 2>/dev/null || true
+  chmod +x "${SCRIPT_DIR}/lib/gen-skill-docs.sh" 2>/dev/null || true
+fi
 echo "  ✓ Scripts made executable"
 
 # ── 6. Initialize default config ─────────────────────────────────────────────
 CONFIG_FILE="${OMNI_STATE_DIR}/config"
-if [ ! -f "${CONFIG_FILE}" ]; then
-  cat > "${CONFIG_FILE}" << 'EOF'
+if ! $DRY_RUN; then
+  if [ ! -f "${CONFIG_FILE}" ]; then
+    cat > "${CONFIG_FILE}" << 'EOF'
 proactive=true
 telemetry=true
 EOF
-  echo "  ✓ Default config initialized (proactive=true, telemetry=true)"
+    echo "  ✓ Default config initialized (proactive=true, telemetry=true)"
+  else
+    echo "  ✓ Config already exists at ${CONFIG_FILE}"
+  fi
 else
-  echo "  ✓ Config already exists at ${CONFIG_FILE}"
+  echo "  [dry-run] Would initialize config at ${CONFIG_FILE}"
 fi
 
+# ── 7. Summary ────────────────────────────────────────────────────────────────
 echo ""
-echo "✅ super-omni installed successfully!"
+if [ -z "${INSTALLED_PLATFORMS}" ]; then
+  echo "⚠ No platforms were installed. Use --only <platform> to force."
+  exit 1
+fi
+
+# Count installed platforms
+PLATFORM_COUNT=0
+for _ in ${INSTALLED_PLATFORMS}; do
+  PLATFORM_COUNT=$((PLATFORM_COUNT + 1))
+done
+
+echo "✅ super-omni v${VERSION} installed for ${PLATFORM_COUNT} platform(s)"
+echo ""
+echo "Installed platforms:"
+for key in ${INSTALLED_PLATFORMS}; do
+  case "${key}" in
+    claude)   echo "  • Claude Code   → ~/.claude/skills/super-omni" ;;
+    cursor)   echo "  • Cursor        → ~/.cursor/skills/super-omni" ;;
+    codex)    echo "  • Codex CLI     → ~/.agents/skills/super-omni" ;;
+    gemini)   echo "  • Gemini CLI    → ~/.gemini/skills/super-omni" ;;
+    opencode) echo "  • OpenCode      → ~/.opencode/skills/super-omni" ;;
+  esac
+done
+
 echo ""
 echo "Next steps:"
-echo "  1. Open a project in Claude Code"
+echo "  1. Open a project in your AI coding tool"
 echo "  2. Skills will auto-activate via session hooks"
 echo "  3. Type /brainstorm, /write-plan, or /retro to get started"
 echo ""

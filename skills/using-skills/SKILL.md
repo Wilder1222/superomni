@@ -73,6 +73,11 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Deploying/releasing software | `ship` |
 | Creating a new skill | `writing-skills` |
 | Exploratory investigation | `investigate` |
+| Responding to review feedback | `receiving-code-review` |
+| Auditing for security vulnerabilities | `security-audit` |
+| Quality assurance and testing | `qa` |
+| Safety guardrails for high-risk operations | `careful` |
+| Sprint pipeline orchestration | `workflow` |
 
 ## The 6 Decision Principles
 

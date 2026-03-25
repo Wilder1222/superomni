@@ -1,0 +1,35 @@
+{
+  "name": "super-omni",
+  "version": "0.3.0",
+  "type": "skill",
+  "displayName": "super-omni",
+  "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
+  "author": "Wilder1222",
+  "repository": "https://github.com/Wilder1222/super-omni",
+  "homepage": "https://github.com/Wilder1222/super-omni",
+  "skillsDir": "./skills",
+  "agentsDir": "./agents",
+  "entrySkill": "skills/using-skills/SKILL.md",
+  "commands": [
+    { "name": "brainstorm",    "file": "commands/brainstorm.md" },
+    { "name": "write-plan",    "file": "commands/write-plan.md" },
+    { "name": "execute-plan",  "file": "commands/execute-plan.md" },
+    { "name": "retro",         "file": "commands/retro.md" },
+    { "name": "ship",          "file": "commands/ship.md" },
+    { "name": "investigate",   "file": "commands/investigate.md" },
+    { "name": "review",        "file": "commands/review.md" },
+    { "name": "workflow",      "file": "commands/workflow.md" },
+    { "name": "qa",            "file": "commands/qa.md" },
+    { "name": "security",      "file": "commands/security.md" },
+    { "name": "list-agents",   "file": "commands/list-agents.md" },
+    { "name": "install-agent", "file": "commands/install-agent.md" },
+    { "name": "create-agent",  "file": "commands/create-agent.md" }
+  ],
+  "hooks": {
+    "source": "./hooks/hooks.json",
+    "installDir": "~/.claude/hooks/super-omni-hooks.json"
+  },
+  "install": {
+    "script": "./setup"
+  }
+}

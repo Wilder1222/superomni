@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # super-omni setup script
-# Installs the skill framework for Claude Code, Cursor, Codex CLI, Gemini CLI, and OpenCode
+# Installs the skill framework for Claude Code, Cursor, Codex CLI, Gemini CLI,
+# OpenCode, VS Code (Cline/Continue.dev/Copilot), and JetBrains AI Assistant.
 
 set -e
 
-VERSION="0.2.0"
+VERSION="0.3.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OMNI_STATE_DIR="${HOME}/.omni-skills"
 
@@ -35,21 +36,24 @@ Usage: ./setup [OPTIONS]
 Options:
   --help, -h        Show this help message
   --only <platform> Install for a single platform only
-                    (claude, cursor, codex, gemini, opencode)
+                    (claude, cursor, codex, gemini, opencode, vscode, jetbrains)
   --skip <platform> Skip a specific platform (repeatable)
   --dry-run         Show what would be done without making changes
   --verbose         Show detailed output
 
 Supported platforms:
-  claude    Claude Code    (~/.claude/skills/)
-  cursor    Cursor         (~/.cursor/skills/)
-  codex     Codex CLI      (~/.agents/skills/)
-  gemini    Gemini CLI     (~/.gemini/skills/)
-  opencode  OpenCode       (~/.opencode/skills/)
+  claude     Claude Code       (~/.claude/skills/)
+  cursor     Cursor            (~/.cursor/skills/)
+  codex      Codex CLI         (~/.agents/skills/)
+  gemini     Gemini CLI        (~/.gemini/skills/)
+  opencode   OpenCode          (~/.opencode/skills/)
+  vscode     VS Code (Cline/Continue.dev/Copilot) (~/.vscode-super-omni/)
+  jetbrains  JetBrains AI Assistant (~/.jetbrains/super-omni/)
 
 Examples:
   ./setup                     # Auto-detect and install all
   ./setup --only claude       # Install for Claude Code only
+  ./setup --only vscode       # Install for VS Code only
   ./setup --skip gemini       # Install for all except Gemini
   ./setup --dry-run           # Preview what would happen
 HELP
@@ -242,6 +246,195 @@ if should_install "opencode"; then
   fi
 fi
 
+# ── 3f. VS Code (Cline / Continue.dev / GitHub Copilot) ──────────────────────
+# Writes skills into ~/.vscode-super-omni/ and generates per-extension configs.
+VSCODE_OMNI_DIR="${HOME}/.vscode-super-omni"
+install_vscode() {
+  local label="$1"
+  local key="$2"
+
+  if $DRY_RUN; then
+    echo "  [dry-run] Would set up VS Code support at ${VSCODE_OMNI_DIR}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
+    return
+  fi
+
+  mkdir -p "${VSCODE_OMNI_DIR}"
+
+  # Symlink the full skill set so VS Code extensions can find it
+  if [ -L "${VSCODE_OMNI_DIR}/skills" ]; then
+    rm "${VSCODE_OMNI_DIR}/skills"
+  fi
+  if [ ! -d "${VSCODE_OMNI_DIR}/skills" ]; then
+    ln -s "${SCRIPT_DIR}/skills" "${VSCODE_OMNI_DIR}/skills"
+  fi
+
+  # ── Cline (rooveterinaryinc.roo-cline / saoudrizwan.claude-dev) ───────────
+  # Cline reads custom instructions from .clinerules in the project root or
+  # from a global file. We write a global pointer.
+  CLINE_RULES_DIR="${HOME}/.cline"
+  mkdir -p "${CLINE_RULES_DIR}"
+  cat > "${CLINE_RULES_DIR}/super-omni.md" <<CLINE_EOF
+# super-omni Skills
+
+Skills directory: ${VSCODE_OMNI_DIR}/skills
+Agent library:    ${SCRIPT_DIR}/agents
+
+Load \`${VSCODE_OMNI_DIR}/skills/using-skills/SKILL.md\` at session start.
+See \`${SCRIPT_DIR}/agents/\` for specialized agents.
+CLINE_EOF
+
+  # ── Continue.dev ──────────────────────────────────────────────────────────
+  CONTINUE_CONFIG_DIR="${HOME}/.continue"
+  mkdir -p "${CONTINUE_CONFIG_DIR}"
+  # Only add our context provider if not already present
+  if [ -f "${CONTINUE_CONFIG_DIR}/config.json" ]; then
+    if ! grep -q "super-omni" "${CONTINUE_CONFIG_DIR}/config.json" 2>/dev/null; then
+      echo "  ℹ Continue.dev config exists — add the following context path manually:"
+      echo "      ${VSCODE_OMNI_DIR}/skills"
+    fi
+  else
+    cat > "${CONTINUE_CONFIG_DIR}/config.json" <<CONTINUE_EOF
+{
+  "contextProviders": [
+    {
+      "name": "file",
+      "params": {
+        "nRetrieve": 10,
+        "nFinal": 5
+      }
+    }
+  ],
+  "customCommands": [
+    {
+      "name": "super-omni",
+      "description": "Load super-omni skills",
+      "prompt": "Load and follow the skills in ${VSCODE_OMNI_DIR}/skills/using-skills/SKILL.md. Then ask me what I need help with."
+    }
+  ],
+  "models": []
+}
+CONTINUE_EOF
+  fi
+
+  echo "  ✓ ${label}: configured → ${VSCODE_OMNI_DIR}"
+  INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
+}
+
+if should_install "vscode"; then
+  # Detect VS Code or its extensions
+  if has_cli code || [ -d "${HOME}/.vscode" ] || [ -d "${HOME}/.vscode-server" ]; then
+    echo "  ● VS Code detected"
+    install_vscode "VS Code (Cline/Continue.dev)" "vscode"
+  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "vscode" ]; then
+    echo "  ● VS Code (forced via --only)"
+    install_vscode "VS Code (Cline/Continue.dev)" "vscode"
+  else
+    $VERBOSE && echo "  ○ VS Code not detected (skipped)" || true
+  fi
+fi
+
+# ── 3g. JetBrains AI Assistant ───────────────────────────────────────────────
+JETBRAINS_OMNI_DIR="${HOME}/.jetbrains/super-omni"
+install_jetbrains() {
+  local label="$1"
+  local key="$2"
+
+  if $DRY_RUN; then
+    echo "  [dry-run] Would set up JetBrains support at ${JETBRAINS_OMNI_DIR}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
+    return
+  fi
+
+  mkdir -p "${JETBRAINS_OMNI_DIR}"
+
+  # Symlink skills
+  if [ -L "${JETBRAINS_OMNI_DIR}/skills" ]; then
+    rm "${JETBRAINS_OMNI_DIR}/skills"
+  fi
+  if [ ! -d "${JETBRAINS_OMNI_DIR}/skills" ]; then
+    ln -s "${SCRIPT_DIR}/skills" "${JETBRAINS_OMNI_DIR}/skills"
+  fi
+
+  # Write a prompt file for JetBrains AI Assistant custom prompts
+  # (stored in ~/.config/JetBrains/<product>/ai-prompts/ or similar)
+  # We write a portable README to guide manual setup.
+  cat > "${JETBRAINS_OMNI_DIR}/SETUP.md" <<JB_EOF
+# super-omni for JetBrains AI Assistant
+
+## Setup Instructions
+
+1. Open JetBrains IDE → Settings → Tools → AI Assistant → Prompts
+2. Click "+" to add a new prompt
+3. Name: "super-omni"
+4. Content:
+   \`\`\`
+   You are augmented with the super-omni skill framework.
+   Skills directory: ${JETBRAINS_OMNI_DIR}/skills
+   Agent library:    ${SCRIPT_DIR}/agents
+
+   Load and follow: ${JETBRAINS_OMNI_DIR}/skills/using-skills/SKILL.md
+   \`\`\`
+
+## Available Skills
+
+Skills are located at: ${JETBRAINS_OMNI_DIR}/skills/
+
+## Available Agents
+
+Agents are located at: ${SCRIPT_DIR}/agents/
+JB_EOF
+
+  echo "  ✓ ${label}: configured → ${JETBRAINS_OMNI_DIR}"
+  echo "  ℹ See ${JETBRAINS_OMNI_DIR}/SETUP.md for JetBrains AI Assistant configuration"
+  INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
+}
+
+if should_install "jetbrains"; then
+  # Detect JetBrains IDEs (IDEA, PyCharm, GoLand, WebStorm, etc.)
+  # Use compgen to safely expand glob patterns; avoids iterating literal strings
+  # when no matching directory exists.
+  JB_DETECTED=false
+  JB_GLOB_PATTERNS=(
+    "${HOME}/.IntelliJIdea"
+    "${HOME}/.PyCharm"
+    "${HOME}/.GoLand"
+    "${HOME}/.WebStorm"
+    "${HOME}/.RubyMine"
+    "${HOME}/.DataGrip"
+    "${HOME}/.CLion"
+    "${HOME}/.PhpStorm"
+    "${HOME}/.Rider"
+  )
+  # Check fixed paths first
+  for jb_fixed in "${HOME}/.idea" "${HOME}/Library/Application Support/JetBrains"; do
+    if [ -d "${jb_fixed}" ]; then
+      JB_DETECTED=true
+      break
+    fi
+  done
+  # Then check versioned dirs via glob expansion
+  if ! $JB_DETECTED; then
+    for jb_prefix in "${JB_GLOB_PATTERNS[@]}"; do
+      # compgen -G returns exit code 1 if no matches — safe to ignore
+      if compgen -G "${jb_prefix}*" > /dev/null 2>&1; then
+        JB_DETECTED=true
+        break
+      fi
+    done
+  fi
+
+  if $JB_DETECTED; then
+    echo "  ● JetBrains IDE detected"
+    install_jetbrains "JetBrains AI Assistant" "jetbrains"
+  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "jetbrains" ]; then
+    echo "  ● JetBrains (forced via --only)"
+    install_jetbrains "JetBrains AI Assistant" "jetbrains"
+  else
+    $VERBOSE && echo "  ○ JetBrains IDEs not detected (skipped)" || true
+  fi
+fi
+
 # ── 4. Register hooks (Claude Code specific) ─────────────────────────────────
 HOOKS_SOURCE="${SCRIPT_DIR}/hooks/hooks.json"
 CLAUDE_HOOKS_DIR="${HOME}/.claude/hooks"
@@ -265,6 +458,7 @@ if ! $DRY_RUN; then
   chmod +x "${SCRIPT_DIR}/bin/config" 2>/dev/null || true
   chmod +x "${SCRIPT_DIR}/bin/slug" 2>/dev/null || true
   chmod +x "${SCRIPT_DIR}/bin/analytics-log" 2>/dev/null || true
+  chmod +x "${SCRIPT_DIR}/bin/agent-manager" 2>/dev/null || true
   chmod +x "${SCRIPT_DIR}/lib/gen-skill-docs.sh" 2>/dev/null || true
 fi
 echo "  ✓ Scripts made executable"
@@ -303,11 +497,13 @@ echo ""
 echo "Installed platforms:"
 for key in ${INSTALLED_PLATFORMS}; do
   case "${key}" in
-    claude)   echo "  • Claude Code   → ~/.claude/skills/super-omni" ;;
-    cursor)   echo "  • Cursor        → ~/.cursor/skills/super-omni" ;;
-    codex)    echo "  • Codex CLI     → ~/.agents/skills/super-omni" ;;
-    gemini)   echo "  • Gemini CLI    → ~/.gemini/skills/super-omni" ;;
-    opencode) echo "  • OpenCode      → ~/.opencode/skills/super-omni" ;;
+    claude)    echo "  • Claude Code              → ~/.claude/skills/super-omni" ;;
+    cursor)    echo "  • Cursor                   → ~/.cursor/skills/super-omni" ;;
+    codex)     echo "  • Codex CLI                → ~/.agents/skills/super-omni" ;;
+    gemini)    echo "  • Gemini CLI               → ~/.gemini/skills/super-omni" ;;
+    opencode)  echo "  • OpenCode                 → ~/.opencode/skills/super-omni" ;;
+    vscode)    echo "  • VS Code (Cline/Continue) → ~/.vscode-super-omni/" ;;
+    jetbrains) echo "  • JetBrains AI Assistant   → ~/.jetbrains/super-omni/" ;;
   esac
 done
 
@@ -316,6 +512,11 @@ echo "Next steps:"
 echo "  1. Open a project in your AI coding tool"
 echo "  2. Skills will auto-activate via session hooks"
 echo "  3. Type /brainstorm, /write-plan, or /retro to get started"
+echo ""
+echo "Agent management:"
+echo "  ${SCRIPT_DIR}/bin/agent-manager list           # list all agents"
+echo "  ${SCRIPT_DIR}/bin/agent-manager install <url>  # install from URL"
+echo "  ${SCRIPT_DIR}/bin/agent-manager create <name>  # create custom agent"
 echo ""
 echo "To disable auto-skill triggers:"
 echo "  ${SCRIPT_DIR}/bin/config set proactive false"

@@ -31,7 +31,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | investigate | "investigate", "explore" | P2 |
 | retro | "/retro" | P2 |
 | ship | "/ship" | P2 |
-| writing-skills | "create skill" | P2 |
+| writing-skills | "create skill", "install skill", "list skills" | P2 |
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
 
 ## Configuration

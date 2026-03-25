@@ -127,6 +127,7 @@ super-omni --skip gemini
 Open your project in Claude Code. Skills activate automatically via session hooks.
 
 Start with:
+- `/superpower` — **activate the full framework** and launch the guided default workflow
 - `/brainstorm` — design a feature from scratch
 - `/write-plan` — turn an idea into an executable plan
 - `/execute-plan` — run the plan step by step
@@ -137,7 +138,8 @@ Start with:
 - `/workflow` — sprint pipeline orchestration
 - `/qa` — quality assurance pass
 - `/security` — security audit
-- `/plugin add marketplace <source>` — add a marketplace skill plugin
+- `/plugin add marketplace` — install the full super-omni framework (no source = full install)
+- `/plugin add marketplace <source>` — add a single marketplace skill plugin
 - `/list-skills` — list all built-in + installed marketplace skills
 - `/install-skill <source>` — install a skill from URL/path into your local marketplace
 - `/list-agents` — list all available agents
@@ -339,6 +341,7 @@ super-omni/
 │   └── architect.md          ← Architecture reviewer
 │
 ├── commands/                 ← Slash command definitions
+│   ├── superpower.md         ← /superpower — activate full framework + guided workflow
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md
@@ -354,7 +357,7 @@ super-omni/
 │   ├── create-agent.md       ← Scaffold a new agent
 │   ├── list-skills.md        ← List all skills
 │   ├── install-skill.md      ← Install skill from URL/path
-│   └── plugin.md             ← /plugin add marketplace alias
+│   └── plugin.md             ← /plugin add marketplace (full install or single skill)
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills

@@ -1,0 +1,8 @@
+{
+  "hooks": {
+    "session-start": {
+      "script": "hooks/session-start",
+      "description": "Injects super-omni skill framework at session start"
+    }
+  }
+}

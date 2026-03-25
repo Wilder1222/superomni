@@ -1,0 +1,106 @@
+---
+name: brainstorming
+description: |
+  Use when starting a new feature, project, or design decision.
+  Guides from fuzzy idea to concrete spec through structured dialogue.
+  Triggers: "brainstorm", "design", "spec this out", "let's think through".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebSearch]
+---
+
+{{PREAMBLE}}
+
+# Brainstorming & Specification
+
+**Goal:** Transform a fuzzy idea into a concrete, reviewable spec document.
+
+## Iron Law: Search Before Building
+
+Before designing anything:
+1. **Layer 1 — Tried and true:** Does a well-established solution already exist?
+2. **Layer 2 — New and popular:** Is there a recently popular approach? Evaluate carefully.
+3. **Layer 3 — First principles:** Only design from scratch if nothing fits.
+
+Run: `grep -r "similar functionality" . --include="*.md" -l` to check existing docs.
+
+## Phase 1: Problem Crystallization
+
+Ask ONE clarifying question at a time. Do not ask multiple questions at once.
+
+Required understanding before proceeding:
+- [ ] What is the problem being solved? (not the solution)
+- [ ] Who experiences this problem?
+- [ ] What does success look like? (measurable outcome)
+- [ ] What constraints exist? (time, technology, team size)
+- [ ] What already exists that's related?
+
+Rule: **Ask one question. Wait for answer. Then ask the next.**
+
+## Phase 2: Solution Space Exploration
+
+Generate 3 candidate approaches:
+
+```
+Option A: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option B: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option C: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+```
+
+Apply the 6 Decision Principles when evaluating:
+- Prefer completeness (covers more cases)
+- Prefer DRY (reuses existing)
+- Prefer explicit over clever
+
+Surface only TASTE decisions to the user. Decide MECHANICAL ones silently.
+
+## Phase 3: Visual Companion (if applicable)
+
+For UI or architecture work, produce a text diagram or ASCII wireframe.
+See `visual-companion.md` for diagram formats.
+
+## Phase 4: Spec Document Output
+
+Produce `spec.md` in the project root (or specified path) with this structure:
+
+```markdown
+# [Feature Name] — Spec
+
+## Problem
+[1 paragraph: what is broken or missing and for whom]
+
+## Goals
+- [Measurable outcome 1]
+- [Measurable outcome 2]
+
+## Non-Goals (YAGNI)
+- [What we are explicitly NOT building]
+
+## Proposed Solution
+[Selected approach + rationale]
+
+## Key Design Decisions
+| Decision | Choice | Rationale | Principle Applied |
+
+## Acceptance Criteria
+- [ ] [Testable criterion 1]
+- [ ] [Testable criterion 2]
+
+## Open Questions
+- [Any unresolved taste decisions requiring user input]
+```
+
+## Phase 5: Spec Review
+
+Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
+
+Report status: **DONE** — spec written and reviewed. Path: [spec file path]

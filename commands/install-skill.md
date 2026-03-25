@@ -27,7 +27,7 @@ Where `<source>` is:
 1. The `writing-skills` skill activates
 2. The skill definition is validated and downloaded/copied
 3. It is installed to `~/.omni-skills/skills/<skill-name>/SKILL.md`
-4. The skill becomes available in Claude Code at `~/.claude/skills/super-omni/skills/<skill-name>/`
+4. If `~/.claude/skills/super-omni/skills/` already exists, it is auto-linked there so it is immediately available in Claude Code. Otherwise, it remains installed in `~/.omni-skills/skills/<skill-name>/SKILL.md` and becomes available after running `./setup`.
 
 ## After Installing
 

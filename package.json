@@ -13,14 +13,38 @@
     "agents",
     "vscode",
     "jetbrains",
-    "cursor"
+    "cursor",
+    "claude-skill",
+    "npx"
   ],
+  "bin": {
+    "super-omni": "./bin/super-omni-cli"
+  },
   "scripts": {
     "build": "bash lib/gen-skill-docs.sh",
-    "setup": "bash setup"
+    "setup": "bash setup",
+    "postinstall": "node lib/postinstall.js"
   },
+  "files": [
+    "agents/",
+    "bin/",
+    "commands/",
+    "docs/",
+    "hooks/",
+    "lib/",
+    "skills/",
+    "CLAUDE.md",
+    "ETHOS.md",
+    "LICENSE",
+    "claude-skill.json",
+    "setup"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Wilder1222/super-omni.git"
+  },
+  "homepage": "https://github.com/Wilder1222/super-omni#readme",
+  "bugs": {
+    "url": "https://github.com/Wilder1222/super-omni/issues"
   }
 }

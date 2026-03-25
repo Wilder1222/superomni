@@ -2,7 +2,7 @@
 
 ## super-omni — Developer Reference
 
-**Version:** 0.2.0
+**Version:** 0.3.0
 
 ---
 
@@ -11,17 +11,75 @@
 ```
 super-omni/
 ├── hooks/                    ← Claude Code session hooks
-├── skills/                   ← Skill definitions (22 skills)
+├── skills/                   ← Skill definitions (23 skills)
 ├── agents/                   ← Agent specifications
 ├── commands/                 ← Slash command docs
 ├── lib/                      ← Build tools and shared assets
+│   ├── gen-skill-docs.sh     ← Builds SKILL.md from SKILL.md.tmpl
+│   └── postinstall.js        ← npm postinstall hook (runs setup)
 ├── bin/                      ← Runtime utilities
+│   ├── super-omni-cli        ← CLI entry point (npm global / npx)
+│   ├── install               ← One-line curl bootstrap
+│   ├── agent-manager         ← Agent lifecycle manager
+│   ├── config                ← Config management
+│   ├── slug                  ← Project identifier
+│   └── analytics-log         ← Local telemetry writer
 ├── docs/                     ← This directory
 ├── ETHOS.md                  ← Philosophy
 ├── CLAUDE.md                 ← Claude project config
+├── claude-skill.json         ← Claude Code marketplace manifest
 ├── setup                     ← Installation script
 └── package.json
 ```
+
+---
+
+## Installation Methods
+
+super-omni supports five installation methods — all ultimately delegate to `setup`.
+
+### 1. npm global install
+
+```bash
+npm install -g super-omni
+# postinstall runs `setup` automatically
+# Afterwards, the CLI is available:
+super-omni --only claude
+super-omni --dry-run
+```
+
+`lib/postinstall.js` is the npm postinstall hook. It skips silently in CI environments
+or when `SUPER_OMNI_SKIP_POSTINSTALL=1` is set.
+
+### 2. npx (one-shot)
+
+```bash
+npx super-omni
+npx super-omni --only claude
+```
+
+npx downloads the package to a temp cache, then executes `bin/super-omni-cli`,
+which resolves its own real path (following symlinks) and delegates to `setup`.
+
+### 3. Claude Code marketplace / skill install
+
+`claude-skill.json` at the package root is the manifest Claude Code uses to
+discover the skills directory, agents, commands, and hooks.  When Claude Code
+installs the package from the npm registry, the `postinstall` hook links
+everything into `~/.claude/skills/super-omni` automatically.
+
+### 4. curl one-liner / git clone
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | bash
+# or
+git clone https://github.com/Wilder1222/super-omni.git && cd super-omni && ./setup
+```
+
+### Skipping postinstall
+
+Set `SUPER_OMNI_SKIP_POSTINSTALL=1` to suppress the automatic setup during
+`npm install`. CI environments are detected and skipped automatically.
 
 ---
 

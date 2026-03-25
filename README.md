@@ -22,129 +22,58 @@ Plan only what you need. But what you decide to build — build it fully.
 
 ### Install
 
-Choose the method that fits your workflow:
+---
+
+**① Claude Code — marketplace install (recommended):**
+
+Inside a Claude Code session, register and install the skill from GitHub:
+
+```
+/plugin marketplace add Wilder1222/super-omni
+```
+
+Claude Code will fetch the `claude-skill.json` manifest, install all skills, register slash commands, and set up session hooks automatically.
+
+Then start with:
+
+```
+/vibe
+```
 
 ---
 
-**① npm global install (recommended for regular use):**
+**② Other IDEs & CLIs — npm global install:**
+
+For **Cursor**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**, **Codex**, **Gemini CLI**, and **OpenCode**:
 
 ```bash
 npm install -g super-omni
 ```
 
-Setup runs automatically after install. To re-run at any time:
-
-```bash
-super-omni
-# or with options:
-super-omni --only claude
-super-omni --skip gemini
-super-omni --dry-run
-```
+The `postinstall` hook auto-detects your platform and links skills, commands, and hooks automatically.
 
 ---
 
-**② npx — run once without a permanent install:**
+**③ Project-level install (no global install):**
 
 ```bash
 npx super-omni
-# or with options:
-npx super-omni --only claude
 ```
+
+Runs the same auto-detection and linking as the global install, without installing anything permanently.
 
 ---
-
-**③ Claude Code marketplace / skill install:**
-
-Install the full framework via npm — the `postinstall` hook links skills automatically:
-
-```bash
-npm install -g super-omni   # auto-links skills to ~/.claude/skills/super-omni
-```
-
-The `claude-skill.json` manifest at the package root provides the metadata Claude Code needs to discover commands, agents, and hooks automatically.
-
-To add skills into your local Claude CLI plugin marketplace:
-
-```bash
-bin/skill-manager install <url-or-path>
-bin/skill-manager list
-```
-
-From inside Claude Code, use:
-
-```text
-/plugin add marketplace https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md  # marketplace-style alias
-/install-skill https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md
-/list-skills
-```
-
-To add individual agents from within a Claude Code session, see the [Agent Management](#agent-management) section below.
-
----
-
-**④ One-line curl install:**
-
-```bash
-# Inspect before running (recommended):
-curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | less
-# Then install:
-curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | bash
-```
-
----
-
-**⑤ Clone and run setup manually:**
-
-```bash
-git clone https://github.com/Wilder1222/super-omni.git ~/.claude/skills/super-omni
-cd ~/.claude/skills/super-omni
-./setup
-```
-
-The setup script auto-detects your platform and configures accordingly. Supported platforms: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **OpenCode**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**.
-
-### Install for a Specific Platform
-
-```bash
-# Claude Code only
-super-omni --only claude          # if installed globally
-npx super-omni --only claude      # via npx
-./setup --only claude             # manual clone
-
-# VS Code (Cline / Continue.dev)
-super-omni --only vscode
-
-# JetBrains AI Assistant
-super-omni --only jetbrains
-
-# Skip a platform
-super-omni --skip gemini
-```
 
 ### Use in Claude Code
 
 Open your project in Claude Code. Skills activate automatically via session hooks.
 
 Start with:
-- `/supervibe` — **activate the full framework** and launch the guided default workflow
+- `/vibe` — **activate the full framework** and launch the guided default workflow
 - `/brainstorm` — design a feature from scratch
 - `/write-plan` — turn an idea into an executable plan
 - `/execute-plan` — run the plan step by step
-- `/retro` — weekly engineering retrospective
-- `/ship` — release workflow with changelog
-- `/investigate` — explore unfamiliar code
 - `/review` — structured code review
-- `/workflow` — sprint pipeline orchestration
-- `/qa` — quality assurance pass
-- `/security` — security audit
-- `/plugin add marketplace` — install the full super-omni framework (no source = full install)
-- `/plugin add marketplace <source>` — add a single marketplace skill plugin
-- `/list-skills` — list all built-in + installed marketplace skills
-- `/install-skill <source>` — install a skill from URL/path into your local marketplace
-- `/list-agents` — list all available agents
-- `/install-agent <url>` — install an agent from GitHub
-- `/create-agent <name>` — create a custom agent
 
 ---
 
@@ -341,30 +270,17 @@ super-omni/
 │   └── architect.md          ← Architecture reviewer
 │
 ├── commands/                 ← Slash command definitions
-│   ├── supervibe.md          ← /supervibe — activate full framework + guided workflow
+│   ├── vibe.md               ← /vibe — activate full framework + guided workflow
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md
-│   ├── retro.md
-│   ├── ship.md
-│   ├── investigate.md
-│   ├── review.md
-│   ├── workflow.md
-│   ├── qa.md
-│   ├── security.md
-│   ├── list-agents.md        ← List all agents
-│   ├── install-agent.md      ← Install agent from URL/path
-│   ├── create-agent.md       ← Scaffold a new agent
-│   ├── list-skills.md        ← List all skills
-│   ├── install-skill.md      ← Install skill from URL/path
-│   └── plugin.md             ← /plugin add marketplace (full install or single skill)
+│   └── review.md
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills
 │   └── gen-skill-docs.sh     ← Builds SKILL.md from SKILL.md.tmpl
 │
 ├── bin/
-│   ├── install               ← One-line bootstrap installer
 │   ├── agent-manager         ← Agent lifecycle manager
 │   ├── config                ← Config management
 │   ├── slug                  ← Project identifier

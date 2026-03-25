@@ -9,7 +9,7 @@
     {
       "name": "super-omni",
       "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
-      "source": "."
+      "source": "./"
     }
   ]
 }

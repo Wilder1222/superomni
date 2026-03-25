@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# super-omni setup script
+# Installs the skill framework for Claude Code
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_SKILLS_DIR="${HOME}/.claude/skills"
+INSTALL_DIR="${CLAUDE_SKILLS_DIR}/super-omni"
+OMNI_STATE_DIR="${HOME}/.omni-skills"
+
+echo ""
+echo "╔══════════════════════════════════════════╗"
+echo "║         super-omni  v0.1.0               ║"
+echo "║   Plan Lean, Execute Complete            ║"
+echo "╚══════════════════════════════════════════╝"
+echo ""
+
+# ── 1. Create state directories ──────────────────────────────────────────────
+echo "→ Creating state directories..."
+mkdir -p "${OMNI_STATE_DIR}/sessions"
+mkdir -p "${OMNI_STATE_DIR}/analytics"
+mkdir -p "${OMNI_STATE_DIR}/projects"
+echo "  ✓ ${OMNI_STATE_DIR}"
+
+# ── 2. Build skill docs from templates ────────────────────────────────────────
+echo "→ Building skill docs from templates..."
+bash "${SCRIPT_DIR}/lib/gen-skill-docs.sh"
+echo "  ✓ Skill docs generated"
+
+# ── 3. Link or copy into Claude skills directory ──────────────────────────────
+mkdir -p "${CLAUDE_SKILLS_DIR}"
+
+if [ -L "${INSTALL_DIR}" ]; then
+  rm "${INSTALL_DIR}"
+fi
+
+if [ -d "${INSTALL_DIR}" ]; then
+  echo "  ⚠ ${INSTALL_DIR} already exists (not a symlink). Skipping link."
+else
+  ln -s "${SCRIPT_DIR}" "${INSTALL_DIR}"
+  echo "  ✓ Linked ${SCRIPT_DIR} → ${INSTALL_DIR}"
+fi
+
+# ── 4. Register hooks ─────────────────────────────────────────────────────────
+HOOKS_SOURCE="${SCRIPT_DIR}/hooks/hooks.json"
+CLAUDE_HOOKS_DIR="${HOME}/.claude/hooks"
+mkdir -p "${CLAUDE_HOOKS_DIR}"
+
+if [ -f "${HOOKS_SOURCE}" ]; then
+  cp "${HOOKS_SOURCE}" "${CLAUDE_HOOKS_DIR}/super-omni-hooks.json"
+  echo "  ✓ Hooks registered"
+fi
+
+# ── 5. Make bin scripts executable ────────────────────────────────────────────
+chmod +x "${SCRIPT_DIR}/bin/config" 2>/dev/null || true
+chmod +x "${SCRIPT_DIR}/bin/slug" 2>/dev/null || true
+chmod +x "${SCRIPT_DIR}/bin/analytics-log" 2>/dev/null || true
+chmod +x "${SCRIPT_DIR}/lib/gen-skill-docs.sh" 2>/dev/null || true
+echo "  ✓ Scripts made executable"
+
+# ── 6. Initialize default config ─────────────────────────────────────────────
+CONFIG_FILE="${OMNI_STATE_DIR}/config"
+if [ ! -f "${CONFIG_FILE}" ]; then
+  cat > "${CONFIG_FILE}" << 'EOF'
+proactive=true
+telemetry=true
+EOF
+  echo "  ✓ Default config initialized (proactive=true, telemetry=true)"
+else
+  echo "  ✓ Config already exists at ${CONFIG_FILE}"
+fi
+
+echo ""
+echo "✅ super-omni installed successfully!"
+echo ""
+echo "Next steps:"
+echo "  1. Open a project in Claude Code"
+echo "  2. Skills will auto-activate via session hooks"
+echo "  3. Type /brainstorm, /write-plan, or /retro to get started"
+echo ""
+echo "To disable auto-skill triggers:"
+echo "  ${SCRIPT_DIR}/bin/config set proactive false"
+echo ""

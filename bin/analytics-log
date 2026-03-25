@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# bin/analytics-log — append a usage event to local telemetry log
+#
+# Usage:
+#   bin/analytics-log <skill-name> <duration-seconds> <status>
+#
+# Status values: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+#
+# Output: appended JSON line to ~/.omni-skills/analytics/usage.jsonl
+#
+# Telemetry is LOCAL ONLY. Nothing is sent to any server.
+# Disable: bin/config set telemetry false
+
+set -e
+
+ANALYTICS_DIR="${HOME}/.omni-skills/analytics"
+LOG_FILE="${ANALYTICS_DIR}/usage.jsonl"
+CONFIG_FILE="${HOME}/.omni-skills/config"
+
+# Check if telemetry is enabled
+telemetry_enabled=$(grep "^telemetry=" "${CONFIG_FILE}" 2>/dev/null | tail -n1 | cut -d'=' -f2- || echo "true")
+if [ "${telemetry_enabled}" = "false" ]; then
+  exit 0
+fi
+
+SKILL="${1:-unknown}"
+DURATION="${2:-0}"
+STATUS="${3:-DONE}"
+TS=$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date +%Y-%m-%dT%H:%M:%SZ)
+PROJECT=$(basename "$(pwd)")
+
+mkdir -p "${ANALYTICS_DIR}"
+
+# Write JSON line (append)
+printf '{"skill":"%s","dur":%s,"status":"%s","ts":"%s","project":"%s"}\n' \
+  "${SKILL}" "${DURATION}" "${STATUS}" "${TS}" "${PROJECT}" \
+  >> "${LOG_FILE}" 2>/dev/null || true

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# hooks/session-start
+# Injected by Claude Code at the start of every session.
+# Loads the super-omni skill framework into context.
+
+set -e
+
+SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+STATE_DIR="${HOME}/.omni-skills"
+
+mkdir -p "${STATE_DIR}/sessions"
+
+# ── Environment Detection ────────────────────────────────────────────────────
+_PROACTIVE=$(${SKILLS_DIR}/bin/config get proactive 2>/dev/null || echo "true")
+_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+_PROJECT=$(basename "$(pwd)")
+_SESSION_ID=$(date +%s)
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  super-omni v0.1.0 — Plan Lean, Execute Complete"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Project:   ${_PROJECT}"
+echo "  Branch:    ${_BRANCH}"
+echo "  PROACTIVE: ${_PROACTIVE}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# ── Log session start ────────────────────────────────────────────────────────
+echo "{\"event\":\"session_start\",\"project\":\"${_PROJECT}\",\"branch\":\"${_BRANCH}\",\"session\":\"${_SESSION_ID}\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \
+  >> "${STATE_DIR}/sessions/sessions.jsonl" 2>/dev/null || true
+
+# ── Inject using-skills content ──────────────────────────────────────────────
+USING_SKILLS="${SKILLS_DIR}/skills/using-skills/SKILL.md"
+if [ -f "${USING_SKILLS}" ]; then
+  echo ""
+  echo "Loading skill framework..."
+  cat "${USING_SKILLS}"
+fi
+
+echo ""
+echo "Skills loaded. Type /brainstorm, /write-plan, or /retro to begin."

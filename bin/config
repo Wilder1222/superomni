@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# bin/config — super-omni configuration manager
+#
+# Usage:
+#   bin/config get <key>          — print current value of key
+#   bin/config set <key> <value>  — set a config key
+#   bin/config list               — list all config entries
+#
+# Config file: ~/.omni-skills/config
+# Format: key=value (one per line)
+
+set -e
+
+CONFIG_DIR="${HOME}/.omni-skills"
+CONFIG_FILE="${CONFIG_DIR}/config"
+
+# Ensure config directory and file exist
+mkdir -p "${CONFIG_DIR}"
+if [ ! -f "${CONFIG_FILE}" ]; then
+  cat > "${CONFIG_FILE}" << 'EOF'
+proactive=true
+telemetry=true
+EOF
+fi
+
+CMD="${1}"
+KEY="${2}"
+VALUE="${3}"
+
+case "${CMD}" in
+  get)
+    if [ -z "${KEY}" ]; then
+      echo "Usage: bin/config get <key>" >&2
+      exit 1
+    fi
+    # Extract value for key
+    result=$(grep "^${KEY}=" "${CONFIG_FILE}" 2>/dev/null | tail -n1 | cut -d'=' -f2-)
+    if [ -z "${result}" ]; then
+      echo "null"
+      exit 0
+    fi
+    echo "${result}"
+    ;;
+
+  set)
+    if [ -z "${KEY}" ] || [ -z "${VALUE}" ]; then
+      echo "Usage: bin/config set <key> <value>" >&2
+      exit 1
+    fi
+    # Remove existing key and append new value
+    tmp=$(mktemp)
+    grep -v "^${KEY}=" "${CONFIG_FILE}" > "${tmp}" || true
+    echo "${KEY}=${VALUE}" >> "${tmp}"
+    mv "${tmp}" "${CONFIG_FILE}"
+    echo "✓ Set ${KEY}=${VALUE}"
+    ;;
+
+  list)
+    echo "Config file: ${CONFIG_FILE}"
+    echo "---"
+    cat "${CONFIG_FILE}"
+    ;;
+
+  *)
+    echo "Usage: bin/config <get|set|list> [key] [value]" >&2
+    exit 1
+    ;;
+esac

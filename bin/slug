@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# bin/slug — generate or retrieve a stable project identifier
+#
+# Usage:
+#   bin/slug            — prints current project slug
+#   bin/slug reset      — regenerates the slug
+#
+# Slug is derived from: git remote URL or directory name + short hash
+# Stored in: ~/.omni-skills/projects/<slug>/
+
+set -e
+
+CONFIG_DIR="${HOME}/.omni-skills"
+PROJECTS_DIR="${CONFIG_DIR}/projects"
+SLUG_CACHE="${CONFIG_DIR}/.current-slug"
+
+mkdir -p "${PROJECTS_DIR}"
+
+generate_slug() {
+  # Try git remote first
+  remote=$(git remote get-url origin 2>/dev/null || echo "")
+  if [ -n "${remote}" ]; then
+    # Extract repo name from remote URL
+    repo_name=$(echo "${remote}" | sed 's|.*/||' | sed 's|\.git$||')
+  else
+    # Fall back to directory name
+    repo_name=$(basename "$(pwd)")
+  fi
+
+  # Add short hash of the path for uniqueness
+  path_hash=$(echo "$(pwd)" | sha256sum | cut -c1-6)
+  echo "${repo_name}-${path_hash}"
+}
+
+CMD="${1}"
+
+case "${CMD}" in
+  reset)
+    rm -f "${SLUG_CACHE}"
+    slug=$(generate_slug)
+    echo "${slug}" > "${SLUG_CACHE}"
+    mkdir -p "${PROJECTS_DIR}/${slug}"
+    echo "${slug}"
+    ;;
+  *)
+    if [ -f "${SLUG_CACHE}" ]; then
+      cat "${SLUG_CACHE}"
+    else
+      slug=$(generate_slug)
+      echo "${slug}" > "${SLUG_CACHE}"
+      mkdir -p "${PROJECTS_DIR}/${slug}"
+      echo "${slug}"
+    fi
+    ;;
+esac

@@ -1,0 +1,256 @@
+---
+name: retro
+description: |
+  Engineering retrospective. Analyzes commit history, work patterns,
+  code quality metrics, session detection, streak tracking.
+  Triggers: "/retro", "weekly retro", "what did we ship", "engineering retrospective".
+allowed-tools: [Bash, Read, Write, Glob]
+---
+
+## Preamble
+
+### Environment Detection
+```bash
+mkdir -p ~/.omni-skills/sessions
+_PROACTIVE=$(~/.claude/skills/super-omni/bin/config get proactive 2>/dev/null || echo "true")
+_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+_TEL_START=$(date +%s)
+echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
+```
+
+### PROACTIVE Mode
+If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the
+user explicitly invokes. If you would have auto-invoked, say:
+*"I think [skill-name] might help here — want me to run it?"* and wait.
+
+### Completion Status Protocol
+Report status using one of these at the end of every skill session:
+
+- **DONE** — All steps completed. Evidence provided.
+- **DONE_WITH_CONCERNS** — Completed with issues. List each concern explicitly.
+- **BLOCKED** — Cannot proceed. State what blocks you and what was tried.
+- **NEEDS_CONTEXT** — Missing information. State exactly what you need.
+
+### Escalation Policy
+It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
+
+- **3 attempts without success** → STOP and report BLOCKED
+- **Uncertain about security** → STOP and report NEEDS_CONTEXT
+- **Scope exceeds verification capacity** → STOP and flag blast radius
+
+### Telemetry (Local Only)
+```bash
+_TEL_END=$(date +%s)
+_TEL_DUR=$(( _TEL_END - _TEL_START ))
+~/.claude/skills/super-omni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
+```
+Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
+
+# /retro — Engineering Retrospective
+
+**Goal:** Understand what was shipped, patterns in how you work, and trends over time.
+
+## Arguments
+
+- `/retro` — last 7 days (default)
+- `/retro 24h` — last 24 hours
+- `/retro 14d` — last 14 days
+- `/retro 30d` — last 30 days
+- `/retro compare` — compare this period vs prior period
+
+## Step 1: Setup
+
+```bash
+# Ensure we're up to date
+DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | grep "HEAD branch" | cut -d: -f2 | tr -d ' ' || echo "main")
+git fetch origin "${DEFAULT_BRANCH}" --quiet 2>/dev/null || true
+
+# Get author identity
+AUTHOR_NAME=$(git config user.name)
+AUTHOR_EMAIL=$(git config user.email)
+echo "Retrospective for: ${AUTHOR_NAME} <${AUTHOR_EMAIL}>"
+```
+
+## Step 2: Gather Commit Data
+
+```bash
+# Set period (adjust SINCE based on argument)
+SINCE="7 days ago"  # change based on /retro argument
+
+# Commit log for the period
+git log --oneline --since="${SINCE}" --author="${AUTHOR_EMAIL}" 2>/dev/null | head -100
+
+# Detailed stats
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
+  --pretty=format:"%h|%ad|%s" --date=short \
+  --numstat 2>/dev/null | head -200
+```
+
+## Step 3: Core Metrics
+
+Calculate and display:
+
+```
+METRICS
+════════════════════════════════════════
+Period:          [date range]
+Commits:         [N]
+Net LOC:         +[N] added / -[N] deleted
+Files changed:   [N unique files]
+Active days:     [N out of N days in period]
+```
+
+```bash
+# Commit count
+git log --oneline --since="${SINCE}" --author="${AUTHOR_EMAIL}" | wc -l
+
+# LOC stats
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
+  --pretty=tformat: --numstat | \
+  awk '{ add += $1; del += $2 } END { printf "+%s / -%s\n", add, del }'
+
+# Active days
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
+  --pretty=format:"%ad" --date=short | sort -u | wc -l
+```
+
+## Step 4: Session Detection
+
+Identify work sessions (gap threshold: 45 minutes between commits = new session):
+
+```bash
+# Get commit timestamps in epoch seconds
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
+  --pretty=format:"%at" | sort -n
+```
+
+From timestamps, calculate:
+- Number of sessions (commits >45 min apart = new session)
+- Average session length
+- Longest session
+- Most productive session (most commits)
+
+## Step 5: Time Distribution
+
+Show when work happens (hourly histogram):
+
+```bash
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
+  --pretty=format:"%ad" --date=format:"%H" | \
+  sort | uniq -c | sort -k2 -n
+```
+
+Display as a simple bar chart:
+```
+00  ██ (2)
+09  ████████ (8)
+10  ██████████████ (14)
+...
+```
+
+## Step 6: Commit Type Breakdown
+
+Classify commits by conventional commit type:
+
+```bash
+git log --oneline --since="${SINCE}" --author="${AUTHOR_EMAIL}" | \
+  grep -oE "^[a-f0-9]+ (feat|fix|refactor|test|docs|chore|build|ci)" | \
+  awk '{print $2}' | sort | uniq -c | sort -rn
+```
+
+```
+Commit types:
+  feat:     [N] ([%])
+  fix:      [N] ([%])
+  refactor: [N] ([%])
+  test:     [N] ([%])
+  other:    [N] ([%])
+```
+
+## Step 7: Hotspot Analysis
+
+Top most-changed files in the period:
+
+```bash
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
+  --pretty=tformat: --name-only | \
+  sort | uniq -c | sort -rn | head -10
+```
+
+## Step 8: Streak Tracking
+
+Calculate consecutive active days:
+
+```bash
+# Get all active dates in the last 90 days
+git log --since="90 days ago" --author="${AUTHOR_EMAIL}" \
+  --pretty=format:"%ad" --date=short | sort -u
+```
+
+Report:
+```
+Streak:     [N] consecutive active days
+Best streak: [N days] (dates)
+```
+
+## Step 9: Ship of the Week
+
+Identify the most significant commit (by diff size or PR merge):
+
+```bash
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
+  --pretty=format:"%h %s" --shortstat | head -30
+```
+
+## Step 10: Save Report
+
+```bash
+RETRO_DIR=".context/retros"
+mkdir -p "${RETRO_DIR}"
+RETRO_FILE="${RETRO_DIR}/$(date +%Y-%m-%d).md"
+```
+
+Write the full report to the file and print a summary.
+
+## Optional: Period Comparison
+
+If `/retro compare` was invoked:
+
+```bash
+# Current period vs prior period
+# Current: last 7 days
+# Prior: 7-14 days ago
+git log --since="14 days ago" --until="7 days ago" \
+  --author="${AUTHOR_EMAIL}" --oneline | wc -l
+```
+
+Show delta for each metric: `↑ 23% commits`, `↓ 10% LOC`, etc.
+
+## Final Report Format
+
+```
+RETRO REPORT — [period]
+════════════════════════════════════════
+Commits:      [N]
+Net LOC:      +[N] / -[N]
+Active days:  [N/7]
+Sessions:     [N] (~[avg]h each)
+Streak:       [N] days
+
+Commit types: feat [N] | fix [N] | refactor [N] | test [N]
+
+Ship of the week:
+  [commit message and impact]
+
+Hottest files:
+  [file 1] — [N changes]
+  [file 2] — [N changes]
+
+Peak hours:  [hour range]
+
+[if compare]
+vs last period: commits [+/-N%] | LOC [+/-N%] | sessions [+/-N]
+
+Saved to: [retro file path]
+════════════════════════════════════════
+```

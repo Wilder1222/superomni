@@ -29,8 +29,8 @@ Philosophy: **Plan Lean, Execute Complete**
 | finishing-branch | "finish branch", "merge" | P2 |
 | dispatching-parallel | Parallel tasks | P2 |
 | investigate | "investigate", "explore" | P2 |
-| retro | "/retro" | P2 |
-| ship | "/ship" | P2 |
+| retro | "retro", "weekly review" | P2 |
+| ship | "ship", "release" | P2 |
 | writing-skills | "create skill", "install skill", "list skills" | P2 |
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
 
@@ -38,24 +38,11 @@ Philosophy: **Plan Lean, Execute Complete**
 
 | Command | Description |
 |---------|-------------|
-| `/supervibe` | Activate full framework + launch guided default workflow |
+| `/vibe` | Activate full framework + launch guided default workflow |
 | `/brainstorm` | Design a feature — produces `spec.md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
-| `/ship` | Release workflow with versioning + changelog |
-| `/retro` | Weekly engineering retrospective |
-| `/investigate` | Explore unfamiliar code |
-| `/workflow` | Sprint pipeline status + next-step guidance |
-| `/qa` | Quality assurance pass |
-| `/security` | Security audit (OWASP-aware) |
-| `/plugin add marketplace` | Add super-omni to marketplace registry or install a single skill |
-| `/plugin install` | Install super-omni and activate all slash commands |
-| `/list-skills` | List all built-in and marketplace skills |
-| `/install-skill` | Install a skill from URL or local path |
-| `/list-agents` | List all available agents |
-| `/install-agent` | Install an agent from GitHub or local file |
-| `/create-agent` | Scaffold a new custom agent |
 
 ## Configuration
 

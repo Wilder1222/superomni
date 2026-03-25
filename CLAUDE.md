@@ -49,7 +49,8 @@ Philosophy: **Plan Lean, Execute Complete**
 | `/workflow` | Sprint pipeline status + next-step guidance |
 | `/qa` | Quality assurance pass |
 | `/security` | Security audit (OWASP-aware) |
-| `/plugin add marketplace` | Install full super-omni framework (no source) or a single skill |
+| `/plugin add marketplace` | Add super-omni to marketplace registry or install a single skill |
+| `/plugin install` | Install super-omni and activate all slash commands |
 | `/list-skills` | List all built-in and marketplace skills |
 | `/install-skill` | Install a skill from URL or local path |
 | `/list-agents` | List all available agents |

@@ -10,6 +10,9 @@
 
 ```
 super-omni/
+├── .claude-plugin/           ← Claude Code plugin marketplace files
+│   ├── marketplace.json      ← Marketplace manifest (required by Claude Code)
+│   └── plugin.json           ← Plugin manifest (skills, commands, hooks)
 ├── hooks/                    ← Claude Code session hooks
 ├── skills/                   ← Skill definitions (23 skills)
 ├── agents/                   ← Agent specifications
@@ -26,7 +29,7 @@ super-omni/
 ├── docs/                     ← This directory
 ├── ETHOS.md                  ← Philosophy
 ├── CLAUDE.md                 ← Claude project config
-├── claude-skill.json         ← Claude Code marketplace manifest
+├── claude-skill.json         ← Legacy Claude Code skill manifest
 ├── setup                     ← Installation script
 └── package.json
 ```
@@ -45,7 +48,7 @@ Inside a Claude Code session:
 /plugin marketplace add Wilder1222/super-omni
 ```
 
-Claude Code reads `claude-skill.json` to discover skills, agents, commands, and hooks, and installs them automatically. No `npm` or `setup` step needed.
+Claude Code reads `.claude-plugin/marketplace.json` to discover the plugin, then reads `.claude-plugin/plugin.json` for skills, agents, commands, and hooks, and installs them automatically. No `npm` or `setup` step needed.
 
 ### 2. npm global install
 

@@ -32,7 +32,7 @@ Inside a Claude Code session, register and install the skill from GitHub:
 /plugin marketplace add Wilder1222/super-omni
 ```
 
-Claude Code will fetch the `claude-skill.json` manifest, install all skills, register slash commands, and set up session hooks automatically.
+Claude Code will fetch the `.claude-plugin/marketplace.json` manifest, install all skills, register slash commands, and set up session hooks automatically.
 
 Then start with:
 

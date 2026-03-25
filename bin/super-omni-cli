@@ -4,7 +4,6 @@
 # Supports all installation methods:
 #   npm install -g super-omni  → super-omni [options]
 #   npx super-omni             → npx super-omni [options]
-#   claude skill install       → auto-runs on install via postinstall
 
 set -e
 

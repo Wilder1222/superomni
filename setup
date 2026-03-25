@@ -29,20 +29,26 @@ detect_platform() {
 # ── Help ──────────────────────────────────────────────────────────────────────
 show_help() {
   cat <<HELP
-super-omni v${VERSION} — Multi-platform AI skill framework installer
+super-omni v${VERSION} — AI skill framework setup
 
-Usage: ./setup [OPTIONS]
+Usage: setup [OPTIONS]
+
+  This script is run automatically by:
+    npm install -g super-omni   (global install)
+    npx super-omni              (project-level install)
+
+  For Claude Code, install via the marketplace instead:
+    /plugin marketplace add Wilder1222/super-omni
 
 Options:
   --help, -h        Show this help message
   --only <platform> Install for a single platform only
-                    (claude, cursor, codex, gemini, opencode, vscode, jetbrains)
+                    (cursor, codex, gemini, opencode, vscode, jetbrains)
   --skip <platform> Skip a specific platform (repeatable)
   --dry-run         Show what would be done without making changes
   --verbose         Show detailed output
 
 Supported platforms:
-  claude     Claude Code       (~/.claude/skills/)
   cursor     Cursor            (~/.cursor/skills/)
   codex      Codex CLI         (~/.agents/skills/)
   gemini     Gemini CLI        (~/.gemini/skills/)
@@ -51,11 +57,10 @@ Supported platforms:
   jetbrains  JetBrains AI Assistant (~/.jetbrains/super-omni/)
 
 Examples:
-  ./setup                     # Auto-detect and install all
-  ./setup --only claude       # Install for Claude Code only
-  ./setup --only vscode       # Install for VS Code only
-  ./setup --skip gemini       # Install for all except Gemini
-  ./setup --dry-run           # Preview what would happen
+  npm install -g super-omni   # Auto-detect and install all platforms
+  npx super-omni              # Same, without a permanent global install
+  npx super-omni --only vscode
+  npx super-omni --skip gemini
 HELP
   exit 0
 }
@@ -110,6 +115,46 @@ link_skills() {
   ln -s "${SCRIPT_DIR}" "${target}"
   echo "  ✓ ${label}: linked → ${target}"
   INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
+}
+
+# install_claude_commands
+#   Symlinks each commands/*.md file into ~/.claude/commands/ so they become
+#   native Claude Code slash commands (e.g. /vibe, /brainstorm, etc.).
+#   Idempotent: refreshes stale symlinks, skips real files owned by others.
+install_claude_commands() {
+  local cmds_src="${SCRIPT_DIR}/commands"
+  local cmds_dst="${HOME}/.claude/commands"
+
+  if $DRY_RUN; then
+    echo "  [dry-run] Would symlink commands/*.md → ${cmds_dst}/"
+    return
+  fi
+
+  mkdir -p "${cmds_dst}"
+
+  local count=0
+  for cmd_file in "${cmds_src}"/*.md; do
+    [ -f "${cmd_file}" ] || continue
+    local cmd_name
+    cmd_name="$(basename "${cmd_file}")"
+    local target="${cmds_dst}/${cmd_name}"
+
+    # Refresh stale symlinks
+    if [ -L "${target}" ]; then
+      rm "${target}"
+    fi
+
+    # Skip real (non-symlink) files we didn't create
+    if [ -f "${target}" ]; then
+      echo "  ⚠ ${target} already exists and is not managed by super-omni. Skipping to preserve user file."
+      continue
+    fi
+
+    ln -s "${cmd_file}" "${target}"
+    count=$((count + 1))
+  done
+
+  echo "  ✓ Claude Code commands linked (${count} commands) → ${cmds_dst}/"
 }
 
 # has_cli <command>
@@ -188,6 +233,8 @@ if should_install "claude"; then
     echo "  ● Claude Code (primary — always installed)"
     link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
   fi
+  # Install slash commands so /vibe, /brainstorm, etc. are available in Claude Code
+  install_claude_commands
 fi
 
 # ── 3b. Cursor ────────────────────────────────────────────────────────────────
@@ -498,7 +545,8 @@ echo ""
 echo "Installed platforms:"
 for key in ${INSTALLED_PLATFORMS}; do
   case "${key}" in
-    claude)    echo "  • Claude Code              → ~/.claude/skills/super-omni" ;;
+    claude)    echo "  • Claude Code              → ~/.claude/skills/super-omni"
+               echo "                               ~/.claude/commands/ (slash commands)" ;;
     cursor)    echo "  • Cursor                   → ~/.cursor/skills/super-omni" ;;
     codex)     echo "  • Codex CLI                → ~/.agents/skills/super-omni" ;;
     gemini)    echo "  • Gemini CLI               → ~/.gemini/skills/super-omni" ;;
@@ -510,19 +558,10 @@ done
 
 echo ""
 echo "Next steps:"
-echo "  1. Open a project in your AI coding tool"
-echo "  2. Skills will auto-activate via session hooks"
-echo "  3. Type /brainstorm, /write-plan, or /retro to get started"
-echo ""
-echo "Agent management:"
-echo "  ${SCRIPT_DIR}/bin/agent-manager list           # list all agents"
-echo "  ${SCRIPT_DIR}/bin/agent-manager install <url>  # install from URL"
-echo "  ${SCRIPT_DIR}/bin/agent-manager create <name>  # create custom agent"
-echo ""
-echo "Skill marketplace:"
-echo "  ${SCRIPT_DIR}/bin/skill-manager list           # list all skills"
-echo "  ${SCRIPT_DIR}/bin/skill-manager install <src>  # install from URL/path"
-echo "  ${SCRIPT_DIR}/bin/skill-manager remove <name>  # remove installed skill"
+echo "  1. Open your project in your AI IDE"
+echo "  2. Skills activate automatically via session hooks"
+echo "  3. For Claude Code users: install via the marketplace instead:"
+echo "       /plugin marketplace add Wilder1222/super-omni"
 echo ""
 echo "To disable auto-skill triggers:"
 echo "  ${SCRIPT_DIR}/bin/config set proactive false"

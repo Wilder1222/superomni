@@ -47,7 +47,7 @@ Then start with:
 For **Cursor**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**, **Codex**, **Gemini CLI**, and **OpenCode**:
 
 ```bash
-npm install -g super-omni
+npm install -g github:Wilder1222/super-omni
 ```
 
 The `postinstall` hook auto-detects your platform and links skills, commands, and hooks automatically.
@@ -57,7 +57,7 @@ The `postinstall` hook auto-detects your platform and links skills, commands, an
 **③ Project-level install (no global install):**
 
 ```bash
-npx super-omni
+npx github:Wilder1222/super-omni
 ```
 
 Runs the same auto-detection and linking as the global install, without installing anything permanently.

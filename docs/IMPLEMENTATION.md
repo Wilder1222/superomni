@@ -55,7 +55,7 @@ Claude Code reads `.claude-plugin/marketplace.json` to discover the plugin, then
 For Cursor, VS Code (Cline/Continue.dev), JetBrains, Codex, Gemini CLI, and OpenCode:
 
 ```bash
-npm install -g super-omni
+npm install -g github:Wilder1222/super-omni
 ```
 
 `lib/postinstall.js` is the npm postinstall hook. It runs `setup` automatically to link skills into all detected platform directories. Skips silently in CI environments or when `SUPER_OMNI_SKIP_POSTINSTALL=1` is set.
@@ -63,10 +63,10 @@ npm install -g super-omni
 ### 3. npx (project-level, no global install)
 
 ```bash
-npx super-omni
+npx github:Wilder1222/super-omni
 ```
 
-Downloads the package to a temp cache, executes `bin/super-omni-cli`, which resolves its own real path (following symlinks) and delegates to `setup`.
+Downloads the package directly from GitHub to a temp cache, executes `bin/super-omni-cli`, which resolves its own real path (following symlinks) and delegates to `setup`.
 
 ### Skipping postinstall
 

@@ -27,7 +27,7 @@ Where `<source>` can be:
 
 1. Validate marketplace source
 2. Install skill into `~/.omni-skills/skills/<skill-name>/SKILL.md`
-3. If available, auto-link into `~/.claude/skills/super-omni/skills/<skill-name>/`
+3. If `~/.claude/skills/super-omni/skills/` exists, auto-link into `~/.claude/skills/super-omni/skills/<skill-name>/`
 4. Verify with `/list-skills`
 
 ## Equivalent Commands

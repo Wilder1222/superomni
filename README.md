@@ -74,7 +74,7 @@ bin/skill-manager list
 From inside Claude Code, use:
 
 ```text
-/plugin add marketplace https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md
+/plugin add marketplace https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md  # marketplace-style alias
 /install-skill https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md
 /list-skills
 ```
@@ -353,7 +353,8 @@ super-omni/
 │   ├── install-agent.md      ← Install agent from URL/path
 │   ├── create-agent.md       ← Scaffold a new agent
 │   ├── list-skills.md        ← List all skills
-│   └── install-skill.md      ← Install skill from URL/path
+│   ├── install-skill.md      ← Install skill from URL/path
+│   └── plugin.md             ← /plugin add marketplace alias
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills

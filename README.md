@@ -74,7 +74,7 @@ bin/skill-manager list
 From inside Claude Code, use:
 
 ```text
-/install-skill <url-or-path>
+/install-skill https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md
 /list-skills
 ```
 

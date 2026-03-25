@@ -64,6 +64,20 @@ npm install -g super-omni   # auto-links skills to ~/.claude/skills/super-omni
 
 The `claude-skill.json` manifest at the package root provides the metadata Claude Code needs to discover commands, agents, and hooks automatically.
 
+To add skills into your local Claude CLI plugin marketplace:
+
+```bash
+bin/skill-manager install <url-or-path>
+bin/skill-manager list
+```
+
+From inside Claude Code, use:
+
+```text
+/install-skill <url-or-path>
+/list-skills
+```
+
 To add individual agents from within a Claude Code session, see the [Agent Management](#agent-management) section below.
 
 ---
@@ -122,6 +136,8 @@ Start with:
 - `/workflow` — sprint pipeline orchestration
 - `/qa` — quality assurance pass
 - `/security` — security audit
+- `/list-skills` — list all built-in + installed marketplace skills
+- `/install-skill <source>` — install a skill from URL/path into your local marketplace
 - `/list-agents` — list all available agents
 - `/install-agent <url>` — install an agent from GitHub
 - `/create-agent <name>` — create a custom agent
@@ -333,7 +349,9 @@ super-omni/
 │   ├── security.md
 │   ├── list-agents.md        ← List all agents
 │   ├── install-agent.md      ← Install agent from URL/path
-│   └── create-agent.md       ← Scaffold a new agent
+│   ├── create-agent.md       ← Scaffold a new agent
+│   ├── list-skills.md        ← List all skills
+│   └── install-skill.md      ← Install skill from URL/path
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills

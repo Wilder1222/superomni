@@ -459,6 +459,7 @@ if ! $DRY_RUN; then
   chmod +x "${SCRIPT_DIR}/bin/slug" 2>/dev/null || true
   chmod +x "${SCRIPT_DIR}/bin/analytics-log" 2>/dev/null || true
   chmod +x "${SCRIPT_DIR}/bin/agent-manager" 2>/dev/null || true
+  chmod +x "${SCRIPT_DIR}/bin/skill-manager" 2>/dev/null || true
   chmod +x "${SCRIPT_DIR}/lib/gen-skill-docs.sh" 2>/dev/null || true
 fi
 echo "  ✓ Scripts made executable"
@@ -517,6 +518,11 @@ echo "Agent management:"
 echo "  ${SCRIPT_DIR}/bin/agent-manager list           # list all agents"
 echo "  ${SCRIPT_DIR}/bin/agent-manager install <url>  # install from URL"
 echo "  ${SCRIPT_DIR}/bin/agent-manager create <name>  # create custom agent"
+echo ""
+echo "Skill marketplace:"
+echo "  ${SCRIPT_DIR}/bin/skill-manager list           # list all skills"
+echo "  ${SCRIPT_DIR}/bin/skill-manager install <src>  # install from URL/path"
+echo "  ${SCRIPT_DIR}/bin/skill-manager remove <name>  # remove installed skill"
 echo ""
 echo "To disable auto-skill triggers:"
 echo "  ${SCRIPT_DIR}/bin/config set proactive false"

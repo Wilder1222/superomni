@@ -74,6 +74,7 @@ bin/skill-manager list
 From inside Claude Code, use:
 
 ```text
+/plugin add marketplace https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md
 /install-skill https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md
 /list-skills
 ```
@@ -136,6 +137,7 @@ Start with:
 - `/workflow` — sprint pipeline orchestration
 - `/qa` — quality assurance pass
 - `/security` — security audit
+- `/plugin add marketplace <source>` — add a marketplace skill plugin
 - `/list-skills` — list all built-in + installed marketplace skills
 - `/install-skill <source>` — install a skill from URL/path into your local marketplace
 - `/list-agents` — list all available agents

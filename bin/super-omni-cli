@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# bin/super-omni-cli — super-omni CLI entry point
+#
+# Supports all installation methods:
+#   npm install -g super-omni  → super-omni [options]
+#   npx super-omni             → npx super-omni [options]
+#   claude skill install       → auto-runs on install via postinstall
+
+set -e
+
+# ── Resolve the real path of this script (follows symlinks) ──────────────────
+# Required so the script finds the package root even when executed as
+# a globally-installed symlink (e.g. /usr/local/bin/super-omni → .../<pkg>/bin/super-omni-cli)
+_resolve_path() {
+  local path="$1"
+  if command -v realpath >/dev/null 2>&1; then
+    realpath "$path"
+  elif readlink -f "$path" >/dev/null 2>&1; then
+    readlink -f "$path"
+  else
+    # Fallback: manually follow one level of symlink
+    local dir
+    dir="$(cd "$(dirname "$path")" && pwd)"
+    echo "${dir}/$(basename "$path")"
+  fi
+}
+
+REAL_PATH="$(_resolve_path "$0")"
+SCRIPT_DIR="$(cd "$(dirname "${REAL_PATH}")" && pwd)"
+PACKAGE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# ── Sanity check ──────────────────────────────────────────────────────────────
+if [ ! -f "${PACKAGE_ROOT}/setup" ]; then
+  echo "ERROR: Cannot find setup script at ${PACKAGE_ROOT}/setup" >&2
+  echo "The super-omni package may be corrupted. Try reinstalling:" >&2
+  echo "  npm install -g super-omni" >&2
+  exit 1
+fi
+
+# ── Delegate to the main setup script ────────────────────────────────────────
+exec bash "${PACKAGE_ROOT}/setup" "$@"

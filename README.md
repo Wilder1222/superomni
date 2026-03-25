@@ -22,7 +22,53 @@ Plan only what you need. But what you decide to build — build it fully.
 
 ### Install
 
-**One-line install (recommended):**
+Choose the method that fits your workflow:
+
+---
+
+**① npm global install (recommended for regular use):**
+
+```bash
+npm install -g super-omni
+```
+
+Setup runs automatically after install. To re-run at any time:
+
+```bash
+super-omni
+# or with options:
+super-omni --only claude
+super-omni --skip gemini
+super-omni --dry-run
+```
+
+---
+
+**② npx — run once without a permanent install:**
+
+```bash
+npx super-omni
+# or with options:
+npx super-omni --only claude
+```
+
+---
+
+**③ Claude Code marketplace / skill install:**
+
+Install the full framework via npm — the `postinstall` hook links skills automatically:
+
+```bash
+npm install -g super-omni   # auto-links skills to ~/.claude/skills/super-omni
+```
+
+The `claude-skill.json` manifest at the package root provides the metadata Claude Code needs to discover commands, agents, and hooks automatically.
+
+To add individual agents from within a Claude Code session, see the [Agent Management](#agent-management) section below.
+
+---
+
+**④ One-line curl install:**
 
 ```bash
 # Inspect before running (recommended):
@@ -31,7 +77,9 @@ curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/inst
 curl -fsSL https://raw.githubusercontent.com/Wilder1222/super-omni/main/bin/install | bash
 ```
 
-**Or clone and run setup manually:**
+---
+
+**⑤ Clone and run setup manually:**
 
 ```bash
 git clone https://github.com/Wilder1222/super-omni.git ~/.claude/skills/super-omni
@@ -45,16 +93,18 @@ The setup script auto-detects your platform and configures accordingly. Supporte
 
 ```bash
 # Claude Code only
-./setup --only claude
+super-omni --only claude          # if installed globally
+npx super-omni --only claude      # via npx
+./setup --only claude             # manual clone
 
 # VS Code (Cline / Continue.dev)
-./setup --only vscode
+super-omni --only vscode
 
 # JetBrains AI Assistant
-./setup --only jetbrains
+super-omni --only jetbrains
 
 # Skip a platform
-./setup --skip gemini
+super-omni --skip gemini
 ```
 
 ### Use in Claude Code

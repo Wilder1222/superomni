@@ -1,13 +1,13 @@
-# /superpower
+# /supervibe
 
 Activate the full **super-omni** skill framework and launch the default guided workflow.
 
 ## Usage
 
 ```
-/superpower              — activate all skills and show the guided workflow
-/superpower status       — show which skills are active and pipeline position
-/superpower reset        — restart the guided workflow from the beginning
+/supervibe              — activate all skills and show the guided workflow
+/supervibe status       — show which skills are active and pipeline position
+/supervibe reset        — restart the guided workflow from the beginning
 ```
 
 ## What Happens

@@ -38,7 +38,7 @@ Philosophy: **Plan Lean, Execute Complete**
 
 | Command | Description |
 |---------|-------------|
-| `/superpower` | Activate full framework + launch guided default workflow |
+| `/supervibe` | Activate full framework + launch guided default workflow |
 | `/brainstorm` | Design a feature — produces `spec.md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |

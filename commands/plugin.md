@@ -36,14 +36,14 @@ When called with no source or with `super-omni` as the source:
    - `npm install -g super-omni` (recommended), **or**
    - `npx super-omni` (one-time), **or**
    - `git clone … && ./setup` (manual)
-3. Verifies installation and lists all available commands with `/superpower`
+3. Verifies installation and lists all available commands with `/supervibe`
 
 After installation every command in the framework is immediately available:
 `/brainstorm`, `/write-plan`, `/execute-plan`, `/review`, `/ship`, `/retro`,
 `/investigate`, `/workflow`, `/qa`, `/security`, `/list-skills`, `/install-skill`,
 `/list-agents`, `/install-agent`, `/create-agent`, and more.
 
-Use `/superpower` to activate the guided default workflow.
+Use `/supervibe` to activate the guided default workflow.
 
 ### Installing a single marketplace skill
 
@@ -61,7 +61,7 @@ For the full framework:
 ```bash
 npm install -g super-omni
 # then in Claude Code:
-/superpower
+/supervibe
 ```
 
 For a single skill:

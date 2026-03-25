@@ -5,16 +5,15 @@
   "author": {
     "name": "Wilder1222"
   },
-  "repository": "https://github.com/Wilder1222/super-omni",
-  "skills": "./skills/",
-  "commands": [
-    { "name": "vibe",         "file": "commands/vibe.md" },
-    { "name": "brainstorm",   "file": "commands/brainstorm.md" },
-    { "name": "write-plan",   "file": "commands/write-plan.md" },
-    { "name": "execute-plan", "file": "commands/execute-plan.md" },
-    { "name": "review",       "file": "commands/review.md" }
-  ],
-  "hooks": {
-    "source": "./hooks/hooks.json"
-  }
+  "homepage": "https://github.com/Wilder1222/super-omni#readme",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "workflow",
+    "brainstorm",
+    "planning",
+    "code-review",
+    "productivity",
+    "ai-assistant"
+  ]
 }

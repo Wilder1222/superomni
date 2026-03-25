@@ -1,0 +1,215 @@
+#!/usr/bin/env bash
+# bin/skill-manager — super-omni skill lifecycle manager
+#
+# Manages skills in the skills/ directory:
+#   list    — show all available skills
+#   install — install a skill from URL, local file, or local directory
+#   info    — show details about a specific skill
+#   remove  — remove an installed skill
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "${SCRIPT_DIR}")"
+SKILLS_DIR="${REPO_ROOT}/skills"
+USER_SKILLS_DIR="${HOME}/.omni-skills/skills"
+CLAUDE_SUPER_OMNI_SKILLS_DIR="${HOME}/.claude/skills/super-omni/skills"
+
+usage() {
+  cat <<USAGE
+super-omni skill-manager — manage skills
+
+Usage: bin/skill-manager <command> [args]
+
+Commands:
+  list                    List all available skills
+  install <source>        Install a skill from URL, local file, or local directory
+                          Examples:
+                            bin/skill-manager install ./my-skill/SKILL.md
+                            bin/skill-manager install ./my-skill
+                            bin/skill-manager install https://raw.githubusercontent.com/user/repo/main/skills/my-skill/SKILL.md
+  info <name>             Show details about a skill
+  remove <name>           Remove an installed skill
+
+Examples:
+  bin/skill-manager list
+  bin/skill-manager info writing-plans
+  bin/skill-manager install ./skills/custom/my-skill/SKILL.md
+USAGE
+  exit "${1:-0}"
+}
+
+err() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+sanitize_name() {
+  local raw="$1"
+  local cleaned
+  cleaned="$(echo "${raw}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//')"
+  [ -n "${cleaned}" ] || err "Could not derive a valid skill name from '${raw}'"
+  echo "${cleaned}"
+}
+
+extract_skill_name_from_file() {
+  local skill_file="$1"
+
+  local name
+  name="$(grep -m1 '^name:' "${skill_file}" 2>/dev/null | sed 's/^name:[[:space:]]*//' | tr -d '"' || true)"
+  if [ -n "${name}" ]; then
+    sanitize_name "${name}"
+    return
+  fi
+
+  sanitize_name "$(basename "$(dirname "${skill_file}")")"
+}
+
+cmd_list() {
+  echo ""
+  echo "super-omni Skills"
+  echo "═════════════════════════════════════"
+  echo ""
+  echo "Built-in skills:"
+  local count=0
+
+  for f in "${SKILLS_DIR}"/*/SKILL.md; do
+    [ -f "${f}" ] || continue
+    name="$(basename "$(dirname "${f}")")"
+    desc="$(grep -m1 '^# ' "${f}" 2>/dev/null | sed 's/^# //' || echo "(no description)")"
+    printf "  %-22s %s\n" "${name}" "${desc}"
+    count=$((count + 1))
+  done
+
+  if [ -d "${USER_SKILLS_DIR}" ] && [ "$(ls -A "${USER_SKILLS_DIR}" 2>/dev/null)" ]; then
+    echo ""
+    echo "Installed skills (~/.omni-skills/skills):"
+    for f in "${USER_SKILLS_DIR}"/*/SKILL.md; do
+      [ -f "${f}" ] || continue
+      name="$(basename "$(dirname "${f}")")"
+      desc="$(grep -m1 '^# ' "${f}" 2>/dev/null | sed 's/^# //' || echo "(no description)")"
+      printf "  %-22s %s\n" "${name}" "${desc}"
+      count=$((count + 1))
+    done
+  fi
+
+  echo ""
+  echo "Total: ${count} skill(s)"
+  echo ""
+}
+
+cmd_info() {
+  local name="${1}"
+  [ -n "${name}" ] || err "Usage: bin/skill-manager info <name>"
+
+  local skill_file=""
+  if [ -f "${SKILLS_DIR}/${name}/SKILL.md" ]; then
+    skill_file="${SKILLS_DIR}/${name}/SKILL.md"
+  elif [ -f "${USER_SKILLS_DIR}/${name}/SKILL.md" ]; then
+    skill_file="${USER_SKILLS_DIR}/${name}/SKILL.md"
+  fi
+
+  if [ -z "${skill_file}" ]; then
+    err "Skill '${name}' not found. Run 'bin/skill-manager list' to see available skills."
+  fi
+
+  echo ""
+  echo "Skill: ${name}"
+  echo "File:  ${skill_file}"
+  echo "═════════════════════════════════════"
+  echo ""
+  head -30 "${skill_file}"
+  echo ""
+  echo "... (run 'cat ${skill_file}' to see full skill definition)"
+  echo ""
+}
+
+cmd_install() {
+  local source="${1}"
+  [ -n "${source}" ] || err "Usage: bin/skill-manager install <url-or-path>"
+
+  mkdir -p "${USER_SKILLS_DIR}"
+
+  local tmp_file=""
+  local skill_file=""
+  local skill_name=""
+
+  if [[ "${source}" =~ ^https?:// ]]; then
+    tmp_file="$(mktemp)"
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsSL "${source}" -o "${tmp_file}" || err "Failed to download skill from ${source}"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -q "${source}" -O "${tmp_file}" || err "Failed to download skill from ${source}"
+    else
+      err "Neither curl nor wget is available. Please install one to download skills."
+    fi
+    skill_file="${tmp_file}"
+    skill_name="$(extract_skill_name_from_file "${skill_file}")"
+  elif [ -d "${source}" ]; then
+    [ -f "${source}/SKILL.md" ] || err "Directory must contain SKILL.md: ${source}"
+    skill_file="${source}/SKILL.md"
+    skill_name="$(extract_skill_name_from_file "${skill_file}")"
+  else
+    [ -f "${source}" ] || err "Local file not found: ${source}"
+    [ "$(basename "${source}")" = "SKILL.md" ] || err "Local file must be named SKILL.md"
+    skill_file="${source}"
+    skill_name="$(extract_skill_name_from_file "${skill_file}")"
+  fi
+
+  if [ -d "${SKILLS_DIR}/${skill_name}" ]; then
+    err "Skill '${skill_name}' already exists as a built-in skill and cannot be overwritten."
+  fi
+
+  local target_dir="${USER_SKILLS_DIR}/${skill_name}"
+  mkdir -p "${target_dir}"
+  cp "${skill_file}" "${target_dir}/SKILL.md"
+  rm -f "${tmp_file}" 2>/dev/null || true
+
+  if [ -d "${CLAUDE_SUPER_OMNI_SKILLS_DIR}" ]; then
+    local claude_skill_target="${CLAUDE_SUPER_OMNI_SKILLS_DIR}/${skill_name}"
+    if [ -L "${claude_skill_target}" ]; then
+      rm "${claude_skill_target}"
+    elif [ -e "${claude_skill_target}" ]; then
+      err "Claude skill path already exists and is not a symlink: ${claude_skill_target}"
+    fi
+    ln -s "${target_dir}" "${claude_skill_target}"
+  fi
+
+  echo "  ✓ Skill installed: ${target_dir}/SKILL.md"
+  echo "  Skill name: ${skill_name}"
+  echo ""
+  echo "Run 'bin/skill-manager list' to verify."
+}
+
+cmd_remove() {
+  local name="${1}"
+  [ -n "${name}" ] || err "Usage: bin/skill-manager remove <name>"
+
+  local skill_dir="${USER_SKILLS_DIR}/${name}"
+  if [ ! -d "${skill_dir}" ]; then
+    if [ -d "${SKILLS_DIR}/${name}" ]; then
+      err "Cannot remove built-in skill '${name}'. Built-in skills are part of the super-omni framework."
+    else
+      err "Skill '${name}' not found in user skills (~/.omni-skills/skills/)."
+    fi
+  fi
+
+  rm -rf "${skill_dir}"
+  local claude_skill_target="${CLAUDE_SUPER_OMNI_SKILLS_DIR}/${name}"
+  if [ -L "${claude_skill_target}" ]; then
+    rm "${claude_skill_target}"
+  fi
+  echo "  ✓ Skill '${name}' removed from ${USER_SKILLS_DIR}"
+}
+
+COMMAND="${1:-}"
+[ -n "${COMMAND}" ] || usage
+
+case "${COMMAND}" in
+  list)    cmd_list ;;
+  info)    cmd_info "${2:-}" ;;
+  install) cmd_install "${2:-}" ;;
+  remove)  cmd_remove "${2:-}" ;;
+  --help|-h|help) usage 0 ;;
+  *) echo "Unknown command: ${COMMAND}"; echo ""; usage 1 ;;
+esac

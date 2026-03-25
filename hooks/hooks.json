@@ -2,8 +2,12 @@
   "hooks": {
     "SessionStart": [
       {
-        "script": "hooks/session-start",
-        "description": "Injects super-omni skill framework at session start"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/session-start"
+          }
+        ]
       }
     ]
   }

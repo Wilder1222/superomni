@@ -64,22 +64,12 @@ npm install -g super-omni   # auto-links skills to ~/.claude/skills/super-omni
 
 The `claude-skill.json` manifest at the package root provides the metadata Claude Code needs to discover commands, agents, and hooks automatically.
 
-To add skills into your local Claude CLI plugin marketplace:
+To add skills via the skill manager CLI:
 
 ```bash
 bin/skill-manager install <url-or-path>
 bin/skill-manager list
 ```
-
-From inside Claude Code, use:
-
-```text
-/plugin add marketplace https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md  # marketplace-style alias
-/install-skill https://raw.githubusercontent.com/user/skills/main/data-analysis/SKILL.md
-/list-skills
-```
-
-To add individual agents from within a Claude Code session, see the [Agent Management](#agent-management) section below.
 
 ---
 
@@ -127,24 +117,11 @@ super-omni --skip gemini
 Open your project in Claude Code. Skills activate automatically via session hooks.
 
 Start with:
-- `/supervibe` — **activate the full framework** and launch the guided default workflow
+- `/vibe` — **activate the full framework** and launch the guided default workflow
 - `/brainstorm` — design a feature from scratch
 - `/write-plan` — turn an idea into an executable plan
 - `/execute-plan` — run the plan step by step
-- `/retro` — weekly engineering retrospective
-- `/ship` — release workflow with changelog
-- `/investigate` — explore unfamiliar code
 - `/review` — structured code review
-- `/workflow` — sprint pipeline orchestration
-- `/qa` — quality assurance pass
-- `/security` — security audit
-- `/plugin add marketplace` — install the full super-omni framework (no source = full install)
-- `/plugin add marketplace <source>` — add a single marketplace skill plugin
-- `/list-skills` — list all built-in + installed marketplace skills
-- `/install-skill <source>` — install a skill from URL/path into your local marketplace
-- `/list-agents` — list all available agents
-- `/install-agent <url>` — install an agent from GitHub
-- `/create-agent <name>` — create a custom agent
 
 ---
 
@@ -341,23 +318,11 @@ super-omni/
 │   └── architect.md          ← Architecture reviewer
 │
 ├── commands/                 ← Slash command definitions
-│   ├── supervibe.md          ← /supervibe — activate full framework + guided workflow
+│   ├── vibe.md               ← /vibe — activate full framework + guided workflow
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md
-│   ├── retro.md
-│   ├── ship.md
-│   ├── investigate.md
-│   ├── review.md
-│   ├── workflow.md
-│   ├── qa.md
-│   ├── security.md
-│   ├── list-agents.md        ← List all agents
-│   ├── install-agent.md      ← Install agent from URL/path
-│   ├── create-agent.md       ← Scaffold a new agent
-│   ├── list-skills.md        ← List all skills
-│   ├── install-skill.md      ← Install skill from URL/path
-│   └── plugin.md             ← /plugin add marketplace (full install or single skill)
+│   └── review.md
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills

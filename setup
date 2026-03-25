@@ -114,7 +114,7 @@ link_skills() {
 
 # install_claude_commands
 #   Symlinks each commands/*.md file into ~/.claude/commands/ so they become
-#   native Claude Code slash commands (e.g. /brainstorm, /plugin, etc.).
+#   native Claude Code slash commands (e.g. /vibe, /brainstorm, etc.).
 #   Idempotent: refreshes stale symlinks, skips real files owned by others.
 install_claude_commands() {
   local cmds_src="${SCRIPT_DIR}/commands"
@@ -228,7 +228,7 @@ if should_install "claude"; then
     echo "  ● Claude Code (primary — always installed)"
     link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
   fi
-  # Install slash commands so /brainstorm, /plugin, etc. are available in Claude Code
+  # Install slash commands so /vibe, /brainstorm, etc. are available in Claude Code
   install_claude_commands
 fi
 
@@ -555,21 +555,8 @@ echo ""
 echo "Next steps:"
 echo "  1. Open a project in Claude Code"
 echo "  2. All slash commands are immediately available:"
-echo "     /supervibe  /brainstorm  /write-plan  /execute-plan"
-echo "     /review  /ship  /retro  /investigate  /workflow"
-echo "     /qa  /security  /plugin  /list-skills  /install-skill"
-echo "     /list-agents  /install-agent  /create-agent"
+echo "     /vibe  /brainstorm  /write-plan  /execute-plan  /review"
 echo "  3. Skills auto-activate via session hooks for other triggers"
-echo ""
-echo "Agent management:"
-echo "  ${SCRIPT_DIR}/bin/agent-manager list           # list all agents"
-echo "  ${SCRIPT_DIR}/bin/agent-manager install <url>  # install from URL"
-echo "  ${SCRIPT_DIR}/bin/agent-manager create <name>  # create custom agent"
-echo ""
-echo "Skill marketplace:"
-echo "  ${SCRIPT_DIR}/bin/skill-manager list           # list all skills"
-echo "  ${SCRIPT_DIR}/bin/skill-manager install <src>  # install from URL/path"
-echo "  ${SCRIPT_DIR}/bin/skill-manager remove <name>  # remove installed skill"
 echo ""
 echo "To disable auto-skill triggers:"
 echo "  ${SCRIPT_DIR}/bin/config set proactive false"

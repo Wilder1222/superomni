@@ -2,7 +2,7 @@
 
 ## super-omni — Developer Reference
 
-**Version:** 0.1.0
+**Version:** 0.2.0
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 super-omni/
 ├── hooks/                    ← Claude Code session hooks
-├── skills/                   ← Skill definitions (17 skills)
+├── skills/                   ← Skill definitions (22 skills)
 ├── agents/                   ← Agent specifications
 ├── commands/                 ← Slash command docs
 ├── lib/                      ← Build tools and shared assets
@@ -330,7 +330,7 @@ There is no automated test suite currently. Testing is done manually:
 3. **Build test:**
    ```bash
    bash lib/gen-skill-docs.sh
-   # Should say "Processed 16 template(s)"
+   # Should say "Processed 21 template(s)"
    head -20 skills/systematic-debugging/SKILL.md
    # Should contain preamble content, not "{{PREAMBLE}}"
    ```
@@ -345,6 +345,29 @@ There is no automated test suite currently. Testing is done manually:
    ```bash
    bin/slug
    # Should output something like "super-omni-abc123"
+   ```
+
+6. **New skills test:**
+   ```bash
+   # Verify new skill directories exist
+   ls skills/receiving-code-review/SKILL.md
+   ls skills/security-audit/SKILL.md
+   ls skills/qa/SKILL.md
+   ls skills/careful/SKILL.md
+   ls skills/workflow/SKILL.md
+   ```
+
+7. **New commands test:**
+   ```bash
+   # Verify new command files exist
+   ls commands/ship.md commands/investigate.md commands/review.md
+   ls commands/workflow.md commands/qa.md commands/security.md
+   ```
+
+8. **Multi-platform setup test:**
+   ```bash
+   # Verify setup detects platform correctly
+   ./setup --help  # or run setup and check output
    ```
 
 ---
@@ -387,18 +410,26 @@ A skill meets the quality bar when:
 
 ## Roadmap
 
-### v0.2.0
+### v0.2.0 ✅ Completed
 
-- [ ] Dual Voices support (optional Claude + Codex consensus for plan review)
-- [ ] `/ship` command registration
-- [ ] More commands (investigate, code-review)
-- [ ] Static validation tests
+- [x] `/ship` command registration
+- [x] More commands (`/investigate`, `/review`, `/workflow`, `/qa`, `/security`)
+- [x] `receiving-code-review` skill — respond to review feedback
+- [x] `security-audit` skill — OWASP/STRIDE security vulnerability audit
+- [x] `qa` skill — quality assurance with checklists
+- [x] `careful` skill — safety guardrails for destructive operations
+- [x] `workflow` skill — sprint pipeline orchestration
+- [x] Multi-platform support (Claude Code, Cursor, Codex, Gemini CLI, OpenCode)
+- [x] Review checklists (data vs logic separation)
+- [x] Platform detection in hooks
 
 ### v0.3.0
 
-- [ ] Multi-platform support (Cursor, Gemini CLI, OpenCode)
-- [ ] CSO skill (OWASP Top 10 + STRIDE security audit)
+- [ ] Dual Voices support (optional Claude + Codex consensus for plan review)
+- [ ] Static validation tests
 - [ ] Analytics dashboard (`bin/analytics-view`)
+- [ ] Skill dependency graph visualization
+- [ ] Auto-update mechanism
 
 ### v1.0.0
 

@@ -1,6 +1,6 @@
 # super-omni
 
-> **Plan Lean, Execute Complete** — A fused AI coding skill framework for Claude Code.
+> **Plan Lean, Execute Complete** — A fused AI coding skill framework for Claude Code, Cursor, Codex, Gemini CLI, and OpenCode.
 
 super-omni combines the best ideas from [obra/superpowers](https://github.com/obra/superpowers) (methodology-driven AI skill framework) and [garrytan/gstack](https://github.com/garrytan/gstack) (engineering completeness principles) into a unified, opinionated system for AI-assisted software development.
 
@@ -28,6 +28,8 @@ cd ~/.claude/skills/super-omni
 ./setup
 ```
 
+The setup script auto-detects your platform and configures accordingly. Supported platforms: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **OpenCode**.
+
 ### Use in Claude Code
 
 Open your project in Claude Code. Skills activate automatically via session hooks.
@@ -37,6 +39,12 @@ Start with:
 - `/write-plan` — turn an idea into an executable plan
 - `/execute-plan` — run the plan step by step
 - `/retro` — weekly engineering retrospective
+- `/ship` — release workflow with changelog
+- `/investigate` — explore unfamiliar code
+- `/review` — structured code review
+- `/workflow` — sprint pipeline orchestration
+- `/qa` — quality assurance pass
+- `/security` — security audit
 
 ---
 
@@ -61,6 +69,10 @@ Start with:
 | `code-review` | Reviewing code/PRs | Structured review |
 | `plan-review` | Before executing a plan | Reviewed plan |
 | `subagent-development` | Complex parallel tasks | Multi-agent output |
+| `receiving-code-review` | Responding to review feedback | Updated code + reply |
+| `security-audit` | Security vulnerability audit | Threat model + fixes |
+| `qa` | Quality assurance pass | QA report |
+| `careful` | High-risk/destructive operations | Safety checklist |
 
 ### Advanced (P2)
 
@@ -73,6 +85,23 @@ Start with:
 | `retro` | Weekly review | Retrospective report |
 | `ship` | Releasing software | Release + changelog |
 | `writing-skills` | Creating new skills | New skill file |
+| `workflow` | Sprint pipeline orchestration | Workflow plan + status |
+
+---
+
+## Multi-Platform Support
+
+super-omni supports multiple AI coding platforms:
+
+| Platform | Status | Setup |
+|----------|--------|-------|
+| **Claude Code** | ✅ Full support | Auto-detected by `./setup` |
+| **Cursor** | ✅ Full support | Auto-detected by `./setup` |
+| **Codex** | ✅ Full support | Auto-detected by `./setup` |
+| **Gemini CLI** | ✅ Full support | Auto-detected by `./setup` |
+| **OpenCode** | ✅ Full support | Auto-detected by `./setup` |
+
+The setup script detects your platform and configures hooks, skills injection, and session management accordingly.
 
 ---
 
@@ -152,7 +181,12 @@ super-omni/
 │   ├── investigate/
 │   ├── retro/                ← Weekly engineering retrospective
 │   ├── ship/                 ← Release workflow
-│   └── writing-skills/       ← Meta: create new skills
+│   ├── writing-skills/       ← Meta: create new skills
+│   ├── receiving-code-review/ ← Respond to review feedback
+│   ├── security-audit/       ← Security vulnerability audit
+│   ├── qa/                   ← Quality assurance
+│   ├── careful/              ← Safety guardrails
+│   └── workflow/             ← Sprint pipeline orchestration
 │
 ├── agents/
 │   └── code-reviewer.md      ← Code reviewer agent definition
@@ -161,7 +195,13 @@ super-omni/
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md
-│   └── retro.md
+│   ├── retro.md
+│   ├── ship.md
+│   ├── investigate.md
+│   ├── review.md
+│   ├── workflow.md
+│   ├── qa.md
+│   └── security.md
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills
@@ -192,7 +232,7 @@ super-omni/
 
 ### Building Skills from Templates
 
-Skills use `{{PREAMBLE}}` as a macro that gets expanded during build:
+22 skills use `{{PREAMBLE}}` as a macro that gets expanded during build:
 
 ```bash
 # Build all skills

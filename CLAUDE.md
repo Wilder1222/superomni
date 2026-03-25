@@ -20,6 +20,11 @@ Philosophy: **Plan Lean, Execute Complete**
 | verification | "verify", "done", "complete" | P1 |
 | code-review | "review", "PR ready" | P1 |
 | plan-review | "review plan", "autoplan" | P1 |
+| receiving-code-review | "review feedback", "address review" | P1 |
+| security-audit | "security audit", "threat model" | P1 |
+| qa | "qa", "quality assurance" | P1 |
+| careful | "careful", destructive operations | P1 |
+| workflow | "workflow", "sprint", "what's next" | P1 |
 | git-worktrees | Parallel work | P2 |
 | finishing-branch | "finish branch", "merge" | P2 |
 | dispatching-parallel | Parallel tasks | P2 |

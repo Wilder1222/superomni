@@ -2,8 +2,8 @@
 # bin/super-omni-cli — super-omni CLI entry point
 #
 # Supports all installation methods:
-#   npm install -g super-omni  → super-omni [options]
-#   npx super-omni             → npx super-omni [options]
+#   npm install -g github:Wilder1222/super-omni  → super-omni [options]
+#   npx github:Wilder1222/super-omni             → npx github:Wilder1222/super-omni [options]
 
 set -e
 
@@ -32,7 +32,7 @@ PACKAGE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 if [ ! -f "${PACKAGE_ROOT}/setup" ]; then
   echo "ERROR: Cannot find setup script at ${PACKAGE_ROOT}/setup" >&2
   echo "The super-omni package may be corrupted. Try reinstalling:" >&2
-  echo "  npm install -g super-omni" >&2
+  echo "  npm install -g github:Wilder1222/super-omni" >&2
   exit 1
 fi
 

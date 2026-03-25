@@ -40,9 +40,9 @@ brainstorm → write-plan → execute-plan → review
 If super-omni is not yet installed, run one of these in your terminal:
 
 ```bash
-npm install -g super-omni        # recommended — installs globally from npm
+npm install -g github:Wilder1222/super-omni   # recommended — installs globally from GitHub
 # or
-npx super-omni                   # one-time run without permanent install
+npx github:Wilder1222/super-omni              # one-time run without permanent install
 # or
 git clone https://github.com/Wilder1222/super-omni.git && cd super-omni && ./setup
 ```

@@ -2,8 +2,8 @@
 
 ## super-omni — Architecture and Fusion Strategy
 
-**Version:** 0.1.0
-**Status:** Implemented
+**Version:** 0.2.0
+**Status:** Implemented (v0.2.0)
 
 ---
 
@@ -99,6 +99,38 @@ The distinction is in the _starting state_, not the methods.
 - Session detection from commit timestamps (45-min gap threshold)
 - No dependency on gstack-specific state
 - Save reports to `.context/retros/` (project-local, git-ignoreable)
+
+### Decision 7: Multi-Platform Support Strategy
+
+**Problem:** super-omni was originally built for Claude Code only. Users want to use it with Cursor, Codex, Gemini CLI, and OpenCode.
+
+**Decision:** Platform detection at setup and hook time:
+1. `./setup` auto-detects the active platform and configures paths accordingly
+2. `hooks/session-start` detects the platform at runtime for environment-specific behavior
+3. Skill definitions remain platform-agnostic — only hooks and setup are platform-aware
+4. Each platform gets appropriate config file placement and hook registration
+
+**Implementation:** Platform detection in `setup` and `hooks/session-start`.
+
+### Decision 8: Review Checklists (Data vs Logic Separation)
+
+**Problem:** Code review and QA skills need structured checklists. Embedding checklists in skill logic makes them hard to maintain.
+
+**Decision:** Separate checklist data from skill logic:
+1. Checklists are stored as data (markdown tables or YAML) within skill directories
+2. Skill logic references checklists but doesn't hardcode them
+3. New checklists can be added without modifying skill protocol
+4. `receiving-code-review` uses checklists to systematically address review feedback
+
+### Decision 9: Workflow/Sprint Pipeline (Inter-Skill Orchestration)
+
+**Problem:** Individual skills work well in isolation, but real development follows a pipeline: plan → implement → test → review → ship. No skill orchestrates this.
+
+**Decision:** The `workflow` skill orchestrates inter-skill pipelines:
+1. Defines sprint phases that map to existing skills
+2. Tracks progress across phases (plan → code → QA → review → ship)
+3. Suggests the next skill to invoke based on current state
+4. Does not replace individual skills — it sequences them
 
 ---
 
@@ -262,6 +294,15 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 - **investigate**: gstack investigate, scoped to complement systematic-debugging
 - **ship**: gstack ship, generalized release workflow
 
+### New in v0.2.0
+- **receiving-code-review**: Structured protocol for responding to review feedback
+- **security-audit**: OWASP/STRIDE-informed security vulnerability audit
+- **qa**: Quality assurance pass with structured checklists
+- **careful**: Safety guardrails for destructive/high-risk operations
+- **workflow**: Sprint pipeline orchestration across skills
+- **Multi-platform support**: Claude Code, Cursor, Codex, Gemini CLI, OpenCode
+- **Review checklists**: Data-driven checklist system for review and QA skills
+
 ### New (original to super-omni)
 - **ETHOS.md**: Plan Lean / Execute Complete synthesis
 - **lib/preamble.md**: PROACTIVE mode toggle, unified status protocol
@@ -275,8 +316,11 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 
 | Risk | Mitigation |
 |------|-----------|
-| 17 skills is too many — cognitive overload | PROACTIVE mode focuses agent; skills reference each other |
+| 22 skills is too many — cognitive overload | PROACTIVE mode focuses agent; `workflow` skill sequences skills; skills reference each other |
 | `.tmpl` build step adds complexity | Pre-built `.md` files committed; build only needed for dev |
 | investigate + systematic-debugging overlap | Clear separation: no error → investigate; has error → debug |
 | retro requires git history | Gracefully handles shallow clones with `git fetch` |
 | gstack Dual Voices removed | Noted as future upgrade; consensus optional with Codex config |
+| Multi-platform support fragmentation | Platform detection is isolated to setup/hooks; skills stay platform-agnostic |
+| workflow skill over-orchestration | workflow suggests, doesn't force; individual skills remain independently usable |
+| security-audit false sense of security | Clearly documented as AI-assisted, not a replacement for professional security review |

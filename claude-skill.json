@@ -21,6 +21,7 @@
     { "name": "workflow",      "file": "commands/workflow.md" },
     { "name": "qa",            "file": "commands/qa.md" },
     { "name": "security",      "file": "commands/security.md" },
+    { "name": "supervibe",    "file": "commands/supervibe.md" },
     { "name": "plugin",        "file": "commands/plugin.md" },
     { "name": "list-skills",   "file": "commands/list-skills.md" },
     { "name": "install-skill", "file": "commands/install-skill.md" },

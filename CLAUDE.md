@@ -81,3 +81,4 @@ These documents serve as a permanent, reviewable audit trail for the user.
 - Always check `using-skills/SKILL.md` first — it's the meta-skill
 - Respect PROACTIVE mode — if false, only run skills when explicitly asked
 - Use status protocol: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
+- **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`spec.md`, `plan.md`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.

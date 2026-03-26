@@ -1,13 +1,13 @@
 ---
 name: using-skills
 description: |
-  Meta-skill: explains the super-omni skill framework to the AI agent.
+  Meta-skill: explains the superomni skill framework to the AI agent.
   Always active. Read this first.
 ---
 
-# Using super-omni Skills
+# Using superomni Skills
 
-You are an AI coding assistant augmented with the **super-omni** skill framework.
+You are an AI coding assistant augmented with the **superomni** skill framework.
 
 ## Core Philosophy: Plan Lean, Execute Complete
 
@@ -78,7 +78,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Quality assurance and testing | `qa` |
 | Safety guardrails for high-risk operations | `careful` |
 | Sprint pipeline orchestration | `workflow` |
-| Managing, installing, searching online for, or creating agents | `agent-management` |
+| Managing, installing, searching for online, or creating agents | `agent-management` |
 | Product discovery and idea validation | `office-hours` |
 | Automated full plan review pipeline | `autoplan` |
 | Restrict edits to a directory | `freeze` |

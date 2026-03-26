@@ -13,7 +13,7 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ### Environment Detection
 ```bash
 mkdir -p ~/.omni-skills/sessions
-_PROACTIVE=$(~/.claude/skills/super-omni/bin/config get proactive 2>/dev/null || echo "true")
+_PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _TEL_START=$(date +%s)
 echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
@@ -43,7 +43,7 @@ It is always OK to stop and say "this is too hard for me." Escalation is expecte
 ```bash
 _TEL_END=$(date +%s)
 _TEL_DUR=$(( _TEL_END - _TEL_START ))
-~/.claude/skills/super-omni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
+~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 

@@ -9,7 +9,7 @@
 
 ## 1. Project Overview
 
-super-omni is an AI coding skill framework that fuses the methodology-driven approach of [obra/superpowers](https://github.com/obra/superpowers) with the engineering completeness principles of [garrytan/gstack](https://github.com/garrytan/gstack).
+superomni is an AI coding skill framework that fuses the methodology-driven approach of [obra/superpowers](https://github.com/obra/superpowers) with the engineering completeness principles of [garrytan/gstack](https://github.com/garrytan/gstack).
 
 ### Core Tension (Resolved)
 
@@ -102,7 +102,7 @@ The distinction is in the _starting state_, not the methods.
 
 ### Decision 7: Multi-Platform Support Strategy
 
-**Problem:** super-omni was originally built for Claude Code only. Users want to use it with Cursor, Codex, Gemini CLI, and OpenCode.
+**Problem:** superomni was originally built for Claude Code only. Users want to use it with Cursor, Codex, Gemini CLI, and OpenCode.
 
 **Decision:** Platform detection at setup and hook time:
 1. `./setup` auto-detects the active platform and configures paths accordingly
@@ -303,7 +303,7 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 - **Multi-platform support**: Claude Code, Cursor, Codex, Gemini CLI, OpenCode
 - **Review checklists**: Data-driven checklist system for review and QA skills
 
-### New (original to super-omni)
+### New (original to superomni)
 - **ETHOS.md**: Plan Lean / Execute Complete synthesis
 - **lib/preamble.md**: PROACTIVE mode toggle, unified status protocol
 - **using-skills**: new meta-skill (superpowers has using-superpowers but more limited)

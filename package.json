@@ -18,7 +18,7 @@
     "npx"
   ],
   "bin": {
-    "superomni": "./bin/super-omni-cli"
+    "superomni": "./bin/superomni-cli"
   },
   "scripts": {
     "build": "bash lib/gen-skill-docs.sh",
@@ -42,10 +42,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wilder1222/super-omni.git"
+    "url": "https://github.com/Wilder1222/superomni.git"
   },
-  "homepage": "https://github.com/Wilder1222/super-omni#readme",
+  "homepage": "https://github.com/Wilder1222/superomni#readme",
   "bugs": {
-    "url": "https://github.com/Wilder1222/super-omni/issues"
+    "url": "https://github.com/Wilder1222/superomni/issues"
   }
 }

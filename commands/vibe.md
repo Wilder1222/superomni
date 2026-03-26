@@ -37,14 +37,14 @@ brainstorm → write-plan → execute-plan → review
 
 ## First-Time Setup
 
-If super-omni is not yet installed, run one of these in your terminal:
+If superomni is not yet installed, run one of these in your terminal:
 
 ```bash
-npm install -g github:Wilder1222/super-omni   # recommended — installs globally from GitHub
+npm install -g github:Wilder1222/superomni   # recommended — installs globally from GitHub
 # or
-npx github:Wilder1222/super-omni              # one-time run without permanent install
+npx github:Wilder1222/superomni              # one-time run without permanent install
 # or
-git clone https://github.com/Wilder1222/super-omni.git && cd super-omni && ./setup
+git clone https://github.com/Wilder1222/superomni.git && cd superomni && ./setup
 ```
 
 ## Skill Reference

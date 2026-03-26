@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bin/config — super-omni configuration manager
+# bin/config — superomni configuration manager
 #
 # Usage:
 #   bin/config get <key>          — print current value of key

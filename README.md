@@ -29,7 +29,7 @@ Plan only what you need. But what you decide to build — build it fully.
 Inside a Claude Code session, register and install the skill from GitHub:
 
 ```
-/plugin marketplace add Wilder1222/super-omni
+/plugin marketplace add Wilder1222/superomni
 ```
 
 Claude Code will fetch the `.claude-plugin/marketplace.json` manifest, install all skills, register slash commands, and set up session hooks automatically.
@@ -47,7 +47,7 @@ Then start with:
 For **Cursor**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**, **Codex**, **Gemini CLI**, and **OpenCode**:
 
 ```bash
-npm install -g github:Wilder1222/super-omni
+npm install -g github:Wilder1222/superomni
 ```
 
 The `postinstall` hook auto-detects your platform and links skills, commands, and hooks automatically.
@@ -57,7 +57,7 @@ The `postinstall` hook auto-detects your platform and links skills, commands, an
 **③ Project-level install (no global install):**
 
 ```bash
-npx github:Wilder1222/super-omni
+npx github:Wilder1222/superomni
 ```
 
 Runs the same auto-detection and linking as the global install, without installing anything permanently.
@@ -121,7 +121,7 @@ Start with:
 
 ## Agent Library
 
-super-omni ships with specialized agents you can spawn for focused tasks:
+superomni ships with specialized agents you can spawn for focused tasks:
 
 | Agent | Specialty |
 |-------|-----------|
@@ -160,7 +160,7 @@ See [`docs/AGENTS.md`](docs/AGENTS.md) for the full agent library reference.
 
 ## Multi-Platform Support
 
-super-omni supports multiple AI coding platforms:
+superomni supports multiple AI coding platforms:
 
 | Platform | Status | Setup |
 |----------|--------|-------|
@@ -231,7 +231,7 @@ Every skill session ends with one of:
 ## Directory Structure
 
 ```
-super-omni/
+superomni/
 ├── hooks/                    ← Claude Code session hooks
 │   ├── session-start         ← Injects skills at session start
 │   └── hooks.json

@@ -1,6 +1,6 @@
 # Design Document
 
-## super-omni — Architecture and Fusion Strategy
+## superomni — Architecture and Fusion Strategy
 
 **Version:** 0.2.0
 **Status:** Implemented (v0.2.0)
@@ -312,7 +312,7 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 
 ---
 
-## 10. Dynamic Agent & Skill Discovery
+## 9. Dynamic Agent & Skill Discovery
 
 ### Design
 

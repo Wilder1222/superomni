@@ -31,6 +31,26 @@ Report status using one of these at the end of every skill session:
 - **BLOCKED** — Cannot proceed. State what blocks you and what was tried.
 - **NEEDS_CONTEXT** — Missing information. State exactly what you need.
 
+### Session Continuity
+After reporting any terminal status (DONE / DONE_WITH_CONCERNS), **always** close with a
+"What's next?" line that names the next logical superomni skill:
+
+```
+What's next → [skill-name]: [one-sentence reason]
+```
+
+When the user sends a **follow-up message after a completed session**, before doing anything else:
+1. Scan for prior session context:
+   ```bash
+   ls spec.md plan.md .superomni/ 2>/dev/null
+   git log --oneline -3 2>/dev/null
+   ```
+2. If context exists → re-engage the skill framework. Pick the skill that matches the
+   current stage (see `workflow` skill for stage → skill mapping) and announce:
+   *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
+3. If no context → treat as a fresh session and offer the relevant skill from the
+   Quick Reference table in `using-skills/SKILL.md`.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -147,5 +167,31 @@ Concerns (if any):
   - [concern 1]
 ════════════════════════════════════════
 ```
+
+## Save Execution Results Document
+
+After completing execution, save the results as a Markdown document:
+
+```bash
+_EXEC_DATE=$(date +%Y%m%d-%H%M%S)
+_EXEC_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_EXEC_FILE="execution-${_EXEC_BRANCH}-${_EXEC_DATE}.md"
+mkdir -p .superomni/executions
+cat > ".superomni/executions/${_EXEC_FILE}" << EOF
+# Execution Results: ${_EXEC_BRANCH}
+
+**Date:** ${_EXEC_DATE}
+**Branch:** ${_EXEC_BRANCH}
+
+[Paste the full PLAN EXECUTION COMPLETE block here]
+
+## Steps Log
+
+[Paste all step completion/blocked entries here]
+EOF
+echo "Execution results saved to .superomni/executions/${_EXEC_FILE}"
+```
+
+Write the full execution log (all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `.superomni/executions/execution-[branch]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
 
 Then trigger the `verification` skill.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bin/agent-manager — super-omni agent lifecycle manager
+# bin/agent-manager — superomni agent lifecycle manager
 #
 # Manages agents in the agents/ directory:
 #   list    — show all available agents
@@ -203,7 +203,7 @@ cmd_create() {
   cat > "${out_file}" <<TEMPLATE
 # ${display_name} Agent
 
-You are the **super-omni ${display_name}** — an AI agent specialized in [describe your agent's specialty here].
+You are the **superomni ${display_name}** — an AI agent specialized in [describe your agent's specialty here].
 
 ## Your Identity
 
@@ -236,7 +236,7 @@ You are the **super-omni ${display_name}** — an AI agent specialized in [descr
 \`\`\`
 ${display_name^^} REPORT
 ════════════════════════════════════════
-Agent:    super-omni ${display_name}
+Agent:    superomni ${display_name}
 [Key metrics and results]
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
@@ -335,7 +335,7 @@ cmd_search() {
   echo "Known agent repositories:"
   echo "  obra/superpowers         https://github.com/obra/superpowers/tree/main/agents"
   echo "  garrytan/gstack          https://github.com/garrytan/gstack/tree/main/agents"
-  echo "  Wilder1222/superomni     https://github.com/Wilder1222/super-omni/tree/main/agents"
+  echo "  Wilder1222/superomni     https://github.com/Wilder1222/superomni/tree/main/agents"
   echo ""
 }
 

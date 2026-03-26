@@ -28,7 +28,7 @@ Each skill in `skills/` is a behavior specification. When a relevant situation a
 
 Check your PROACTIVE setting:
 ```bash
-~/.claude/skills/super-omni/bin/config get proactive
+~/.claude/skills/superomni/bin/config get proactive
 ```
 
 - **`proactive=true`** (default): Automatically trigger relevant skills when you detect a matching situation. Don't ask for permission — just invoke the skill.

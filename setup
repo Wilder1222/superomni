@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# super-omni setup script
+# superomni setup script
 # Installs the skill framework for Claude Code, Cursor, Codex CLI, Gemini CLI,
 # OpenCode, VS Code (Cline/Continue.dev/Copilot), and JetBrains AI Assistant.
 
@@ -29,16 +29,16 @@ detect_platform() {
 # ── Help ──────────────────────────────────────────────────────────────────────
 show_help() {
   cat <<HELP
-super-omni v${VERSION} — AI skill framework setup
+superomni v${VERSION} — AI skill framework setup
 
 Usage: setup [OPTIONS]
 
   This script is run automatically by:
-    npm install -g super-omni   (global install)
-    npx super-omni              (project-level install)
+    npm install -g superomni   (global install)
+    npx superomni              (project-level install)
 
   For Claude Code, install via the marketplace instead:
-    /plugin marketplace add Wilder1222/super-omni
+    /plugin marketplace add Wilder1222/superomni
 
 Options:
   --help, -h        Show this help message
@@ -53,14 +53,14 @@ Supported platforms:
   codex      Codex CLI         (~/.agents/skills/)
   gemini     Gemini CLI        (~/.gemini/skills/)
   opencode   OpenCode          (~/.opencode/skills/)
-  vscode     VS Code (Cline/Continue.dev/Copilot) (~/.vscode-super-omni/)
-  jetbrains  JetBrains AI Assistant (~/.jetbrains/super-omni/)
+  vscode     VS Code (Cline/Continue.dev/Copilot) (~/.vscode-superomni/)
+  jetbrains  JetBrains AI Assistant (~/.jetbrains/superomni/)
 
 Examples:
-  npm install -g super-omni   # Auto-detect and install all platforms
-  npx super-omni              # Same, without a permanent global install
-  npx super-omni --only vscode
-  npx super-omni --skip gemini
+  npm install -g superomni   # Auto-detect and install all platforms
+  npx superomni              # Same, without a permanent global install
+  npx superomni --only vscode
+  npx superomni --skip gemini
 HELP
   exit 0
 }
@@ -86,13 +86,13 @@ done
 INSTALLED_PLATFORMS=""
 
 # link_skills <skills_dir> <platform_label> <platform_key>
-#   Creates <skills_dir>/super-omni as a symlink to SCRIPT_DIR.
+#   Creates <skills_dir>/superomni as a symlink to SCRIPT_DIR.
 #   Idempotent: re-creates stale symlinks, skips real directories.
 link_skills() {
   local skills_dir="$1"
   local label="$2"
   local key="$3"
-  local target="${skills_dir}/super-omni"
+  local target="${skills_dir}/superomni"
 
   if $DRY_RUN; then
     echo "  [dry-run] Would link ${SCRIPT_DIR} → ${target}"
@@ -146,7 +146,7 @@ install_claude_commands() {
 
     # Skip real (non-symlink) files we didn't create
     if [ -f "${target}" ]; then
-      echo "  ⚠ ${target} already exists and is not managed by super-omni. Skipping to preserve user file."
+      echo "  ⚠ ${target} already exists and is not managed by superomni. Skipping to preserve user file."
       continue
     fi
 
@@ -181,7 +181,7 @@ should_install() {
 # ── Banner ────────────────────────────────────────────────────────────────────
 echo ""
 echo "╔══════════════════════════════════════════╗"
-echo "║         super-omni  v${VERSION}               ║"
+echo "║         superomni  v${VERSION}               ║"
 echo "║   Plan Lean, Execute Complete            ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
@@ -294,8 +294,8 @@ if should_install "opencode"; then
 fi
 
 # ── 3f. VS Code (Cline / Continue.dev / GitHub Copilot) ──────────────────────
-# Writes skills into ~/.vscode-super-omni/ and generates per-extension configs.
-VSCODE_OMNI_DIR="${HOME}/.vscode-super-omni"
+# Writes skills into ~/.vscode-superomni/ and generates per-extension configs.
+VSCODE_OMNI_DIR="${HOME}/.vscode-superomni"
 install_vscode() {
   local label="$1"
   local key="$2"
@@ -321,8 +321,8 @@ install_vscode() {
   # from a global file. We write a global pointer.
   CLINE_RULES_DIR="${HOME}/.cline"
   mkdir -p "${CLINE_RULES_DIR}"
-  cat > "${CLINE_RULES_DIR}/super-omni.md" <<CLINE_EOF
-# super-omni Skills
+  cat > "${CLINE_RULES_DIR}/superomni.md" <<CLINE_EOF
+# superomni Skills
 
 Skills directory: ${VSCODE_OMNI_DIR}/skills
 Agent library:    ${SCRIPT_DIR}/agents
@@ -336,7 +336,7 @@ CLINE_EOF
   mkdir -p "${CONTINUE_CONFIG_DIR}"
   # Only add our context provider if not already present
   if [ -f "${CONTINUE_CONFIG_DIR}/config.json" ]; then
-    if ! grep -q "super-omni" "${CONTINUE_CONFIG_DIR}/config.json" 2>/dev/null; then
+    if ! grep -q "superomni" "${CONTINUE_CONFIG_DIR}/config.json" 2>/dev/null; then
       echo "  ℹ Continue.dev config exists — add the following context path manually:"
       echo "      ${VSCODE_OMNI_DIR}/skills"
     fi
@@ -354,8 +354,8 @@ CLINE_EOF
   ],
   "customCommands": [
     {
-      "name": "super-omni",
-      "description": "Load super-omni skills",
+      "name": "superomni",
+      "description": "Load superomni skills",
       "prompt": "Load and follow the skills in ${VSCODE_OMNI_DIR}/skills/using-skills/SKILL.md. Then ask me what I need help with."
     }
   ],
@@ -382,7 +382,7 @@ if should_install "vscode"; then
 fi
 
 # ── 3g. JetBrains AI Assistant ───────────────────────────────────────────────
-JETBRAINS_OMNI_DIR="${HOME}/.jetbrains/super-omni"
+JETBRAINS_OMNI_DIR="${HOME}/.jetbrains/superomni"
 install_jetbrains() {
   local label="$1"
   local key="$2"
@@ -407,16 +407,16 @@ install_jetbrains() {
   # (stored in ~/.config/JetBrains/<product>/ai-prompts/ or similar)
   # We write a portable README to guide manual setup.
   cat > "${JETBRAINS_OMNI_DIR}/SETUP.md" <<JB_EOF
-# super-omni for JetBrains AI Assistant
+# superomni for JetBrains AI Assistant
 
 ## Setup Instructions
 
 1. Open JetBrains IDE → Settings → Tools → AI Assistant → Prompts
 2. Click "+" to add a new prompt
-3. Name: "super-omni"
+3. Name: "superomni"
 4. Content:
    \`\`\`
-   You are augmented with the super-omni skill framework.
+   You are augmented with the superomni skill framework.
    Skills directory: ${JETBRAINS_OMNI_DIR}/skills
    Agent library:    ${SCRIPT_DIR}/agents
 
@@ -491,7 +491,7 @@ if should_install "claude"; then
   if ! $DRY_RUN; then
     mkdir -p "${CLAUDE_HOOKS_DIR}"
     if [ -f "${HOOKS_SOURCE}" ]; then
-      cp "${HOOKS_SOURCE}" "${CLAUDE_HOOKS_DIR}/super-omni-hooks.json"
+      cp "${HOOKS_SOURCE}" "${CLAUDE_HOOKS_DIR}/superomni-hooks.json"
       echo "  ✓ Hooks registered"
     fi
   else
@@ -540,19 +540,19 @@ for _ in ${INSTALLED_PLATFORMS}; do
   PLATFORM_COUNT=$((PLATFORM_COUNT + 1))
 done
 
-echo "✅ super-omni v${VERSION} installed for ${PLATFORM_COUNT} platform(s)"
+echo "✅ superomni v${VERSION} installed for ${PLATFORM_COUNT} platform(s)"
 echo ""
 echo "Installed platforms:"
 for key in ${INSTALLED_PLATFORMS}; do
   case "${key}" in
-    claude)    echo "  • Claude Code              → ~/.claude/skills/super-omni"
+    claude)    echo "  • Claude Code              → ~/.claude/skills/superomni"
                echo "                               ~/.claude/commands/ (slash commands)" ;;
-    cursor)    echo "  • Cursor                   → ~/.cursor/skills/super-omni" ;;
-    codex)     echo "  • Codex CLI                → ~/.agents/skills/super-omni" ;;
-    gemini)    echo "  • Gemini CLI               → ~/.gemini/skills/super-omni" ;;
-    opencode)  echo "  • OpenCode                 → ~/.opencode/skills/super-omni" ;;
-    vscode)    echo "  • VS Code (Cline/Continue) → ~/.vscode-super-omni/" ;;
-    jetbrains) echo "  • JetBrains AI Assistant   → ~/.jetbrains/super-omni/" ;;
+    cursor)    echo "  • Cursor                   → ~/.cursor/skills/superomni" ;;
+    codex)     echo "  • Codex CLI                → ~/.agents/skills/superomni" ;;
+    gemini)    echo "  • Gemini CLI               → ~/.gemini/skills/superomni" ;;
+    opencode)  echo "  • OpenCode                 → ~/.opencode/skills/superomni" ;;
+    vscode)    echo "  • VS Code (Cline/Continue) → ~/.vscode-superomni/" ;;
+    jetbrains) echo "  • JetBrains AI Assistant   → ~/.jetbrains/superomni/" ;;
   esac
 done
 
@@ -561,7 +561,7 @@ echo "Next steps:"
 echo "  1. Open your project in your AI IDE"
 echo "  2. Skills activate automatically via session hooks"
 echo "  3. For Claude Code users: install via the marketplace instead:"
-echo "       /plugin marketplace add Wilder1222/super-omni"
+echo "       /plugin marketplace add Wilder1222/superomni"
 echo ""
 echo "To disable auto-skill triggers:"
 echo "  ${SCRIPT_DIR}/bin/config set proactive false"

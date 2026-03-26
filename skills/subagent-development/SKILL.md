@@ -1,9 +1,10 @@
 ---
 name: subagent-development
 description: |
-  Use when a task is too large or complex for a single context window.
-  Spawns specialized sub-agents for implementation, spec review, and code quality review.
-  Triggers: "use subagents", "parallel implementation", "too complex for one pass".
+  Default working mode for all non-trivial tasks.
+  Decompose any task that benefits from specialization, parallelism, or independent verification into sub-agents.
+  Use sub-agents by default unless the task is trivially small (< 5 min, single file).
+  Triggers: any implementation, review, or analysis task; "use subagents", "parallel implementation", "too complex for one pass".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -31,6 +32,26 @@ Report status using one of these at the end of every skill session:
 - **BLOCKED** — Cannot proceed. State what blocks you and what was tried.
 - **NEEDS_CONTEXT** — Missing information. State exactly what you need.
 
+### Session Continuity
+After reporting any terminal status (DONE / DONE_WITH_CONCERNS), **always** close with a
+"What's next?" line that names the next logical superomni skill:
+
+```
+What's next → [skill-name]: [one-sentence reason]
+```
+
+When the user sends a **follow-up message after a completed session**, before doing anything else:
+1. Scan for prior session context:
+   ```bash
+   ls spec.md plan.md .superomni/ 2>/dev/null
+   git log --oneline -3 2>/dev/null
+   ```
+2. If context exists → re-engage the skill framework. Pick the skill that matches the
+   current stage (see `workflow` skill for stage → skill mapping) and announce:
+   *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
+3. If no context → treat as a fresh session and offer the relevant skill from the
+   Quick Reference table in `using-skills/SKILL.md`.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -48,7 +69,16 @@ Nothing is sent to external servers. Data is stored only in `~/.omni-skills/anal
 
 # Sub-Agent Development
 
-**Goal:** Decompose complex work across specialized sub-agents, each with a focused context and clear output contract.
+**Goal:** Decompose work across specialized sub-agents, each with a focused context and clear output contract. **This is the default working mode for all non-trivial tasks.**
+
+## Default Mode: Always Consider Sub-Agents First
+
+Before executing any task directly, ask:
+- Is this task complex enough to benefit from specialization? (multiple files, multiple concerns)
+- Would parallel execution reduce elapsed time?
+- Would independent verification improve quality?
+
+If yes to any → **use sub-agents by default**. Only skip sub-agents for trivially small tasks (< 5 min, single file, single concern).
 
 ## When to Use Sub-Agents
 
@@ -137,3 +167,36 @@ If task B depends on task A's output, run them sequentially.
 For critical decisions, run two agents with the same task and compare outputs:
 - If they agree → proceed
 - If they disagree → surface disagreement to user as TASTE decision
+
+## Save Sub-Agent Session Document
+
+After the sub-agent session is complete, save the full session record as a Markdown document:
+
+```bash
+_SA_DATE=$(date +%Y%m%d-%H%M%S)
+_SA_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_SA_FILE="subagent-${_SA_BRANCH}-${_SA_DATE}.md"
+mkdir -p .superomni/subagents
+cat > ".superomni/subagents/${_SA_FILE}" << EOF
+# Sub-Agent Session: ${_SA_BRANCH}
+
+**Date:** ${_SA_DATE}
+**Branch:** ${_SA_BRANCH}
+
+## Agents Dispatched
+
+[List each agent, its type, task, and reported status]
+
+## Integration Summary
+
+[What was merged, any conflicts resolved, final state]
+
+## Status
+
+[DONE | DONE_WITH_CONCERNS | BLOCKED]
+[Any concerns or issues]
+EOF
+echo "Sub-agent session saved to .superomni/subagents/${_SA_FILE}"
+```
+
+Write the full session record (agents dispatched, outputs, integration summary, and final status, formatted as Markdown) to `.superomni/subagents/subagent-[branch]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.

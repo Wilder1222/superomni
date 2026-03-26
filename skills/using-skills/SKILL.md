@@ -23,6 +23,41 @@ Each skill in `skills/` is a behavior specification. When a relevant situation a
 2. **Load** the relevant skill's `SKILL.md`
 3. **Follow** the skill's protocol exactly
 4. **Report** using the status protocol when complete
+5. **Continue** — after DONE, suggest the next skill and re-engage on follow-up messages
+
+## Follow-up Message Protocol
+
+**After any superomni skill session completes**, the agent stays in superomni mode for all subsequent messages in the conversation. When the user sends a new message:
+
+### Step 1 — Scan for existing context
+```bash
+ls spec.md plan.md .superomni/ 2>/dev/null
+git log --oneline -3 2>/dev/null
+git status --short 2>/dev/null
+```
+
+### Step 2 — Determine current stage and re-engage
+Use the scan results to locate the current pipeline stage:
+
+| Context found | Current stage | Skill to use |
+|---------------|--------------|--------------|
+| No artifacts | THINK | `brainstorming` |
+| `spec.md` only | PLAN | `writing-plans` |
+| `spec.md` + `plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
+| `plan.md` all checked, no review | REVIEW | `code-review` |
+| PR approved, tests green | TEST / SHIP | `qa` → `ship` |
+| `.superomni/executions/` files exist | Continuing run | Resume with the same skill |
+| `.superomni/reviews/` files exist | Post-review | `receiving-code-review` |
+
+### Step 3 — Announce continuity
+Before handling the user's new request, say:
+
+> *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
+
+Then apply the identified skill to address the user's new message.
+
+### Override
+If the user's message is clearly unrelated to the prior session (e.g. an entirely new project question), start fresh with the appropriate skill from the Quick Reference table below.
 
 ## PROACTIVE Mode
 
@@ -33,6 +68,26 @@ Check your PROACTIVE setting:
 
 - **`proactive=true`** (default): Automatically trigger relevant skills when you detect a matching situation. Don't ask for permission — just invoke the skill.
 - **`proactive=false`**: Do NOT auto-invoke skills. Instead, say: *"I think the [skill-name] skill might help here — want me to run it?"* and wait for confirmation.
+
+## Default Working Mode: Sub-Agent First
+
+**Sub-agent development is the default working mode.** Before executing any non-trivial task directly, consider decomposing it into specialized sub-agents:
+
+- Any task spanning multiple files or concerns → use `subagent-development`
+- Only skip sub-agents for trivially small tasks (< 5 min, single file, single concern)
+- Sub-agent sessions, code reviews, and execution results are **always saved as Markdown documents** in `.superomni/` for the user to review
+
+## Document Output Convention
+
+All major skill outputs are saved as Markdown documents for user review:
+
+| Output | Location |
+|--------|----------|
+| Code reviews | `.superomni/reviews/review-[branch]-[date].md` |
+| Execution results | `.superomni/executions/execution-[branch]-[date].md` |
+| Sub-agent sessions | `.superomni/subagents/subagent-[branch]-[date].md` |
+| Specs | `spec.md` |
+| Plans | `plan.md` |
 
 ## Status Protocol
 
@@ -57,6 +112,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 
 | Situation | Use Skill |
 |-----------|----------|
+| Any non-trivial task (default) | `subagent-development` |
 | Starting a new feature/project idea | `brainstorming` |
 | Creating an implementation plan | `writing-plans` |
 | Executing a plan step by step | `executing-plans` |

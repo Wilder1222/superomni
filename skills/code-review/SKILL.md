@@ -30,6 +30,26 @@ Report status using one of these at the end of every skill session:
 - **BLOCKED** — Cannot proceed. State what blocks you and what was tried.
 - **NEEDS_CONTEXT** — Missing information. State exactly what you need.
 
+### Session Continuity
+After reporting any terminal status (DONE / DONE_WITH_CONCERNS), **always** close with a
+"What's next?" line that names the next logical superomni skill:
+
+```
+What's next → [skill-name]: [one-sentence reason]
+```
+
+When the user sends a **follow-up message after a completed session**, before doing anything else:
+1. Scan for prior session context:
+   ```bash
+   ls spec.md plan.md .superomni/ 2>/dev/null
+   git log --oneline -3 2>/dev/null
+   ```
+2. If context exists → re-engage the skill framework. Pick the skill that matches the
+   current stage (see `workflow` skill for stage → skill mapping) and announce:
+   *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
+3. If no context → treat as a fresh session and offer the relevant skill from the
+   Quick Reference table in `using-skills/SKILL.md`.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -179,3 +199,26 @@ git diff main...HEAD --stat
 ```
 
 See `requesting-review.md` for how to request and respond to reviews.
+
+## Save Review Document
+
+After completing the review, save the full review output as a Markdown document:
+
+```bash
+_REVIEW_DATE=$(date +%Y%m%d-%H%M%S)
+_REVIEW_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_REVIEW_FILE="review-${_REVIEW_BRANCH}-${_REVIEW_DATE}.md"
+mkdir -p .superomni/reviews
+cat > ".superomni/reviews/${_REVIEW_FILE}" << EOF
+# Code Review: ${_REVIEW_BRANCH}
+
+**Date:** ${_REVIEW_DATE}
+**Reviewer:** superomni
+**Branch:** ${_REVIEW_BRANCH}
+
+[Paste the full review output here]
+EOF
+echo "Review saved to .superomni/reviews/${_REVIEW_FILE}"
+```
+
+Write the full CODE REVIEW block (formatted as Markdown) to `.superomni/reviews/review-[branch]-[date].md`. This file serves as the permanent record of the review for the user to revisit.

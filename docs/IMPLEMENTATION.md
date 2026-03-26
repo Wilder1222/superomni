@@ -9,7 +9,7 @@
 ## Project Structure
 
 ```
-super-omni/
+superomni/
 ├── .claude-plugin/           ← Claude Code plugin marketplace files
 │   ├── marketplace.json      ← Marketplace manifest (required by Claude Code)
 │   └── plugin.json           ← Plugin manifest (skills, commands, hooks)
@@ -21,7 +21,7 @@ super-omni/
 │   ├── gen-skill-docs.sh     ← Builds SKILL.md from SKILL.md.tmpl
 │   └── postinstall.js        ← npm postinstall hook (runs setup)
 ├── bin/                      ← Runtime utilities
-│   ├── super-omni-cli        ← CLI entry point (npm global / npx)
+│   ├── superomni-cli        ← CLI entry point (npm global / npx)
 │   ├── agent-manager         ← Agent lifecycle manager
 │   ├── config                ← Config management
 │   ├── slug                  ← Project identifier
@@ -38,14 +38,14 @@ super-omni/
 
 ## Installation Methods
 
-super-omni supports three installation methods.
+superomni supports three installation methods.
 
 ### 1. Claude Code marketplace install
 
 Inside a Claude Code session:
 
 ```
-/plugin marketplace add Wilder1222/super-omni
+/plugin marketplace add Wilder1222/superomni
 ```
 
 Claude Code reads `.claude-plugin/marketplace.json` to discover the plugin, then reads `.claude-plugin/plugin.json` for skills, agents, commands, and hooks, and installs them automatically. No `npm` or `setup` step needed.
@@ -55,7 +55,7 @@ Claude Code reads `.claude-plugin/marketplace.json` to discover the plugin, then
 For Cursor, VS Code (Cline/Continue.dev), JetBrains, Codex, Gemini CLI, and OpenCode:
 
 ```bash
-npm install -g github:Wilder1222/super-omni
+npm install -g github:Wilder1222/superomni
 ```
 
 `lib/postinstall.js` is the npm postinstall hook. It runs `setup` automatically to link skills into all detected platform directories. Skips silently in CI environments or when `SUPER_OMNI_SKIP_POSTINSTALL=1` is set.
@@ -63,10 +63,10 @@ npm install -g github:Wilder1222/super-omni
 ### 3. npx (project-level, no global install)
 
 ```bash
-npx github:Wilder1222/super-omni
+npx github:Wilder1222/superomni
 ```
 
-Downloads the package directly from GitHub to a temp cache, executes `bin/super-omni-cli`, which resolves its own real path (following symlinks) and delegates to `setup`.
+Downloads the package directly from GitHub to a temp cache, executes `bin/superomni-cli`, which resolves its own real path (following symlinks) and delegates to `setup`.
 
 ### Skipping postinstall
 
@@ -80,15 +80,15 @@ Set `SUPER_OMNI_SKIP_POSTINSTALL=1` to suppress the automatic setup during
 ### Setting Up Locally
 
 ```bash
-git clone https://github.com/Wilder1222/super-omni.git
-cd super-omni
+git clone https://github.com/Wilder1222/superomni.git
+cd superomni
 npm install   # or: ./setup
 ```
 
 The setup script:
 1. Creates `~/.omni-skills/` state directories
 2. Runs `lib/gen-skill-docs.sh` to build `.md` from `.tmpl`
-3. Symlinks the project into `~/.claude/skills/super-omni`
+3. Symlinks the project into `~/.claude/skills/superomni`
 4. Registers hooks in `~/.claude/hooks/`
 5. Makes bin scripts executable
 6. Initializes default config
@@ -117,7 +117,7 @@ bash lib/gen-skill-docs.sh skills/systematic-debugging/SKILL.md.tmpl
 HOME=/tmp/test-home bash setup
 
 # Verify installation
-ls -la /tmp/test-home/.claude/skills/super-omni/
+ls -la /tmp/test-home/.claude/skills/superomni/
 cat /tmp/test-home/.omni-skills/config
 
 # Clean up
@@ -365,7 +365,7 @@ There is no automated test suite currently. Testing is done manually:
 1. **Setup test:**
    ```bash
    HOME=/tmp/test-home ./setup
-   ls /tmp/test-home/.claude/skills/super-omni/
+   ls /tmp/test-home/.claude/skills/superomni/
    ls /tmp/test-home/.omni-skills/
    ```
 
@@ -394,7 +394,7 @@ There is no automated test suite currently. Testing is done manually:
 5. **Slug test:**
    ```bash
    bin/slug
-   # Should output something like "super-omni-abc123"
+   # Should output something like "superomni-abc123"
    ```
 
 6. **New skills test:**

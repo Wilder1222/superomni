@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # hooks/session-start
 # Injected at the start of every session.
-# Loads the super-omni skill framework into context.
+# Loads the superomni skill framework into context.
 
 set -e
 
@@ -35,7 +35,7 @@ if [ -d "${SKILLS_DIR}/skills" ]; then
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  super-omni v0.2.0 — Plan Lean, Execute Complete"
+echo "  superomni v0.2.0 — Plan Lean, Execute Complete"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Project:   ${_PROJECT}"
 echo "  Branch:    ${_BRANCH}"

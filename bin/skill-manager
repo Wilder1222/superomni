@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bin/skill-manager — super-omni skill lifecycle manager
+# bin/skill-manager — superomni skill lifecycle manager
 #
 # Manages skills in the skills/ directory:
 #   list    — show all available skills
@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "${SCRIPT_DIR}")"
 SKILLS_DIR="${REPO_ROOT}/skills"
 USER_SKILLS_DIR="${HOME}/.omni-skills/skills"
-CLAUDE_SUPER_OMNI_SKILLS_DIR="${HOME}/.claude/skills/super-omni/skills"
+CLAUDE_SUPER_OMNI_SKILLS_DIR="${HOME}/.claude/skills/superomni/skills"
 
 usage() {
   cat <<USAGE
@@ -264,7 +264,7 @@ cmd_search() {
   echo "Known skill repositories:"
   echo "  obra/superpowers         https://github.com/obra/superpowers/tree/main/skills"
   echo "  garrytan/gstack          https://github.com/garrytan/gstack/tree/main/skills"
-  echo "  Wilder1222/superomni     https://github.com/Wilder1222/super-omni/tree/main/skills"
+  echo "  Wilder1222/superomni     https://github.com/Wilder1222/superomni/tree/main/skills"
   echo ""
 }
 

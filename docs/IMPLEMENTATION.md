@@ -1,6 +1,6 @@
 # Implementation Guide
 
-## super-omni — Developer Reference
+## superomni — Developer Reference
 
 **Version:** 0.3.0
 

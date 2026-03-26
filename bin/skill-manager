@@ -17,7 +17,7 @@ CLAUDE_SUPER_OMNI_SKILLS_DIR="${HOME}/.claude/skills/super-omni/skills"
 
 usage() {
   cat <<USAGE
-super-omni skill-manager — manage skills
+superomni skill-manager — manage skills
 
 Usage: bin/skill-manager <command> [args]
 
@@ -30,11 +30,13 @@ Commands:
                             bin/skill-manager install https://raw.githubusercontent.com/user/repo/main/skills/my-skill/SKILL.md
   info <name>             Show details about a skill
   remove <name>           Remove an installed skill
+  search <query>          Search GitHub for skill markdown files
 
 Examples:
   bin/skill-manager list
   bin/skill-manager info writing-plans
   bin/skill-manager install ./skills/custom/my-skill/SKILL.md
+  bin/skill-manager search "data-processing"
 USAGE
   exit "${1:-0}"
 }
@@ -67,7 +69,7 @@ extract_skill_name_from_file() {
 
 cmd_list() {
   echo ""
-  echo "super-omni Skills"
+  echo "superomni Skills"
   echo "═════════════════════════════════════"
   echo ""
   echo "Built-in skills:"
@@ -188,7 +190,7 @@ cmd_remove() {
   local skill_dir="${USER_SKILLS_DIR}/${name}"
   if [ ! -d "${skill_dir}" ]; then
     if [ -d "${SKILLS_DIR}/${name}" ]; then
-      err "Cannot remove built-in skill '${name}'. Built-in skills are part of the super-omni framework."
+      err "Cannot remove built-in skill '${name}'. Built-in skills are part of the superomni framework."
     else
       err "Skill '${name}' not found in user skills (~/.omni-skills/skills/)."
     fi
@@ -202,6 +204,70 @@ cmd_remove() {
   echo "  ✓ Skill '${name}' removed from ${USER_SKILLS_DIR}"
 }
 
+cmd_search() {
+  local query="${1}"
+  [ -n "${query}" ] || err "Usage: bin/skill-manager search <query>"
+
+  echo ""
+  echo "Searching for skills matching: ${query}"
+  echo "═════════════════════════════════════"
+  echo ""
+
+  # Search GitHub for SKILL.md files matching the query
+  local search_url="https://api.github.com/search/code?q=${query}+skill+filename:SKILL+extension:md&type=Code"
+
+  if command -v curl >/dev/null 2>&1; then
+    local result
+    result="$(curl -fsSL --max-time 15 \
+      -H "Accept: application/vnd.github.v3+json" \
+      "${search_url}" 2>/dev/null)" || true
+  elif command -v wget >/dev/null 2>&1; then
+    local result
+    result="$(wget -qO- --timeout=15 "${search_url}" 2>/dev/null)" || true
+  else
+    echo "Neither curl nor wget available. Cannot search."
+    echo ""
+    echo "Manual search options:"
+    echo "  GitHub: https://github.com/search?q=${query}+SKILL.md&type=code"
+    echo "  npm:    https://www.npmjs.com/search?q=${query}+skill"
+    return 0
+  fi
+
+  if [ -n "${result}" ] && echo "${result}" | grep -q '"items"'; then
+    # Parse JSON results (basic extraction without jq dependency)
+    local html_urls
+    html_urls="$(echo "${result}" | grep -o '"html_url":"[^"]*"' | sed 's/"html_url":"//;s/"//' | head -10)"
+
+    if [ -n "${html_urls}" ]; then
+      echo "Found results on GitHub:"
+      echo ""
+      echo "${html_urls}" | while read -r url; do
+        echo "  ${url}"
+      done
+      echo ""
+      echo "To install a skill from a raw GitHub URL:"
+      echo "  bin/skill-manager install <raw-url>"
+      echo ""
+      echo "Convert a GitHub URL to raw: replace github.com with raw.githubusercontent.com"
+      echo "  e.g. github.com/user/repo/blob/main/skills/my-skill/SKILL.md"
+      echo "    → raw.githubusercontent.com/user/repo/main/skills/my-skill/SKILL.md"
+    else
+      echo "No results found on GitHub."
+    fi
+  else
+    echo "Search unavailable or no results. Try manually:"
+    echo "  GitHub: https://github.com/search?q=${query}+SKILL.md&type=code"
+    echo "  npm:    https://www.npmjs.com/search?q=${query}+skill"
+  fi
+
+  echo ""
+  echo "Known skill repositories:"
+  echo "  obra/superpowers         https://github.com/obra/superpowers/tree/main/skills"
+  echo "  garrytan/gstack          https://github.com/garrytan/gstack/tree/main/skills"
+  echo "  Wilder1222/superomni     https://github.com/Wilder1222/super-omni/tree/main/skills"
+  echo ""
+}
+
 COMMAND="${1:-}"
 [ -n "${COMMAND}" ] || usage
 
@@ -210,6 +276,7 @@ case "${COMMAND}" in
   info)    cmd_info "${2:-}" ;;
   install) cmd_install "${2:-}" ;;
   remove)  cmd_remove "${2:-}" ;;
+  search)  cmd_search "${2:-}" ;;
   --help|-h|help) usage 0 ;;
   *) echo "Unknown command: ${COMMAND}"; echo ""; usage 1 ;;
 esac

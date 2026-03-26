@@ -1,14 +1,14 @@
-# super-omni
+# superomni
 
 > **Plan Lean, Execute Complete** — A fused AI coding skill framework for Claude Code, Cursor, Codex, Gemini CLI, and OpenCode.
 
-super-omni combines the best ideas from [obra/superpowers](https://github.com/obra/superpowers) (methodology-driven AI skill framework) and [garrytan/gstack](https://github.com/garrytan/gstack) (engineering completeness principles) into a unified, opinionated system for AI-assisted software development.
+superomni combines the best ideas from [obra/superpowers](https://github.com/obra/superpowers) (methodology-driven AI skill framework) and [garrytan/gstack](https://github.com/garrytan/gstack) (engineering completeness principles) into a unified, opinionated system for AI-assisted software development.
 
 ---
 
 ## What Is This?
 
-super-omni is a collection of **skills** — structured behavior specifications for AI coding assistants. Each skill tells Claude Code exactly how to handle a specific type of work: brainstorming, planning, debugging, testing, reviewing, shipping.
+superomni is a collection of **skills** — structured behavior specifications for AI coding assistants. Each skill tells Claude Code exactly how to handle a specific type of work: brainstorming, planning, debugging, testing, reviewing, shipping.
 
 The framework is built on one core philosophy:
 

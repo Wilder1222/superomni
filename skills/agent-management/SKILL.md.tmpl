@@ -37,6 +37,27 @@ bin/agent-manager list
 | `test-writer` | Behavior-verifying test suites |
 | `security-auditor` | OWASP-aware vulnerability identification |
 | `architect` | System design and architecture review |
+| `ceo-advisor` | Product strategy, scope decisions, demand validation |
+| `designer` | UX design, missing states, AI slop detection |
+
+## Phase 0: Search Online (When Built-ins Don't Fit)
+
+If none of the built-in agents match your need, search for one before creating from scratch:
+
+```bash
+# Search GitHub for matching agents
+bin/agent-manager search <your-query>
+```
+
+This searches GitHub for agent markdown files matching your query and shows raw URLs you can install directly.
+
+**Search strategy:**
+1. Search with your domain term: `bin/agent-manager search "data-analyst"`
+2. Check known registries:
+   - obra/superpowers: `https://github.com/obra/superpowers/tree/main/agents`
+   - garrytan/gstack: `https://github.com/garrytan/gstack/tree/main/agents`
+3. If found → install via URL (Phase 2)
+4. If nothing suitable → create from scratch (Phase 3)
 
 ## Phase 1: Find an Agent
 

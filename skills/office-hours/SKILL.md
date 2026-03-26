@@ -1,7 +1,7 @@
 ---
 name: office-hours
 description: |
-  YC Office Hours — product discovery and validation. Two modes:
+  Superomni Office Hours — product discovery and validation. Two modes:
   Startup mode: six forcing questions that expose demand reality, the narrowest
   wedge, and implementation alternatives. Builder mode: design thinking for
   side projects and open source. Saves a design doc.

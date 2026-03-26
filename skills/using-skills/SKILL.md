@@ -34,6 +34,26 @@ Check your PROACTIVE setting:
 - **`proactive=true`** (default): Automatically trigger relevant skills when you detect a matching situation. Don't ask for permission — just invoke the skill.
 - **`proactive=false`**: Do NOT auto-invoke skills. Instead, say: *"I think the [skill-name] skill might help here — want me to run it?"* and wait for confirmation.
 
+## Default Working Mode: Sub-Agent First
+
+**Sub-agent development is the default working mode.** Before executing any non-trivial task directly, consider decomposing it into specialized sub-agents:
+
+- Any task spanning multiple files or concerns → use `subagent-development`
+- Only skip sub-agents for trivially small tasks (< 5 min, single file, single concern)
+- Sub-agent sessions, code reviews, and execution results are **always saved as Markdown documents** in `.superomni/` for the user to review
+
+## Document Output Convention
+
+All major skill outputs are saved as Markdown documents for user review:
+
+| Output | Location |
+|--------|----------|
+| Code reviews | `.superomni/reviews/review-[branch]-[date].md` |
+| Execution results | `.superomni/executions/execution-[branch]-[date].md` |
+| Sub-agent sessions | `.superomni/subagents/subagent-[branch]-[date].md` |
+| Specs | `spec.md` |
+| Plans | `plan.md` |
+
 ## Status Protocol
 
 Always end a skill session with one of these statuses:
@@ -57,6 +77,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 
 | Situation | Use Skill |
 |-----------|----------|
+| Any non-trivial task (default) | `subagent-development` |
 | Starting a new feature/project idea | `brainstorming` |
 | Creating an implementation plan | `writing-plans` |
 | Executing a plan step by step | `executing-plans` |

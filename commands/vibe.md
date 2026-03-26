@@ -1,6 +1,6 @@
 # /vibe
 
-Activate the full **super-omni** skill framework and launch the default guided workflow.
+Activate the full **superomni** skill framework and launch the default guided workflow.
 
 ## Usage
 

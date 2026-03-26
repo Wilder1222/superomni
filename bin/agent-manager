@@ -18,7 +18,7 @@ AGENTS_DIR="${REPO_ROOT}/agents"
 
 usage() {
   cat <<USAGE
-super-omni agent-manager — manage AI agents
+superomni agent-manager — manage AI agents
 
 Usage: bin/agent-manager <command> [args]
 
@@ -31,6 +31,7 @@ Commands:
   create <name>           Scaffold a new custom agent
   info <name>             Show details about an agent
   remove <name>           Remove an installed agent
+  search <query>          Search GitHub for agent markdown files
 
 Examples:
   bin/agent-manager list
@@ -38,6 +39,7 @@ Examples:
   bin/agent-manager create data-analyst
   bin/agent-manager install ./agents/custom/my-agent.md
   bin/agent-manager install https://raw.githubusercontent.com/obra/superpowers/main/agents/some-agent.md
+  bin/agent-manager search "data-analyst"
 USAGE
   exit "${1:-0}"
 }
@@ -51,7 +53,7 @@ err() {
 
 cmd_list() {
   echo ""
-  echo "super-omni Agents"
+  echo "superomni Agents"
   echo "═════════════════════════════════════"
   echo ""
   echo "Built-in agents:"
@@ -263,7 +265,7 @@ cmd_remove() {
   if [ ! -f "${agent_file}" ]; then
     # Check if it's a built-in
     if [ -f "${AGENTS_DIR}/${name}.md" ]; then
-      err "Cannot remove built-in agent '${name}'. Built-in agents are part of the super-omni framework."
+      err "Cannot remove built-in agent '${name}'. Built-in agents are part of the superomni framework."
     else
       err "Agent '${name}' not found in user agents (~/.omni-skills/agents/)."
     fi
@@ -271,6 +273,70 @@ cmd_remove() {
 
   rm "${agent_file}"
   echo "  ✓ Agent '${name}' removed from ${USER_AGENTS_DIR}"
+}
+
+cmd_search() {
+  local query="${1}"
+  [ -n "${query}" ] || err "Usage: bin/agent-manager search <query>"
+
+  echo ""
+  echo "Searching for agents matching: ${query}"
+  echo "═════════════════════════════════════"
+  echo ""
+
+  # Search GitHub for agent markdown files
+  local search_url="https://api.github.com/search/code?q=${query}+agent+filename:agent+extension:md&type=Code"
+
+  if command -v curl >/dev/null 2>&1; then
+    local result
+    result="$(curl -fsSL --max-time 15 \
+      -H "Accept: application/vnd.github.v3+json" \
+      "${search_url}" 2>/dev/null)" || true
+  elif command -v wget >/dev/null 2>&1; then
+    local result
+    result="$(wget -qO- --timeout=15 "${search_url}" 2>/dev/null)" || true
+  else
+    echo "Neither curl nor wget available. Cannot search."
+    echo ""
+    echo "Manual search options:"
+    echo "  GitHub: https://github.com/search?q=${query}+agent&type=code"
+    echo "  npm:    https://www.npmjs.com/search?q=${query}+agent"
+    return 0
+  fi
+
+  if [ -n "${result}" ] && echo "${result}" | grep -q '"items"'; then
+    # Parse JSON results (basic extraction without jq dependency)
+    local html_urls
+    html_urls="$(echo "${result}" | grep -o '"html_url":"[^"]*"' | sed 's/"html_url":"//;s/"//' | head -10)"
+
+    if [ -n "${html_urls}" ]; then
+      echo "Found results on GitHub:"
+      echo ""
+      echo "${html_urls}" | while read -r url; do
+        echo "  ${url}"
+      done
+      echo ""
+      echo "To install an agent from a raw GitHub URL:"
+      echo "  bin/agent-manager install <raw-url>"
+      echo ""
+      echo "Convert a GitHub URL to raw: replace github.com with raw.githubusercontent.com"
+      echo "  e.g. github.com/user/repo/blob/main/agent.md"
+      echo "    → raw.githubusercontent.com/user/repo/main/agent.md"
+    else
+      echo "No results found on GitHub."
+    fi
+  else
+    echo "Search unavailable or no results. Try manually:"
+    echo "  GitHub: https://github.com/search?q=${query}+agent&type=code"
+    echo "  npm:    https://www.npmjs.com/search?q=${query}+agent"
+  fi
+
+  echo ""
+  echo "Known agent repositories:"
+  echo "  obra/superpowers         https://github.com/obra/superpowers/tree/main/agents"
+  echo "  garrytan/gstack          https://github.com/garrytan/gstack/tree/main/agents"
+  echo "  Wilder1222/superomni     https://github.com/Wilder1222/super-omni/tree/main/agents"
+  echo ""
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────
@@ -284,6 +350,7 @@ case "${COMMAND}" in
   install) cmd_install "${2:-}" ;;
   create)  cmd_create "${2:-}" ;;
   remove)  cmd_remove "${2:-}" ;;
+  search)  cmd_search "${2:-}" ;;
   --help|-h|help) usage 0 ;;
   *) echo "Unknown command: ${COMMAND}"; echo ""; usage 1 ;;
 esac

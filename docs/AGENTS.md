@@ -1,4 +1,4 @@
-# super-omni Agent Library
+# superomni Agent Library
 
 > Specialized AI agents for focused tasks — each with a single expertise, iron law, and defined output format.
 
@@ -161,7 +161,7 @@ Create `agents/<name>.md` following this template:
 ```markdown
 # [Name] Agent
 
-You are the **super-omni [Name]** — an AI agent specialized in [specialty].
+You are the **superomni [Name]** — an AI agent specialized in [specialty].
 
 ## Your Identity
 

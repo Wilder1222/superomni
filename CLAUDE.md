@@ -1,8 +1,8 @@
-# super-omni — Project Configuration
+# superomni — Project Configuration
 
 ## Project Identity
 
-This is the **super-omni** AI skill framework — a fusion of obra/superpowers and garrytan/gstack.
+This is the **superomni** AI skill framework — a fusion of obra/superpowers and garrytan/gstack.
 
 Philosophy: **Plan Lean, Execute Complete**
 
@@ -25,6 +25,9 @@ Philosophy: **Plan Lean, Execute Complete**
 | qa | "qa", "quality assurance" | P1 |
 | careful | "careful", destructive operations | P1 |
 | workflow | "workflow", "sprint", "what's next" | P1 |
+| office-hours | "office hours", "validate idea", "brainstorm this" | P1 |
+| autoplan | "autoplan", "auto review", "review this plan" | P1 |
+| freeze | "freeze", "restrict edits", "lock edits" | P1 |
 | git-worktrees | Parallel work | P2 |
 | finishing-branch | "finish branch", "merge" | P2 |
 | dispatching-parallel | Parallel tasks | P2 |
@@ -33,6 +36,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | ship | "ship", "release" | P2 |
 | writing-skills | "create skill", "install skill", "list skills" | P2 |
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
+| document-release | "update docs", "sync docs", "post-ship docs" | P2 |
 
 ## Commands
 

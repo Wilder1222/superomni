@@ -23,6 +23,41 @@ Each skill in `skills/` is a behavior specification. When a relevant situation a
 2. **Load** the relevant skill's `SKILL.md`
 3. **Follow** the skill's protocol exactly
 4. **Report** using the status protocol when complete
+5. **Continue** — after DONE, suggest the next skill and re-engage on follow-up messages
+
+## Follow-up Message Protocol
+
+**After any superomni skill session completes**, the agent stays in superomni mode for all subsequent messages in the conversation. When the user sends a new message:
+
+### Step 1 — Scan for existing context
+```bash
+ls spec.md plan.md .superomni/ 2>/dev/null
+git log --oneline -3 2>/dev/null
+git status --short 2>/dev/null
+```
+
+### Step 2 — Determine current stage and re-engage
+Use the scan results to locate the current pipeline stage:
+
+| Context found | Current stage | Skill to use |
+|---------------|--------------|--------------|
+| No artifacts | THINK | `brainstorming` |
+| `spec.md` only | PLAN | `writing-plans` |
+| `spec.md` + `plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
+| `plan.md` all checked, no review | REVIEW | `code-review` |
+| PR approved, tests green | TEST / SHIP | `qa` → `ship` |
+| `.superomni/executions/` files exist | Continuing run | Resume with the same skill |
+| `.superomni/reviews/` files exist | Post-review | `receiving-code-review` |
+
+### Step 3 — Announce continuity
+Before handling the user's new request, say:
+
+> *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
+
+Then apply the identified skill to address the user's new message.
+
+### Override
+If the user's message is clearly unrelated to the prior session (e.g. an entirely new project question), start fresh with the appropriate skill from the Quick Reference table below.
 
 ## PROACTIVE Mode
 

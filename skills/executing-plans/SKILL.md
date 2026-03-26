@@ -148,4 +148,30 @@ Concerns (if any):
 ════════════════════════════════════════
 ```
 
+## Save Execution Results Document
+
+After completing execution, save the results as a Markdown document:
+
+```bash
+_EXEC_DATE=$(date +%Y%m%d-%H%M%S)
+_EXEC_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_EXEC_FILE="execution-${_EXEC_BRANCH}-${_EXEC_DATE}.md"
+mkdir -p .superomni/executions
+cat > ".superomni/executions/${_EXEC_FILE}" << EOF
+# Execution Results: ${_EXEC_BRANCH}
+
+**Date:** ${_EXEC_DATE}
+**Branch:** ${_EXEC_BRANCH}
+
+[Paste the full PLAN EXECUTION COMPLETE block here]
+
+## Steps Log
+
+[Paste all step completion/blocked entries here]
+EOF
+echo "Execution results saved to .superomni/executions/${_EXEC_FILE}"
+```
+
+Write the full execution log (all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `.superomni/executions/execution-[branch]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
+
 Then trigger the `verification` skill.

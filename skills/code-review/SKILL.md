@@ -179,3 +179,26 @@ git diff main...HEAD --stat
 ```
 
 See `requesting-review.md` for how to request and respond to reviews.
+
+## Save Review Document
+
+After completing the review, save the full review output as a Markdown document:
+
+```bash
+_REVIEW_DATE=$(date +%Y%m%d-%H%M%S)
+_REVIEW_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_REVIEW_FILE="review-${_REVIEW_BRANCH}-${_REVIEW_DATE}.md"
+mkdir -p .superomni/reviews
+cat > ".superomni/reviews/${_REVIEW_FILE}" << EOF
+# Code Review: ${_REVIEW_BRANCH}
+
+**Date:** ${_REVIEW_DATE}
+**Reviewer:** superomni
+**Branch:** ${_REVIEW_BRANCH}
+
+[Paste the full review output here]
+EOF
+echo "Review saved to .superomni/reviews/${_REVIEW_FILE}"
+```
+
+Write the full CODE REVIEW block (formatted as Markdown) to `.superomni/reviews/review-[branch]-[date].md`. This file serves as the permanent record of the review for the user to revisit.

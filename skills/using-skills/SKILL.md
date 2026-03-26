@@ -140,6 +140,15 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Restrict edits to a directory | `freeze` |
 | Update docs after shipping | `document-release` |
 
+## Project-First Tool Selection
+
+**Always prefer skills and agents that already exist in this project.** Only look outside when none of the project's built-in tools fit the task.
+
+**Priority order:**
+1. **Project built-ins first** — check existing skills (`skills/`) and agents (`agents/`) before anything else
+2. **Search project tools** — `bin/skill-manager list` / `bin/agent-manager list` for a full inventory
+3. **External registries last** — only after confirming no project tool fits
+
 ## Dynamic Agent & Skill Discovery
 
 When no built-in skill or agent fits your task:
@@ -154,10 +163,10 @@ When no built-in skill or agent fits your task:
 ```
 Task received
     ↓
-Check built-in agents/skills (bin/agent-manager list)
+Check built-in skills/agents (bin/skill-manager list / bin/agent-manager list)
     ↓
-Built-in fits? → Use it
-    ↓
+Project tool fits? → Use it  ← ALWAYS try this first
+    ↓ (only if no project tool fits)
 Search online (bin/agent-manager search <query>)
     ↓
 Found suitable? → Install → Evaluate → Adapt if needed

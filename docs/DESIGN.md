@@ -312,6 +312,49 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 
 ---
 
+## 10. Dynamic Agent & Skill Discovery
+
+### Design
+
+Users sometimes need skills or agents beyond what ships with superomni. Rather than requiring users to know where to find them, the framework provides discovery commands built into the manager scripts:
+
+```bash
+bin/agent-manager search <query>   # Search GitHub for agent files
+bin/skill-manager search <query>   # Search GitHub for skill files
+```
+
+### Decision: In-band search vs external registry
+
+**Problem:** How should users find community agents and skills?
+
+**Decision:** In-band search via the existing manager scripts, with fallback to known registries. This:
+1. Requires no new infrastructure or external registry
+2. Works offline with graceful degradation (shows manual URLs)
+3. Leverages GitHub's existing code search index
+4. Keeps the install flow consistent (`search` → `install <url>`)
+
+### New Skills in v0.3.0
+
+| Skill | Origin | Purpose |
+|-------|--------|---------|
+| `office-hours` | gstack-inspired | YC-style product discovery before building |
+| `autoplan` | gstack-inspired | Full automated plan review pipeline |
+| `freeze` | Original | Restrict edits to a directory scope |
+| `document-release` | Original | Post-ship documentation synchronization |
+
+### New Agents in v0.3.0
+
+| Agent | Specialty |
+|-------|-----------|
+| `ceo-advisor` | Product strategy, scope mode, demand validation |
+| `designer` | UX review, missing states, AI slop detection |
+
+The `ceo-advisor` agent formalizes the CEO Lens from the `plan-review` skill into a standalone agent that can be invoked independently or used in the `autoplan` pipeline.
+
+The `designer` agent adds the missing design review dimension to the framework — previously design review existed only as a phase inside `plan-review`.
+
+---
+
 ## 8. Design Risks and Mitigations
 
 | Risk | Mitigation |

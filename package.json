@@ -1,7 +1,7 @@
 {
-  "name": "super-omni",
+  "name": "superomni",
   "version": "0.3.0",
-  "description": "A fused AI coding skill framework combining methodology-driven practices with engineering completeness. Plan Lean, Execute Complete.",
+  "description": "superomni — A fused AI coding skill framework combining methodology-driven practices with engineering completeness. Plan Lean, Execute Complete.",
   "license": "MIT",
   "author": "Wilder1222",
   "keywords": [
@@ -18,7 +18,7 @@
     "npx"
   ],
   "bin": {
-    "super-omni": "./bin/super-omni-cli"
+    "superomni": "./bin/super-omni-cli"
   },
   "scripts": {
     "build": "bash lib/gen-skill-docs.sh",

@@ -78,7 +78,36 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Quality assurance and testing | `qa` |
 | Safety guardrails for high-risk operations | `careful` |
 | Sprint pipeline orchestration | `workflow` |
-| Managing, installing, or creating agents | `agent-management` |
+| Managing, installing, searching online for, or creating agents | `agent-management` |
+| Product discovery and idea validation | `office-hours` |
+| Automated full plan review pipeline | `autoplan` |
+| Restrict edits to a directory | `freeze` |
+| Update docs after shipping | `document-release` |
+
+## Dynamic Agent & Skill Discovery
+
+When no built-in skill or agent fits your task:
+
+1. **Search first**: `bin/agent-manager search <query>` or `bin/skill-manager search <query>`
+2. **Check registries**: obra/superpowers, garrytan/gstack, npm registry
+3. **Install if found**: `bin/agent-manager install <url>` or `bin/skill-manager install <url>`
+4. **Adapt if close**: install the closest match, then modify via `bin/agent-manager create`
+5. **Create if nothing fits**: scaffold a new agent or skill from scratch
+
+**Decision flow:**
+```
+Task received
+    ↓
+Check built-in agents/skills (bin/agent-manager list)
+    ↓
+Built-in fits? → Use it
+    ↓
+Search online (bin/agent-manager search <query>)
+    ↓
+Found suitable? → Install → Evaluate → Adapt if needed
+    ↓
+Nothing suitable → Create custom (bin/agent-manager create <name>)
+```
 
 ## The 6 Decision Principles
 

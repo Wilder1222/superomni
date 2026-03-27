@@ -305,6 +305,7 @@ superomni/
 - [`docs/DESIGN.md`](docs/DESIGN.md) — Architectural design and fusion strategy
 - [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) — Implementation details and development guide
 - [`docs/AGENTS.md`](docs/AGENTS.md) — Agent library reference
+- [`docs/COMPARISON.md`](docs/COMPARISON.md) — Detailed comparison: superomni vs superpowers vs gstack
 
 ---
 

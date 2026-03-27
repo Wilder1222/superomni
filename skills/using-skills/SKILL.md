@@ -45,7 +45,8 @@ Use the scan results to locate the current pipeline stage:
 | `spec.md` only | PLAN | `writing-plans` |
 | `spec.md` + `plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
 | `plan.md` all checked, no review | REVIEW | `code-review` |
-| PR approved, tests green | TEST / SHIP | `qa` → `ship` |
+| PR approved, tests green | TEST / PROD-CHECK | `qa` → `verification` → `production-readiness` |
+| `.superomni/production-readiness/` files exist | SHIP | `ship` |
 | `.superomni/executions/` files exist | Continuing run | Resume with the same skill |
 | `.superomni/reviews/` files exist | Post-review | `receiving-code-review` |
 
@@ -86,6 +87,7 @@ All major skill outputs are saved as Markdown documents for user review:
 | Code reviews | `.superomni/reviews/review-[branch]-[date].md` |
 | Execution results | `.superomni/executions/execution-[branch]-[date].md` |
 | Sub-agent sessions | `.superomni/subagents/subagent-[branch]-[date].md` |
+| Production readiness | `.superomni/production-readiness/production-readiness-[branch]-[date].md` |
 | Specs | `spec.md` |
 | Plans | `plan.md` |
 
@@ -139,6 +141,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Automated full plan review pipeline | `autoplan` |
 | Restrict edits to a directory | `freeze` |
 | Update docs after shipping | `document-release` |
+| Verifying production readiness before deploy | `production-readiness` |
 
 ## Project-First Tool Selection
 

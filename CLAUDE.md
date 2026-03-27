@@ -37,6 +37,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | writing-skills | "create skill", "install skill", "list skills" | P2 |
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
 | document-release | "update docs", "sync docs", "post-ship docs" | P2 |
+| production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |
 
 ## Commands
 
@@ -70,6 +71,7 @@ All review content, execution results, and sub-agent session records are saved a
 | Code reviews | `.superomni/reviews/` | `review-[branch]-[date].md` |
 | Execution results | `.superomni/executions/` | `execution-[branch]-[date].md` |
 | Sub-agent sessions | `.superomni/subagents/` | `subagent-[branch]-[date].md` |
+| Production readiness | `.superomni/production-readiness/` | `production-readiness-[branch]-[date].md` |
 | Specs | project root | `spec.md` |
 | Plans | project root | `plan.md` |
 

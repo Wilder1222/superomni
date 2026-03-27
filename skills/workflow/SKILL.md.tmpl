@@ -16,10 +16,10 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ## The Pipeline
 
 ```
-THINK → PLAN → BUILD → REVIEW → TEST → SHIP → REFLECT
-  │        │       │        │        │       │       │
-  ▼        ▼       ▼        ▼        ▼       ▼       ▼
-spec.md  plan.md  code   feedback  green  release  retro
+THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → REFLECT
+  │        │       │        │        │        │          │       │
+  ▼        ▼       ▼        ▼        ▼        ▼          ▼       ▼
+spec.md  plan.md  code   feedback  green  ready-report release  retro
 ```
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
@@ -139,9 +139,9 @@ code (branch) → code-review (self) → PR
 1. Use `qa` for comprehensive quality assurance:
    - Run existing tests, write missing tests, explore edge cases
 2. Use `security-audit` if changes touch auth, data handling, or external input
-3. Use `verification` as final pre-completion checklist
+3. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against spec.md acceptance criteria
 
-**Output:** Verified code — all tests green, security reviewed, verification checklist complete.
+**Output:** Verified code — all tests green, security reviewed, goal alignment confirmed.
 
 **Data flow:**
 ```
@@ -149,13 +149,41 @@ approved code → qa ──────────────→ QA report
                 │
                 ├── security-audit → security report (if applicable)
                 │
-                └── verification ──→ verification report
+                └── verification ──→ verification report (with goal alignment)
                                           │
                                           ▼
                                      [next stage]
 ```
 
-**"What's next" check:** QA passed? Security clean? Verification complete? → Move to SHIP.
+**"What's next" check:** QA passed? Security clean? Verification complete? Goal alignment confirmed? → Move to PROD-CHECK.
+
+## Stage 5.5: PROD-CHECK — Production Readiness
+
+**Skills:** `production-readiness`
+
+**Input:** Verified code from Stage 5.
+
+**Process:**
+1. Use `production-readiness` to run the pre-deploy gate
+2. Check observability (logging, metrics), reliability (health, timeouts, degradation), and operability (rollback, runbook, alerts)
+3. Verdict must be READY or READY_WITH_CONCERNS before proceeding
+
+**Output:** Production readiness report saved to `.superomni/production-readiness/`.
+
+**Data flow:**
+```
+verified code → production-readiness ──→ readiness report
+                                               │
+                              READY or READY_WITH_CONCERNS?
+                                               │ YES
+                                               ▼
+                                          [next stage]
+                                               │ NO (NOT_READY)
+                                               ▼
+                                    fix blockers → re-run check
+```
+
+**"What's next" check:** Verdict is READY or READY_WITH_CONCERNS? → Move to SHIP.
 
 ## Stage 6: SHIP — Release
 
@@ -220,6 +248,7 @@ completed feature → retro → retrospective notes
 | Audit for security | `security-audit` |
 | Handle risky operations | `careful` |
 | Verify work is complete | `verification` |
+| Check production readiness | `production-readiness` |
 | Debug an error | `systematic-debugging` |
 | Prepare branch for merge | `finishing-branch` |
 | Release software | `ship` |
@@ -240,7 +269,8 @@ git status --short
 - `spec.md` exists but no `plan.md` → You're at PLAN stage
 - `plan.md` exists with unchecked items → You're at BUILD stage
 - Feature branch with code but no review → You're at REVIEW stage
-- PR approved but not merged → You're at TEST or SHIP stage
+- PR approved but not merged → You're at TEST or PROD-CHECK stage
+- `.superomni/production-readiness/` files exist but not yet shipped → You're at SHIP stage
 - Nothing exists → You're at THINK stage
 
 ## Report
@@ -248,13 +278,14 @@ git status --short
 ```
 WORKFLOW STATUS
 ════════════════════════════════════════
-Current stage:    [THINK/PLAN/BUILD/REVIEW/TEST/SHIP/REFLECT]
+Current stage:    [THINK/PLAN/BUILD/REVIEW/TEST/PROD-CHECK/SHIP/REFLECT]
 Artifacts:
   spec.md:        [exists/missing]
   plan.md:        [exists/missing]
   code:           [branch name or N/A]
   tests:          [passing/failing/none]
   review:         [approved/pending/not started]
+  prod-check:     [READY/READY_WITH_CONCERNS/NOT_READY/not run]
   release:        [deployed/not deployed]
 Next step:        [specific action to take]
 Blocking issues:  [none or list]

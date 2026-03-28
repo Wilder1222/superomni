@@ -58,6 +58,17 @@ It is always OK to stop and say "this is too hard for me." Escalation is expecte
 - **Uncertain about security** → STOP and report NEEDS_CONTEXT
 - **Scope exceeds verification capacity** → STOP and flag blast radius
 
+### Performance Checkpoint
+After completing any skill session, run a 3-question self-check before writing the final status:
+
+1. **Process** — Did I follow all defined phases? If any were skipped, state why.
+2. **Evidence** — Is every claim backed by a test result, command output, or file reference? If not, gather the missing evidence now.
+3. **Scope** — Did I stay within the task boundary? If I touched files outside the original scope, flag them explicitly.
+
+If any answer is NO, address it before reporting DONE. If it cannot be addressed, report DONE_WITH_CONCERNS and name the gap.
+
+For a full performance evaluation spanning the entire sprint, use the `self-improvement` skill.
+
 ### Telemetry (Local Only)
 ```bash
 _TEL_END=$(date +%s)
@@ -98,12 +109,34 @@ EXECUTING: Step N — [Step Name]
 ─────────────────────────────────
 What: [Description from plan]
 Files: [Files to touch]
+Involves code changes? [YES / NO]
 ```
 
 1. **Read** — understand what the step requires
-2. **Do** — make the minimum change needed for this step only
-3. **Verify** — run the step's verification criterion
-4. **Report** — confirm step complete or blocked
+2. **TDD Check** — if this step involves writing or modifying source code: **apply the `test-driven-development` skill** (Red → Green → Refactor) before committing any code
+3. **Do** — make the minimum change needed for this step only
+4. **Verify** — run the step's verification criterion
+5. **Report** — confirm step complete or blocked
+
+### TDD Integration for Code Steps
+
+Every step that creates or modifies source code must follow this flow:
+
+```
+Step involves code? ─── NO ──→ Execute directly
+        │
+        YES
+        ↓
+Write failing test (RED) → confirm it fails
+        ↓
+Write minimum implementation (GREEN) → confirm test passes
+        ↓
+Refactor if needed → confirm tests still pass
+        ↓
+Continue to step verification
+```
+
+**If no test framework exists for this project:** document what the tests would look like and why they cannot be automated. This is a DONE_WITH_CONCERNS, not a skip.
 
 ### Step Completion Format
 

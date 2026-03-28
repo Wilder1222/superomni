@@ -38,6 +38,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
 | document-release | "update docs", "sync docs", "post-ship docs" | P2 |
 | production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |
+| self-improvement | "self-improve", "evaluate performance", "reflect on execution", "how did we do", "improve process" | P1 |
 
 ## Commands
 

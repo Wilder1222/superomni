@@ -2,8 +2,8 @@
 
 ## superomni — Architecture and Fusion Strategy
 
-**Version:** 0.2.0
-**Status:** Implemented (v0.2.0)
+**Version:** 0.3.0
+**Status:** Implemented (v0.3.0)
 
 ---
 

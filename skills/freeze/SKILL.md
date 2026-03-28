@@ -60,6 +60,17 @@ It is always OK to stop and say "this is too hard for me." Escalation is expecte
 - **Uncertain about security** → STOP and report NEEDS_CONTEXT
 - **Scope exceeds verification capacity** → STOP and flag blast radius
 
+### Performance Checkpoint
+After completing any skill session, run a 3-question self-check before writing the final status:
+
+1. **Process** — Did I follow all defined phases? If any were skipped, state why.
+2. **Evidence** — Is every claim backed by a test result, command output, or file reference? If not, gather the missing evidence now.
+3. **Scope** — Did I stay within the task boundary? If I touched files outside the original scope, flag them explicitly.
+
+If any answer is NO, address it before reporting DONE. If it cannot be addressed, report DONE_WITH_CONCERNS and name the gap.
+
+For a full performance evaluation spanning the entire sprint, use the `self-improvement` skill.
+
 ### Telemetry (Local Only)
 ```bash
 _TEL_END=$(date +%s)

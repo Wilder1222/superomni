@@ -102,6 +102,7 @@ Start with:
 | `security-audit` | Security vulnerability audit | Threat model + fixes |
 | `qa` | Quality assurance pass | QA report |
 | `careful` | High-risk/destructive operations | Safety checklist |
+| `self-improvement` | Post-task performance evaluation | Improvement report + 3 actions |
 
 ### Advanced (P2)
 
@@ -259,6 +260,7 @@ superomni/
 │   ├── qa/                   ← Quality assurance
 │   ├── careful/              ← Safety guardrails
 │   ├── workflow/             ← Sprint pipeline orchestration
+│   ├── self-improvement/     ← Post-task performance evaluation
 │   └── agent-management/     ← Install, create, and manage agents
 │
 ├── agents/                   ← Specialized agent definitions

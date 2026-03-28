@@ -132,10 +132,34 @@ go test ./... 2>&1 | tail -20
 
 ### 2. Test Verification
 
-- [ ] Are there tests? (If no, is that intentional? If yes, why not?)
+- [ ] Are there tests? (If new code was written, tests are **mandatory** — this is a hard gate)
 - [ ] Do all tests pass?
 - [ ] Do tests verify behavior (not just implementation)?
 - [ ] Are tests independent (can run in any order)?
+- [ ] Was TDD followed? (test written before implementation)
+
+**Hard gate for new code:** If new source code was written and no tests exist for it, report BLOCKED — do not advance to DONE until tests are added. The only valid exception is a documented reason (pure UI layout, throw-away prototype).
+
+```bash
+# Step 1: List source files changed (exclude tests and docs)
+git diff HEAD --name-only | grep -vE "(test|spec|\.md$|\.txt$)" | head -10
+
+# Step 2: List test files changed
+git diff HEAD --name-only | grep -E "(test|spec|_test\.|\.test\.)" | head -10
+
+# Step 3: Check if any source file has a corresponding test file
+# For each changed source file, search for a test file by base name
+for f in $(git diff HEAD --name-only | grep -vE "(test|spec|\.md$)"); do
+  base=$(basename "$f" | sed 's/\..*//')
+  found=$(find . -name "*${base}*test*" -o -name "*${base}*spec*" -o \
+          -name "test_*${base}*" 2>/dev/null | head -1)
+  if [ -z "$found" ]; then
+    echo "MISSING TESTS: $f (no test file found for '$base')"
+  else
+    echo "HAS TESTS: $f → $found"
+  fi
+done
+```
 
 ### 3. Regression Verification
 

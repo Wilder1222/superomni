@@ -98,6 +98,20 @@ Each stage uses specific skills and produces artifacts consumed by the next stag
 
 **Input:** Fuzzy idea, user request, bug report, or feature ask.
 
+**Start-of-sprint context scan:**
+```bash
+# Always check for prior improvement actions from the last self-improvement run
+LATEST_IMPROVE=$(find .superomni/improvements -name "*.md" -type f 2>/dev/null |   sort -t- -k2,3 | tail -1)
+if [ -n "$LATEST_IMPROVE" ]; then
+  echo "=== Applying improvement actions from last sprint ==="
+  grep "^### ACTION" "$LATEST_IMPROVE" -A 4 | head -30
+fi
+
+# Check what spec/plan artifacts already exist
+test -f spec.md && echo "spec.md found" || echo "No spec.md"
+test -f plan.md && echo "plan.md found" || echo "No plan.md"
+```
+
 **Process:**
 1. If the problem space is unclear → use `investigate` to map the system
 2. Use `brainstorming` to crystallize the problem and explore solutions

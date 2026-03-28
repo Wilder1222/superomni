@@ -4,6 +4,11 @@
 # Supports all installation methods:
 #   npm install -g github:Wilder1222/superomni  → superomni [options]
 #   npx github:Wilder1222/superomni             → npx github:Wilder1222/superomni [options]
+#
+# Commands:
+#   superomni [setup options]  — run the setup/install script
+#   superomni upgrade          — upgrade superomni to the latest version
+#   superomni version          — print the installed version
 
 set -e
 
@@ -36,5 +41,57 @@ if [ ! -f "${PACKAGE_ROOT}/setup" ]; then
   exit 1
 fi
 
-# ── Delegate to the main setup script ────────────────────────────────────────
-exec bash "${PACKAGE_ROOT}/setup" "$@"
+# ── Read current version ──────────────────────────────────────────────────────
+CURRENT_VERSION="$(node -p "require('${PACKAGE_ROOT}/package.json').version" 2>/dev/null || echo "unknown")"
+
+# ── Command dispatch ──────────────────────────────────────────────────────────
+COMMAND="${1:-}"
+
+case "$COMMAND" in
+  upgrade)
+    echo "superomni upgrade — checking for updates..."
+    echo "Current version: ${CURRENT_VERSION}"
+
+    # Determine if installed globally via npm or directly via npx
+    if npm list -g superomni 2>/dev/null | grep -q superomni; then
+      echo "Upgrading via npm (global install)..."
+      npm install -g "github:Wilder1222/superomni"
+    else
+      echo "Upgrading via npm install..."
+      npm install -g "github:Wilder1222/superomni"
+    fi
+
+    NEW_VERSION="$(npm list -g superomni 2>/dev/null | grep superomni | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown")"
+    if [ "${NEW_VERSION}" != "${CURRENT_VERSION}" ]; then
+      echo ""
+      echo "✓ Upgraded: ${CURRENT_VERSION} → ${NEW_VERSION}"
+      echo "  Run 'superomni' to re-run setup with the latest version."
+    else
+      echo ""
+      echo "✓ Already at latest version: ${CURRENT_VERSION}"
+    fi
+    ;;
+
+  version|--version|-v)
+    echo "superomni ${CURRENT_VERSION}"
+    ;;
+
+  help|--help|-h)
+    echo "superomni — AI coding skill framework"
+    echo ""
+    echo "Usage:"
+    echo "  superomni [setup options]  Run setup/install for your platform"
+    echo "  superomni upgrade          Upgrade to the latest version"
+    echo "  superomni version          Print installed version"
+    echo "  superomni help             Show this help"
+    echo ""
+    echo "Setup options are passed through to the setup script."
+    echo "Run 'superomni --help-setup' to see setup-specific options."
+    ;;
+
+  *)
+    # ── Delegate to the main setup script ──────────────────────────────────────
+    exec bash "${PACKAGE_ROOT}/setup" "$@"
+    ;;
+esac
+

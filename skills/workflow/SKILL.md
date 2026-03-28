@@ -58,6 +58,17 @@ It is always OK to stop and say "this is too hard for me." Escalation is expecte
 - **Uncertain about security** → STOP and report NEEDS_CONTEXT
 - **Scope exceeds verification capacity** → STOP and flag blast radius
 
+### Performance Checkpoint
+After completing any skill session, run a 3-question self-check before writing the final status:
+
+1. **Process** — Did I follow all defined phases? If any were skipped, state why.
+2. **Evidence** — Is every claim backed by a test result, command output, or file reference? If not, gather the missing evidence now.
+3. **Scope** — Did I stay within the task boundary? If I touched files outside the original scope, flag them explicitly.
+
+If any answer is NO, address it before reporting DONE. If it cannot be addressed, report DONE_WITH_CONCERNS and name the gap.
+
+For a full performance evaluation spanning the entire sprint, use the `self-improvement` skill.
+
 ### Telemetry (Local Only)
 ```bash
 _TEL_END=$(date +%s)
@@ -267,26 +278,33 @@ verified code → finishing-branch → merge to main
 
 **"What's next" check:** Code merged? Deployed? Version tagged? → Move to REFLECT.
 
-## Stage 7: REFLECT — Learn
+## Stage 7: REFLECT — Learn and Improve
 
-**Skills:** `retro`
+**Skills:** `retro`, `self-improvement`
 
 **Input:** Completed feature — the full journey from idea to deployment.
 
 **Process:**
-1. Use `retro` to analyze what went well and what didn't
-2. Capture metrics: time spent, deviations from plan, bugs found
-3. Identify process improvements for next sprint
+1. Use `retro` to analyze what was shipped: commits, LOC, active days, streak
+2. Use `self-improvement` to evaluate *how* you worked:
+   - Process adherence (were phases followed?)
+   - Agent behavior (scope management, instruction following, escalation)
+   - Skill effectiveness (were the right skills used correctly?)
+3. Generate 3 concrete improvement actions for the next sprint
+4. Save both the retro report and the improvement report
 
-**Output:** Retrospective notes — lessons learned, action items.
+**Output:** Retrospective notes + Improvement report with 3 action items.
 
 **Data flow:**
 ```
-completed feature → retro → retrospective notes
-                              │
-                              ▼
-                         [next sprint — back to THINK]
+completed feature → retro → retrospective notes (.context/retros/)
+                  ↓
+           self-improvement → improvement report (.superomni/improvements/)
+                  ↓
+          3 action items → [next sprint — feed into THINK stage]
 ```
+
+**"What's next" check:** Retro saved? Improvement actions defined? → Start next sprint at THINK.
 
 ## Quick Reference: Which Skill When?
 
@@ -310,6 +328,7 @@ completed feature → retro → retrospective notes
 | Prepare branch for merge | `finishing-branch` |
 | Release software | `ship` |
 | Run a retrospective | `retro` |
+| Evaluate sprint performance | `self-improvement` |
 | Create a new skill | `writing-skills` |
 
 ## Picking Up Mid-Sprint

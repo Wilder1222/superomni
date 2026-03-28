@@ -1,0 +1,33 @@
+name: Validate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  validate:
+    name: Skill Format Validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build skill docs
+        run: bash lib/gen-skill-docs.sh
+
+      - name: Check for uncommitted build changes
+        run: |
+          if ! git diff --quiet; then
+            echo "ERROR: SKILL.md files are out of sync with their .tmpl sources."
+            echo "Run 'bash lib/gen-skill-docs.sh' and commit the generated files."
+            git diff --name-only
+            exit 1
+          fi
+
+      - name: Validate skill format
+        run: bash lib/validate-skills.sh

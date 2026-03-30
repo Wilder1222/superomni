@@ -51,6 +51,19 @@ When the user sends a **follow-up message after a completed session**, before do
 3. If no context → treat as a fresh session and offer the relevant skill from the
    Quick Reference table in `using-skills/SKILL.md`.
 
+### Question Confirmation Protocol
+
+When asking the user a question, match the confirmation requirement to the complexity of the response:
+
+| Question type | Confirmation rule |
+|---------------|------------------|
+| **Single-choice** — user picks one option (A/B/C, 1/2/3, Yes/No) | The user's selection IS the confirmation. Do NOT ask "Are you sure?" or require a second submission. |
+| **Free-text input** — user types a value and presses Enter | The submitted text IS the confirmation. No secondary prompt needed. |
+| **Multi-choice** — user selects multiple items from a list | After the user lists their selections, ask once: "Confirm these selections? (Y to proceed)" before acting. |
+| **Complex / open-ended discussion** — back-and-forth clarification | Collect all input, then present a summary and ask: "Ready to proceed with the above? (Y/N)" before acting. |
+
+**Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -102,6 +115,7 @@ Required understanding before proceeding:
 - [ ] What already exists that's related?
 
 Rule: **Ask one question. Wait for answer. Then ask the next.**
+Confirmation rule: each answer (text input or single-choice) is an immediate confirmation — do NOT re-ask or add a "confirm?" prompt after the user replies.
 
 ## Phase 2: Solution Space Exploration
 

@@ -45,6 +45,13 @@ git diff --stat HEAD~3 2>/dev/null | tail -5
 ls spec.md plan.md 2>/dev/null
 ls .superomni/ 2>/dev/null
 
+# Read the latest evaluation report (from verification skill)
+LATEST_EVAL=$(find .superomni/evaluations -name "*.md" -type f 2>/dev/null | sort | tail -1)
+if [ -n "$LATEST_EVAL" ]; then
+  echo "Latest verification evaluation:"
+  cat "$LATEST_EVAL" | head -40
+fi
+
 # Skill telemetry for this session
 tail -10 ~/.omni-skills/analytics/usage.jsonl 2>/dev/null || echo "(no telemetry)"
 
@@ -56,6 +63,7 @@ Document the raw facts:
 - Which skills were invoked?
 - What artifacts were produced?
 - What tests ran, and what was the outcome?
+- What did the latest evaluation report say?
 
 ## Phase 2: Process Adherence Evaluation
 
@@ -169,26 +177,88 @@ Verify:   Next session starts with `ls spec.md` — must exist before first code
 ```bash
 IMPROVE_DIR=".superomni/improvements"
 mkdir -p "$IMPROVE_DIR"
-BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
-DATE=$(date +%Y-%m-%d)
-REPORT_FILE="$IMPROVE_DIR/improvement-${BRANCH}-${DATE}.md"
+BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "main")
+TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)
+REPORT_FILE="$IMPROVE_DIR/improvement-${BRANCH}-${TIMESTAMP}.md"
 ```
 
-Save the full report (Phase 1-6 output) to `$REPORT_FILE`.
+Save the **full** evaluation report to `$REPORT_FILE` using the following structure. All scores and tables from Phases 1–6 must be included — not just the action items:
 
-Print a 5-line summary:
+```markdown
+# Improvement Report: [branch]
 
+**Date:** [date]
+**Branch:** [branch]
+**Task description:** [what was worked on this session]
+
+## Session Evidence (Phase 1)
+
+- Skills invoked: [list]
+- Artifacts produced: [list of files in .superomni/ and project root]
+- Tests outcome: [pass/fail counts]
+- Evaluation report referenced: [path or "none"]
+
+## Process Adherence (Phase 2)
+
+| Question | Answer | Evidence |
+|----------|--------|----------|
+| THINK→PLAN→BUILD→REVIEW followed | YES/PARTIAL/NO | |
+| Spec/plan created before implementation | YES/PARTIAL/NO | |
+| Skills used for intended triggers | YES/PARTIAL/NO | |
+| Session ended with status report | YES/PARTIAL/NO | |
+
+**Iron Law compliance:** [N/5 laws followed]
+
+## Agent Evaluation (Phase 3)
+
+| Dimension | Score | Evidence |
+|-----------|-------|---------|
+| Scope management | [N]/5 | |
+| Instruction following | [N]/5 | |
+| Escalation behavior | [N]/5 | |
+
+**Agent total: [N]/15**
+
+## Skill Effectiveness (Phase 4)
+
+| Skill | Right skill? | Phases done | Output quality | Score |
+|-------|-------------|-------------|---------------|-------|
+| [skill-1] | YES/NO | 100%/80%/<50% | clear/partial/missing | [N]/5 |
+
+**Skills avg: [N]/5**
+
+## Gap Analysis (Phase 5)
+
+| Deviation | Root cause | Principle violated |
+|-----------|-----------|-------------------|
+| [deviation] | [root cause] | [principle] |
+
+## Action Items (Phase 6)
+
+### ACTION 1: [TITLE]
+Problem: ...
+Root cause: ...
+Fix: ...
+Verify: ...
+
+### ACTION 2: [TITLE]
+Problem: ...
+Root cause: ...
+Fix: ...
+Verify: ...
+
+### ACTION 3: [TITLE]
+Problem: ...
+Root cause: ...
+Fix: ...
+Verify: ...
 ```
-SELF-IMPROVEMENT REPORT — [date]
-════════════════════════════════════════
-Process adherence:  [N/N checks passed]
-Agent performance:  [N/15]
-Skills invoked:     [N] (avg effectiveness: [N]/5)
-Top deviation:      [most important finding]
-Action items:       [3 actions, one per line]
-Saved to: [report file path]
-════════════════════════════════════════
+
+```bash
+echo "Improvement report saved to $REPORT_FILE"
 ```
+
+This report is the canonical record of agent and skill performance for this session. The `workflow` skill reads it at the next sprint start to apply the action items.
 
 ## Report
 

@@ -11,12 +11,12 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 
 # Executing Plans
 
-**Goal:** Execute a written implementation plan precisely, step by step, with verification at each stage.
+**Goal:** Execute a written implementation plan precisely, with verification at each stage — running independent steps in parallel to minimize elapsed time.
 
-## Iron Law: One Step at a Time
+## Iron Law: Dependencies First, Then Parallelize
 
-Never execute multiple steps simultaneously unless they are explicitly marked as parallelizable.
-Verify each step before moving to the next.
+Never execute a step before its dependencies are complete.
+But DO run all independent steps in parallel within a wave — never serialize work that can be parallelized.
 
 ## Phase 1: Load the Plan
 
@@ -30,14 +30,50 @@ Read the plan. Confirm:
 - [ ] Prerequisites are met
 - [ ] You understand what "done" looks like for each step
 
-## Phase 2: Execute Step by Step
+## Phase 2: Dependency Analysis — Build the Execution Wave Plan
 
-For each step in the plan:
+Before executing any step, analyze ALL steps for dependencies:
+
+```
+DEPENDENCY ANALYSIS
+─────────────────────────────────
+Step 1: [name] — depends on: none
+Step 2: [name] — depends on: none
+Step 3: [name] — depends on: Step 1
+Step 4: [name] — depends on: none
+Step 5: [name] — depends on: Step 2, Step 3
+Step 6: [name] — depends on: none
+...
+
+WAVE EXECUTION PLAN
+Wave 1 (parallel): Steps 1, 2, 4, 6  ← 4 agents dispatched simultaneously
+Wave 2 (parallel): Steps 3, 5        ← unblocked after Wave 1 completes
+Wave 3 (if needed): ...
+
+Est. time: [N waves] instead of [N sequential steps]
+```
+
+Rule: A step is independent if its outputs are not required by any step in the same wave.
+Rule: Aim for 5–10 steps per wave when sufficient independent steps exist — never artificially group dependent steps to meet this target.
+
+## Phase 3: Execute Wave by Wave
+
+For each wave, dispatch all steps in the wave simultaneously, then wait for all to complete before starting the next wave.
 
 ### Step Execution Protocol
 
+For each step in a wave:
+
 ```
-EXECUTING: Step N — [Step Name]
+EXECUTING WAVE [N] — [M] STEPS IN PARALLEL
+─────────────────────────────────
+Steps: [list of step names/numbers]
+```
+
+For each individual step:
+
+```
+Step [N] — [Step Name]
 ─────────────────────────────────
 What: [Description from plan]
 Files: [Files to touch]
@@ -91,16 +127,16 @@ Continue to step verification
     D) Other — describe your own approach: ___________
 ```
 
-## Phase 3: Mid-Plan Check-ins
+## Phase 4: Mid-Plan Check-ins
 
-After every 3 steps, or when scope is expanding:
+After every wave completes, or when scope is expanding:
 
-1. Report progress: "Completed N/M steps"
+1. Report progress: "Completed N/M steps (Wave X of Y done)"
 2. Flag if actual work diverges from plan
 3. Surface any blast radius discovered mid-execution
 4. Ask before proceeding if scope has changed
 
-## Phase 4: Handling Plan Deviations
+## Phase 5: Handling Plan Deviations
 
 If you discover the plan is wrong or incomplete:
 
@@ -117,7 +153,7 @@ Recommendation: [Proposed resolution]
 Awaiting: [Your decision before continuing]
 ```
 
-## Phase 5: Completion
+## Phase 6: Completion
 
 When all steps are done:
 
@@ -125,6 +161,7 @@ When all steps are done:
 PLAN EXECUTION COMPLETE
 ════════════════════════════════════════
 Steps completed:    N/N
+Waves executed:     W
 Deviations noted:   N
 Files changed:      [list]
 Tests passing:      [output]
@@ -151,6 +188,10 @@ cat > ".superomni/executions/${_EXEC_FILE}" << EOF
 
 [Paste the full PLAN EXECUTION COMPLETE block here]
 
+## Wave Log
+
+[Paste wave-by-wave summary: steps in each wave, outcomes]
+
 ## Steps Log
 
 [Paste all step completion/blocked entries here]
@@ -158,6 +199,6 @@ EOF
 echo "Execution results saved to .superomni/executions/${_EXEC_FILE}"
 ```
 
-Write the full execution log (all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `.superomni/executions/execution-[branch]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
+Write the full execution log (wave plan, all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `.superomni/executions/execution-[branch]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
 
 Then trigger the `verification` skill.

@@ -23,6 +23,27 @@ Before executing any task directly, ask:
 
 If yes to any → **use sub-agents by default**. Only skip sub-agents for trivially small tasks (< 5 min, single file, single concern).
 
+## Maximum Parallelism Principle
+
+**Default concurrency target: 5–10 agents per wave.**
+
+When breaking down a task:
+1. List ALL sub-tasks first — resist the urge to start with just 2–3
+2. Analyze dependencies to find the maximum set that can run in parallel
+3. Group into waves, filling each wave to capacity (5–10 agents)
+4. Only after a wave completes, dispatch the next wave
+
+For tasks with sufficient parallelizable work, this is the difference between a 3-hour task and a 30-minute task.
+
+```
+Anti-pattern (slow):          Correct pattern (fast):
+  Wave 1: 2 agents            Wave 1: 8 agents in parallel
+  Wave 2: 2 agents      vs    Wave 2: 6 agents in parallel
+  Wave 3: 2 agents            Wave 3: 2 agents
+  Wave 4: 2 agents
+  Wave 5: 2 agents
+```
+
 ## When to Use Sub-Agents
 
 Use sub-agents when:
@@ -44,7 +65,25 @@ See `code-quality-reviewer-prompt.md` — reviews code after implementation.
 
 ## Protocol: Spawning a Sub-Agent
 
-### Step 1: Define the Task Boundary
+### Step 1: Build the Full Task List First
+
+Before spawning any agent, list ALL sub-tasks needed to complete the work:
+
+```
+Full task inventory:
+  1. [task A] — depends on: none
+  2. [task B] — depends on: none
+  3. [task C] — depends on: none
+  4. [task D] — depends on: A
+  5. [task E] — depends on: B, C
+  6. [task F] — depends on: none
+  ...
+
+Wave 1 (parallel): tasks 1, 2, 3, 6  ← all with no dependencies
+Wave 2 (parallel): tasks 4, 5        ← unblocked after Wave 1
+```
+
+### Step 2: Define the Task Boundary for Each Agent
 
 Before spawning, define:
 - **Input:** What the sub-agent receives (files, spec, context)
@@ -52,7 +91,7 @@ Before spawning, define:
 - **Scope:** Exactly what files/modules the sub-agent may touch
 - **Constraints:** What the sub-agent must NOT do
 
-### Step 2: Prepare the Sub-Agent Prompt
+### Step 3: Prepare the Sub-Agent Prompt
 
 Use the relevant prompt template from this directory.
 Fill in:
@@ -62,16 +101,25 @@ Fill in:
 - `[OUTPUT CONTRACT]` — exact output format required
 - `[CONSTRAINTS]` — what to avoid
 
-### Step 3: Launch and Monitor
+### Step 4: Launch and Monitor
 
 ```
-SPAWNING SUB-AGENT: [type] — [task name]
-Input: [what it receives]
-Output: [what it must produce]
-Scope: [allowed files]
+SPAWNING WAVE [N] — [N] PARALLEL SUB-AGENTS
+════════════════════════════════════════
+Wave:   [N of W]
+Agents: [N]   ← target 5-10 for large task sets
+
+Agent 1 ([type]) — [task name]
+  Input: [what it receives]
+  Output: [what it must produce]
+  Scope: [allowed files]
+
+Agent 2 ([type]) — [task name]
+  ...
+════════════════════════════════════════
 ```
 
-### Step 4: Validate Output
+### Step 5: Validate Output
 
 When the sub-agent reports back:
 - [ ] Output matches the defined contract
@@ -79,31 +127,38 @@ When the sub-agent reports back:
 - [ ] Reported status is DONE or DONE_WITH_CONCERNS (not BLOCKED)
 - [ ] Evidence is provided for all claims
 
-### Step 5: Integrate Results
+### Step 6: Integrate Results and Proceed to Next Wave
 
 Merge sub-agent outputs carefully:
 1. Review each change before accepting
 2. Run tests after integration
 3. Resolve any conflicts between parallel agents
+4. Dispatch next wave with all newly unblocked tasks
 
 ## Parallel Execution Pattern
 
 When using multiple sub-agents simultaneously:
 
 ```
-PARALLEL EXECUTION
+PARALLEL WAVE EXECUTION
 ═══════════════════════════════════════
-Agent 1: [implementer] — [task A]
-Agent 2: [spec-reviewer] — [spec for task B]
-Agent 3: [implementer] — [task C] (independent of A)
+Wave 1 (8 agents):
+  Agent 1: [implementer] — [task A]
+  Agent 2: [implementer] — [task B]
+  Agent 3: [spec-reviewer] — [spec for task C]
+  Agent 4: [implementer] — [task D] (independent of A, B)
+  Agent 5: [implementer] — [task E]
+  Agent 6: [code-reviewer] — [review module X]
+  Agent 7: [implementer] — [task F]
+  Agent 8: [test-writer] — [tests for module Y]
 
-Synchronization point: After all agents report DONE
-Integration plan: [how to merge their outputs]
+Synchronization point: After all Wave 1 agents report DONE
+Wave 2 tasks (unblocked by Wave 1): [list]
 ═══════════════════════════════════════
 ```
 
 Rule: Only run truly independent tasks in parallel.
-If task B depends on task A's output, run them sequentially.
+If task B depends on task A's output, run them sequentially (in different waves).
 
 ## Consensus Protocol (Optional)
 
@@ -128,7 +183,11 @@ cat > ".superomni/subagents/${_SA_FILE}" << EOF
 
 ## Agents Dispatched
 
-[List each agent, its type, task, and reported status]
+[List each agent, its type, task, wave, and reported status]
+
+## Wave Summary
+
+[Wave 1: N agents, duration. Wave 2: M agents, duration. Total elapsed vs sequential estimate.]
 
 ## Integration Summary
 
@@ -142,4 +201,4 @@ EOF
 echo "Sub-agent session saved to .superomni/subagents/${_SA_FILE}"
 ```
 
-Write the full session record (agents dispatched, outputs, integration summary, and final status, formatted as Markdown) to `.superomni/subagents/subagent-[branch]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.
+Write the full session record (agents dispatched, wave breakdown, outputs, integration summary, and final status, formatted as Markdown) to `.superomni/subagents/subagent-[branch]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.

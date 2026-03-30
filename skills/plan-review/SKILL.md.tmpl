@@ -113,6 +113,10 @@ ENGINEERING REVIEW
 
 List all TASTE decisions collected during review. Present to user:
 
+**If there is only ONE taste decision** — ask it as a single-choice question. The user's reply (A or B) confirms immediately, no second submit needed.
+
+**If there are MULTIPLE taste decisions** — present them all at once, ask the user to reply with their choice for each number (e.g. "1:A 2:B 3:A"), then after the user replies confirm with: "Got it — proceeding with those choices." before acting.
+
 ```
 TASTE DECISIONS FOR YOUR INPUT
 ═══════════════════════════════════════
@@ -125,6 +129,9 @@ These require your judgment. No objectively right answer.
 
 2. [Decision description]
    ...
+
+[If multiple decisions: Reply with "1:A 2:B ..." — your batch reply is the confirmation.]
+[If one decision: Reply A or B — your answer is the immediate confirmation.]
 ═══════════════════════════════════════
 ```
 

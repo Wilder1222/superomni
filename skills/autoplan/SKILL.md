@@ -54,6 +54,19 @@ When the user sends a **follow-up message after a completed session**, before do
 3. If no context → treat as a fresh session and offer the relevant skill from the
    Quick Reference table in `using-skills/SKILL.md`.
 
+### Question Confirmation Protocol
+
+When asking the user a question, match the confirmation requirement to the complexity of the response:
+
+| Question type | Confirmation rule |
+|---------------|------------------|
+| **Single-choice** — user picks one option (A/B/C, 1/2/3, Yes/No) | The user's selection IS the confirmation. Do NOT ask "Are you sure?" or require a second submission. |
+| **Free-text input** — user types a value and presses Enter | The submitted text IS the confirmation. No secondary prompt needed. |
+| **Multi-choice** — user selects multiple items from a list | After the user lists their selections, ask once: "Confirm these selections? (Y to proceed)" before acting. |
+| **Complex / open-ended discussion** — back-and-forth clarification | Collect all input, then present a summary and ask: "Ready to proceed with the above? (Y/N)" before acting. |
+
+**Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -198,14 +211,17 @@ TASTE DECISIONS — YOUR CALL
 Auto-resolved [N] mechanical decisions (see log above)
 Taste decisions needing your input: [N]
 
-Options:
+Reply with one option — your choice is immediate confirmation, no second submit needed:
   A) Approve all recommendations above
-  B) Review each decision
+  B) Review each decision individually
   C) Reject and revise the plan
 ════════════════════════════════════════
 ```
 
+**Confirmation rule:** This is a single-choice question. The moment the user types A, B, or C, treat that as confirmed and act immediately — do NOT ask "Are you sure?" or prompt again.
+
 If approved → write the final reviewed `plan.md` with all auto-decisions incorporated.
+If reviewing individually → present each taste decision as its own single-choice (pick A or B); each answer confirms that decision immediately before moving to the next.
 
 ---
 

@@ -160,6 +160,63 @@ Concerns (if any):
 ════════════════════════════════════════
 ```
 
+## Save Evaluation Report
+
+After completing verification, save the report as a persistent Markdown document:
+
+```bash
+EVAL_DIR=".superomni/evaluations"
+mkdir -p "$EVAL_DIR"
+BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "main")
+TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)
+EVAL_FILE="$EVAL_DIR/evaluation-${BRANCH}-${TIMESTAMP}.md"
+```
+
+Write the full VERIFICATION REPORT block (including all checklist results, test output, and goal alignment table) to `$EVAL_FILE` in this format:
+
+```markdown
+# Verification Evaluation: [branch]
+
+**Date:** [date]
+**Branch:** [branch]
+**Task:** [what was being verified]
+
+## Checklist Results
+
+| Check | Result | Notes |
+|-------|--------|-------|
+| Functional verification | ✓/✗ | |
+| Test verification | ✓/✗ | |
+| Regression verification | ✓/✗ | |
+| Completeness | ✓/✗ | |
+| No regressions | ✓/✗ | |
+| Blast radius | ✓/✗ | |
+
+## Goal Alignment
+
+Spec/plan used: [spec.md | plan.md | user request]
+
+| Criterion | Met? | Evidence |
+|-----------|------|----------|
+| [criterion 1] | ✓/✗ | [proof] |
+
+## Evidence
+
+[Test output snippet or observed behavior]
+
+## Verdict
+
+[Paste full VERIFICATION REPORT block here]
+
+**Status:** DONE | DONE_WITH_CONCERNS | BLOCKED
+```
+
+```bash
+echo "Evaluation saved to $EVAL_FILE"
+```
+
+This file is the permanent task evaluation record. It feeds into `self-improvement` and future sprint retrospectives.
+
 ## When Verification Fails
 
 If any check fails:

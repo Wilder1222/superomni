@@ -20,6 +20,7 @@ All inter-skill artifacts are stored in `.superomni/` with predictable paths:
 .superomni/
 ├── reviews/           ← code-review output
 ├── executions/        ← executing-plans output
+├── evaluations/       ← verification output (task evaluation reports)
 ├── subagents/         ← subagent-development session records
 ├── production-readiness/  ← production-readiness output
 ├── improvements/      ← self-improvement output
@@ -111,6 +112,46 @@ Status: DONE | DONE_WITH_CONCERNS
 
 ---
 
+### `verification` → `self-improvement`
+
+**Produces:** `.superomni/evaluations/evaluation-[branch]-[date].md`
+
+Required sections:
+```markdown
+# Verification Evaluation: [branch]
+
+**Date:** [date]
+**Branch:** [branch]
+**Task:** [what was verified]
+
+## Checklist Results
+
+| Check | Result | Notes |
+|-------|--------|-------|
+| Functional verification | ✓/✗ | |
+| Test verification | ✓/✗ | |
+| Regression verification | ✓/✗ | |
+| Completeness | ✓/✗ | |
+| No regressions | ✓/✗ | |
+| Blast radius | ✓/✗ | |
+
+## Goal Alignment
+
+Spec/plan used: [spec.md | plan.md | user request]
+
+| Criterion | Met? | Evidence |
+|-----------|------|----------|
+| [criterion] | ✓/✗ | [proof] |
+
+## Verdict
+
+**Status:** DONE | DONE_WITH_CONCERNS | BLOCKED
+```
+
+**Consumed by:** `self-improvement` reads the latest evaluation report in Phase 1 as session evidence
+
+---
+
 ### `code-review` → `receiving-code-review`
 
 **Produces:** `.superomni/reviews/review-[branch]-[date].md`
@@ -177,12 +218,66 @@ Required sections:
 ```markdown
 # Improvement Report: [branch]
 
-## Session Summary
-**Process adherence:** N/N
-**Agent score:** N/15
+**Date:** [date]
+**Branch:** [branch]
+**Task description:** [what was worked on]
 
-## Action Items
+## Session Evidence (Phase 1)
+- Skills invoked: [list]
+- Artifacts produced: [list]
+- Tests outcome: [pass/fail counts]
+- Evaluation report referenced: [path or "none"]
+
+## Process Adherence (Phase 2)
+
+| Question | Answer | Evidence |
+|----------|--------|----------|
+| THINK→PLAN→BUILD→REVIEW followed | YES/PARTIAL/NO | |
+| Spec/plan created before implementation | YES/PARTIAL/NO | |
+| Skills used for intended triggers | YES/PARTIAL/NO | |
+| Session ended with status report | YES/PARTIAL/NO | |
+
+**Iron Law compliance:** N/5 laws followed
+
+## Agent Evaluation (Phase 3)
+
+| Dimension | Score | Evidence |
+|-----------|-------|---------|
+| Scope management | [N]/5 | |
+| Instruction following | [N]/5 | |
+| Escalation behavior | [N]/5 | |
+
+**Agent total: [N]/15**
+
+## Skill Effectiveness (Phase 4)
+
+| Skill | Right skill? | Phases done | Output quality | Score |
+|-------|-------------|-------------|---------------|-------|
+| [skill-1] | YES/NO | 100%/80%/<50% | clear/partial/missing | [N]/5 |
+
+**Skills avg: [N]/5**
+
+## Gap Analysis (Phase 5)
+
+| Deviation | Root cause | Principle violated |
+|-----------|-----------|-------------------|
+| [deviation] | [root cause] | [principle] |
+
+## Action Items (Phase 6)
+
 ### ACTION 1: [TITLE]
+Problem: ...
+Root cause: ...
+Fix: ...
+Verify: ...
+
+### ACTION 2: [TITLE]
+Problem: ...
+Root cause: ...
+Fix: ...
+Verify: ...
+
+### ACTION 3: [TITLE]
 Problem: ...
 Root cause: ...
 Fix: ...
@@ -202,6 +297,13 @@ LATEST_IMPROVE=$(find .superomni/improvements -name "*.md" -type f 2>/dev/null |
 if [ -n "$LATEST_IMPROVE" ]; then
   echo "Prior improvement actions:"
   grep "^### ACTION" "$LATEST_IMPROVE" -A 3 | head -30
+fi
+
+# Read latest evaluation report (if exists)
+LATEST_EVAL=$(find .superomni/evaluations -name "*.md" -type f 2>/dev/null | sort | tail -1)
+if [ -n "$LATEST_EVAL" ]; then
+  echo "Latest task evaluation:"
+  cat "$LATEST_EVAL" | head -30
 fi
 
 # Read spec for acceptance criteria

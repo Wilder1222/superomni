@@ -130,14 +130,18 @@ TASTE DECISIONS — YOUR CALL
 Auto-resolved [N] mechanical decisions (see log above)
 Taste decisions needing your input: [N]
 
-Options:
+Reply with one option — your choice is immediate confirmation, no second submit needed:
   A) Approve all recommendations above
-  B) Review each decision
+  B) Review each decision individually
   C) Reject and revise the plan
+  D) Other — describe your own approach: ___________
 ════════════════════════════════════════
 ```
 
+**Confirmation rule:** This is a single-choice question. The moment the user types A, B, C, or D (with custom text for D), treat that as confirmed and act immediately — do NOT ask "Are you sure?" or prompt again.
+
 If approved → write the final reviewed `plan.md` with all auto-decisions incorporated.
+If reviewing individually → present each taste decision as its own single-choice (pick A or B, or type your own idea); each answer confirms that decision immediately before moving to the next.
 
 ---
 

@@ -51,6 +51,27 @@ When the user sends a **follow-up message after a completed session**, before do
 3. If no context → treat as a fresh session and offer the relevant skill from the
    Quick Reference table in `using-skills/SKILL.md`.
 
+### Question Confirmation Protocol
+
+When asking the user a question, match the confirmation requirement to the complexity of the response:
+
+| Question type | Confirmation rule |
+|---------------|------------------|
+| **Single-choice** — user picks one option (A/B/C, 1/2/3, Yes/No) | The user's selection IS the confirmation. Do NOT ask "Are you sure?" or require a second submission. |
+| **Free-text input** — user types a value and presses Enter | The submitted text IS the confirmation. No secondary prompt needed. |
+| **Multi-choice** — user selects multiple items from a list | After the user lists their selections, ask once: "Confirm these selections? (Y to proceed)" before acting. |
+| **Complex / open-ended discussion** — back-and-forth clarification | Collect all input, then present a summary and ask: "Ready to proceed with the above? (Y/N)" before acting. |
+
+**Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
+
+**Custom Input Option Rule:** Whenever you present a predefined list of choices (A/B/C, numbered options, etc.), always append a final "Other" option that lets the user describe their own idea:
+
+```
+  [last letter/number + 1]) Other — describe your own idea: ___________
+```
+
+When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -156,6 +177,7 @@ Continue to step verification
     A) [approach 1]
     B) [approach 2]
     C) Skip this step (explain consequences)
+    D) Other — describe your own approach: ___________
 ```
 
 ## Phase 3: Mid-Plan Check-ins

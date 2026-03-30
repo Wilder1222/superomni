@@ -11,37 +11,73 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 
 # Dispatching Parallel Work
 
-**Goal:** Decompose a task into truly independent units and coordinate parallel execution across sub-agents.
+**Goal:** Decompose a task into truly independent units and coordinate parallel execution across sub-agents — maximizing concurrency to minimize elapsed time.
 
 ## Iron Law: Independence Required
 
 Parallel dispatch only works for TRULY independent tasks.
 If Task B requires the output of Task A, they are sequential, not parallel.
 
+## Iron Law: Maximize Concurrency
+
+**Default concurrency target: 5–10 agents per wave.**
+Never dispatch only 2–3 agents when more independent tasks exist.
+Each wave should saturate available parallelism before waiting for results.
+
 ## Step 1: Decompose into Independent Units
 
-List all tasks to be done. Then classify:
+List ALL tasks to be done. Then classify each:
 
 ```
 Task A: [description]
 Task B: [description]
 Task C: [description]
+Task D: [description]
+...
 
 Dependency analysis:
   A → B?  NO (independent)
   A → C?  YES (C needs A's output)
-  B → C?  NO (independent)
+  B → D?  NO (independent)
+  C → D?  NO (independent)
 
-Execution plan:
-  PARALLEL: A, B
-  THEN: C
+Wave plan:
+  Wave 1 (PARALLEL): A, B, D    ← all tasks with no unmet dependencies
+  Wave 2 (PARALLEL): C, E, F    ← tasks unblocked after Wave 1 completes
+  Wave 3 (sequential if needed): G
 ```
 
 Rule: If you're not sure whether tasks are independent, assume they're sequential.
+Rule: Always fit as many tasks as possible into each wave — aim for 5–10 per wave.
 
-## Step 2: Define Output Contracts
+## Step 2: Wave Planning for Large Task Sets
 
-Before dispatching, each parallel agent needs a clear output contract:
+For task lists with 6+ items, create a formal wave plan:
+
+```
+WAVE EXECUTION PLAN
+════════════════════════════════════════
+Total tasks:     [N]
+Total waves:     [W]
+Max wave size:   [target: 5-10 agents]
+Est. time saved: [sequential time] → [parallel time with waves]
+
+Wave 1 ([N] agents in parallel):
+  Agent 1 → [Task A]
+  Agent 2 → [Task B]
+  Agent 3 → [Task C]
+  ...
+
+Wave 2 ([M] agents in parallel, after Wave 1 complete):
+  Agent 1 → [Task D]
+  Agent 2 → [Task E]
+  ...
+════════════════════════════════════════
+```
+
+## Step 3: Define Output Contracts
+
+Before dispatching each wave, each agent needs a clear output contract:
 
 ```
 Agent 1 — Task A
@@ -57,25 +93,27 @@ Agent 2 — Task B
   NOT allowed: [what to avoid]
 ```
 
-## Step 3: Dispatch
+## Step 4: Dispatch Wave
 
 ```
-DISPATCHING PARALLEL AGENTS
+DISPATCHING WAVE [N] — [N] PARALLEL AGENTS
 ════════════════════════════════════════
-Total agents:    [N]
-Total tasks:     [N]
-Sync point:      After all agents report DONE
+Wave:            [N of W]
+Agents in wave:  [N]   ← should be 5-10 for large task sets
+Sync point:      After all agents in this wave report DONE
 
 Agent assignments:
   Agent 1 → [Task A] → Output: [file/result]
   Agent 2 → [Task B] → Output: [file/result]
+  Agent 3 → [Task C] → Output: [file/result]
+  ...
 
 Conflict zones (check for overlap):
   [list any files that could be touched by multiple agents]
 ════════════════════════════════════════
 ```
 
-## Step 4: Monitor and Handle Conflicts
+## Step 5: Monitor and Handle Conflicts
 
 ### Conflict Detection
 
@@ -85,7 +123,6 @@ Before integrating parallel outputs:
 
 ```bash
 # Check for conflicts in parallel outputs
-# (assuming agents write to separate branches)
 git diff agent-1/feature agent-2/feature -- shared-file.js
 ```
 
@@ -96,17 +133,18 @@ If an agent reports BLOCKED:
 2. If independent: let others continue, fix the blocked one separately
 3. If dependent: pause the dependent agents, resolve the block
 
-## Step 5: Integration
+## Step 6: Integration
 
-After all parallel agents report DONE:
+After all agents in a wave report DONE:
 
 1. **Review each output independently** — don't integrate until you've reviewed
 2. **Integrate in dependency order** — sequential dependencies first
 3. **Run tests after each integration** — catch conflicts early
-4. **Final integration test** — run full test suite after all integrations
+4. **Proceed to next wave** — unblock agents waiting on this wave's output
+5. **Final integration test** — run full test suite after all waves complete
 
 ```bash
-# Integration verification
+# Integration verification after each wave
 npm test 2>&1 | tail -10
 git diff HEAD --stat
 ```
@@ -116,11 +154,18 @@ git diff HEAD --stat
 ```
 PARALLEL DISPATCH COMPLETE
 ════════════════════════════════════════
+Total tasks:          [N]
+Waves executed:       [W]
 Agents dispatched:    [N]
 Agents completed:     [N]
 Agents blocked:       [N]
+Elapsed time:         [actual] vs [sequential estimate]
 
-Results:
+Wave results:
+  Wave 1: [N] agents — DONE in [duration]
+  Wave 2: [N] agents — DONE in [duration]
+
+Task results:
   Agent 1 (Task A): DONE — [evidence summary]
   Agent 2 (Task B): DONE — [evidence summary]
   Agent 3 (Task C): BLOCKED — [blocker description]

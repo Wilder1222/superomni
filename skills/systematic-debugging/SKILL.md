@@ -65,6 +65,14 @@ When asking the user a question, match the confirmation requirement to the compl
 
 **Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
 
+**Custom Input Option Rule:** Whenever you present a predefined list of choices (A/B/C, numbered options, etc.), always append a final "Other" option that lets the user describe their own idea:
+
+```
+  [last letter/number + 1]) Other — describe your own idea: ___________
+```
+
+When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -172,6 +180,7 @@ After 3 failed hypotheses, **STOP**. Do not guess further. Choose:
 **A)** Form a completely different hypothesis (change your mental model, not just the details)
 **B)** Add more logging/instrumentation and gather more data before hypothesizing
 **C)** Escalate: report BLOCKED with your 3 hypotheses and evidence gathered
+**D)** Other — describe your own next step: ___________
 
 ## Phase 4: Implementation
 

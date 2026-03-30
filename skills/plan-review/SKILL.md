@@ -51,6 +51,27 @@ When the user sends a **follow-up message after a completed session**, before do
 3. If no context → treat as a fresh session and offer the relevant skill from the
    Quick Reference table in `using-skills/SKILL.md`.
 
+### Question Confirmation Protocol
+
+When asking the user a question, match the confirmation requirement to the complexity of the response:
+
+| Question type | Confirmation rule |
+|---------------|------------------|
+| **Single-choice** — user picks one option (A/B/C, 1/2/3, Yes/No) | The user's selection IS the confirmation. Do NOT ask "Are you sure?" or require a second submission. |
+| **Free-text input** — user types a value and presses Enter | The submitted text IS the confirmation. No secondary prompt needed. |
+| **Multi-choice** — user selects multiple items from a list | After the user lists their selections, ask once: "Confirm these selections? (Y to proceed)" before acting. |
+| **Complex / open-ended discussion** — back-and-forth clarification | Collect all input, then present a summary and ask: "Ready to proceed with the above? (Y/N)" before acting. |
+
+**Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
+
+**Custom Input Option Rule:** Whenever you present a predefined list of choices (A/B/C, numbered options, etc.), always append a final "Other" option that lets the user describe their own idea:
+
+```
+  [last letter/number + 1]) Other — describe your own idea: ___________
+```
+
+When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -181,6 +202,10 @@ ENGINEERING REVIEW
 
 List all TASTE decisions collected during review. Present to user:
 
+**If there is only ONE taste decision** — ask it as a single-choice question. The user's reply (A, B, or custom text for "Other") confirms immediately, no second submit needed.
+
+**If there are MULTIPLE taste decisions** — present them all at once, ask the user to reply with their choice for each number (e.g. "1:A 2:B 3:Other:my idea"), then after the user replies confirm with: "Got it — proceeding with those choices." before acting.
+
 ```
 TASTE DECISIONS FOR YOUR INPUT
 ═══════════════════════════════════════
@@ -189,10 +214,14 @@ These require your judgment. No objectively right answer.
 1. [Decision description]
    Option A: [description] — Pro: ... Con: ...
    Option B: [description] — Pro: ... Con: ...
+   Option C (Other): describe your own idea — ___________
    My suggestion: [A/B] because [reason]
 
 2. [Decision description]
    ...
+
+[If multiple decisions: Reply with "1:A 2:B ..." or "1:Other:my idea 2:A ..." — your batch reply is the confirmation.]
+[If one decision: Reply A, B, or describe your own idea — your answer is the immediate confirmation.]
 ═══════════════════════════════════════
 ```
 

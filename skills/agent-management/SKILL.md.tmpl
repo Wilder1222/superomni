@@ -22,11 +22,29 @@ An agent is a specialized AI persona defined in `agents/<name>.md`. Each agent:
 - Produces a **defined output format** with status reporting
 - Can be **assigned to tasks** by the main agent or invoked directly
 
-## Built-in Agents
+## Selection Flow
+
+**Always follow this order before creating anything from scratch:**
+
+```
+1. Check project built-ins  →  bin/agent-manager list
+2. Search the network       →  bin/agent-manager search <query>
+3. Install from URL         →  bin/agent-manager install <url>
+4. Create from scratch      →  bin/agent-manager create <name>
+```
+
+Never jump to Phase 4 (create) without first completing Phases 1–3.
+
+## Phase 1: Check Project Built-ins
+
+Before anything else, check if a built-in or previously-installed agent already covers your need:
 
 ```bash
-# List all available agents
+# List all agents (built-in + user-installed)
 bin/agent-manager list
+
+# Get details about a specific agent
+bin/agent-manager info <name>
 ```
 
 | Agent | Specialty |
@@ -40,9 +58,12 @@ bin/agent-manager list
 | `ceo-advisor` | Product strategy, scope decisions, demand validation |
 | `designer` | UX design, missing states, AI slop detection |
 
-## Phase 0: Search Online (When Built-ins Don't Fit)
+**Gate:** If a built-in agent fits your need → use it directly. Stop here.
+If none fits → proceed to Phase 2.
 
-If none of the built-in agents match your need, search for one before creating from scratch:
+## Phase 2: Search the Network
+
+If no built-in agent covers your need, search GitHub and known registries before creating from scratch:
 
 ```bash
 # Search GitHub for matching agents
@@ -56,33 +77,13 @@ This searches GitHub for agent markdown files matching your query and shows raw 
 2. Check known registries:
    - obra/superpowers: `https://github.com/obra/superpowers/tree/main/agents`
    - garrytan/gstack: `https://github.com/garrytan/gstack/tree/main/agents`
-3. If found → install via URL (Phase 2)
-4. If nothing suitable → create from scratch (Phase 3)
+3. If found → install via URL (Phase 3)
+4. If nothing suitable → create from scratch (Phase 4)
 
-## Phase 1: Find an Agent
+**Gate:** If a suitable agent is found online → install it (Phase 3). Stop here.
+If nothing suitable → proceed to Phase 4.
 
-Before installing or creating, check if an agent already exists:
-
-```bash
-# List all agents (built-in + user-installed)
-bin/agent-manager list
-
-# Get details about a specific agent
-bin/agent-manager info <name>
-```
-
-If a built-in agent fits your need → use it directly.
-If none fits → proceed to Phase 2 (install) or Phase 3 (create).
-
-## Phase 2: Install an Agent
-
-### From a Local File
-
-```bash
-bin/agent-manager install ./path/to/my-agent.md
-```
-
-The agent is copied to `~/.omni-skills/agents/` and available immediately.
+## Phase 3: Install an Agent
 
 ### From GitHub (or any URL)
 
@@ -94,6 +95,14 @@ bin/agent-manager install https://raw.githubusercontent.com/user/repo/main/agent
 bin/agent-manager install https://raw.githubusercontent.com/obra/superpowers/main/agents/<agent-name>.md
 ```
 
+### From a Local File
+
+```bash
+bin/agent-manager install ./path/to/my-agent.md
+```
+
+The agent is copied to `~/.omni-skills/agents/` and available immediately.
+
 ### Verify Installation
 
 ```bash
@@ -101,7 +110,7 @@ bin/agent-manager list
 bin/agent-manager info <agent-name>
 ```
 
-## Phase 3: Create a Custom Agent
+## Phase 4: Create a Custom Agent
 
 ### Step 1: Scaffold
 
@@ -139,7 +148,7 @@ Invoke the agent with a sample task:
 2. Verify the agent follows its defined process
 3. Check the output matches the defined format
 
-## Phase 4: Remove an Agent
+## Phase 5: Remove an Agent
 
 Only user-installed agents can be removed (built-ins are part of the framework):
 
@@ -171,6 +180,7 @@ Operation:   [list/install/create/remove]
 Agent:       [name]
 Location:    [path]
 Source:      [local/url — if installed]
+Flow used:   [built-in | network search | created from scratch]
 
 Built-in agents:   [N]
 User agents:       [N]

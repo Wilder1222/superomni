@@ -64,6 +64,14 @@ When asking the user a question, match the confirmation requirement to the compl
 
 **Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
 
+**Custom Input Option Rule:** Whenever you present a predefined list of choices (A/B/C, numbered options, etc.), always append a final "Other" option that lets the user describe their own idea:
+
+```
+  [last letter/number + 1]) Other — describe your own idea: ___________
+```
+
+When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -119,7 +127,7 @@ Confirmation rule: each answer (text input or single-choice) is an immediate con
 
 ## Phase 2: Solution Space Exploration
 
-Generate 3 candidate approaches:
+Generate 3 candidate approaches, then always offer an "Other" option for the user's own idea:
 
 ```
 Option A: [name] — [1-sentence description]
@@ -136,6 +144,8 @@ Option C: [name] — [1-sentence description]
   Pro: ...
   Con: ...
   Effort: [S/M/L]
+
+Option D (Other): describe your own approach — ___________
 ```
 
 Apply the 6 Decision Principles when evaluating:

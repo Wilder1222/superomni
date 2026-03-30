@@ -67,6 +67,14 @@ When asking the user a question, match the confirmation requirement to the compl
 
 **Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
 
+**Custom Input Option Rule:** Whenever you present a predefined list of choices (A/B/C, numbered options, etc.), always append a final "Other" option that lets the user describe their own idea:
+
+```
+  [last letter/number + 1]) Other — describe your own idea: ___________
+```
+
+When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
+
 ### Escalation Policy
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
@@ -215,13 +223,14 @@ Reply with one option — your choice is immediate confirmation, no second submi
   A) Approve all recommendations above
   B) Review each decision individually
   C) Reject and revise the plan
+  D) Other — describe your own approach: ___________
 ════════════════════════════════════════
 ```
 
-**Confirmation rule:** This is a single-choice question. The moment the user types A, B, or C, treat that as confirmed and act immediately — do NOT ask "Are you sure?" or prompt again.
+**Confirmation rule:** This is a single-choice question. The moment the user types A, B, C, or D (with custom text for D), treat that as confirmed and act immediately — do NOT ask "Are you sure?" or prompt again.
 
 If approved → write the final reviewed `plan.md` with all auto-decisions incorporated.
-If reviewing individually → present each taste decision as its own single-choice (pick A or B); each answer confirms that decision immediately before moving to the next.
+If reviewing individually → present each taste decision as its own single-choice (pick A or B, or type your own idea); each answer confirms that decision immediately before moving to the next.
 
 ---
 

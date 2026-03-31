@@ -1,14 +1,4 @@
 #!/usr/bin/env node
-// bin/superomni-cli — CLI entry point for superomni
-//
-// When invoked via `npx github:Wilder1222/superomni`, runs in the user's
-// current working directory and installs the skill framework there.
-//
-// Usage:
-//   npx github:Wilder1222/superomni              # Install in current project
-//   npx github:Wilder1222/superomni --only claude
-//   npx github:Wilder1222/superomni --dry-run
-
 'use strict';
 
 const { spawnSync } = require('child_process');
@@ -16,76 +6,52 @@ const fs = require('fs');
 const path = require('path');
 
 const packageRoot = path.resolve(__dirname, '..');
-const setupJs = path.join(packageRoot, 'lib', 'setup.js');
 const pkgPath = path.join(packageRoot, 'package.json');
 const currentVersion = fs.existsSync(pkgPath)
     ? JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version
     : 'unknown';
 
-const command = process.argv[2] || '';
+const args = process.argv.slice(2);
+const firstArg = args[0] || '';
 
-if (command === 'upgrade') {
-    console.log('superomni upgrade — reinstalling latest version...');
+if (firstArg === 'upgrade') {
+    console.log('superomni upgrade — reinstalling latest...');
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    const result = spawnSync(npmCmd, ['install', '-g', 'github:Wilder1222/superomni'], {
-        stdio: 'inherit',
-    });
-    process.exit(result.status || 0);
+    const r = spawnSync(npmCmd, ['install', '-g', 'github:Wilder1222/superomni'], { stdio: 'inherit' });
+    process.exit(r.status || 0);
 }
 
-if (command === 'version' || command === '--version' || command === '-v') {
-    console.log(`superomni ${currentVersion}`);
+if (firstArg === 'version' || firstArg === '--version' || firstArg === '-v') {
+    console.log('superomni ' + currentVersion);
     process.exit(0);
 }
 
-if (command === 'help' || command === '--help' || command === '-h') {
-    console.log(`superomni ${currentVersion} — AI coding skill framework`);
-    console.log('');
+if (firstArg === 'help' || firstArg === '--help' || firstArg === '-h') {
+    console.log('superomni ' + currentVersion + ' — AI coding skill framework\n');
     console.log('Usage:');
-    console.log('  npx superomni                    Install into current project');
-    console.log('  npx superomni --only <platform>  Install for one platform only');
-    console.log('  npx superomni --skip <platform>  Skip a specific platform');
-    console.log('  npx superomni --dry-run          Preview without making changes');
-    console.log('  npx superomni --verbose          Show detailed output');
-    console.log('  npx superomni upgrade            Upgrade to latest version');
-    console.log('  npx superomni version            Print version');
-    console.log('');
-    console.log('Platforms: claude, codex, gemini, copilot');
+    console.log('  npx github:Wilder1222/superomni                 Install into current project');
+    console.log('  npx github:Wilder1222/superomni --only claude   Claude Code only');
+    console.log('  npx github:Wilder1222/superomni --only codex    Codex CLI only');
+    console.log('  npx github:Wilder1222/superomni --dry-run       Preview changes');
+    console.log('  npx github:Wilder1222/superomni --verbose       Detailed output');
+    console.log('  superomni upgrade                               Upgrade to latest');
+    console.log('\nPlatforms: claude, codex, gemini, copilot');
     process.exit(0);
 }
 
-// ── Locate setup script ───────────────────────────────────────────────────────
-
-process.stdout.write(`superomni v${currentVersion} — installing into ${process.cwd()}\n`);
-
-if (!fs.existsSync(setupJs)) {
-    process.stderr.write(
-        `superomni: setup script not found at ${setupJs}\n` +
-        `superomni: package installation may be incomplete.\n`
-    );
-    process.exit(1);
+const opts = { skip: [] };
+for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--only')         { opts.only = args[++i]; }
+    else if (a === '--skip')    { opts.skip.push(args[++i]); }
+    else if (a === '--dry-run') { opts.dryRun = true; }
+    else if (a === '--verbose') { opts.verbose = true; }
 }
 
-// ── Determine target directory ────────────────────────────────────────────────
-// process.cwd() is always the user's project directory when running via npx.
-
-const env = Object.assign({}, process.env);
-
-const isGlobalInstall = process.env.npm_config_global === 'true';
-
-if (!isGlobalInstall && !env.SUPEROMNI_TARGET_DIR) {
-    // npx run: install into the user's current working directory
-    env.SUPEROMNI_TARGET_DIR = process.cwd();
+const isGlobal = process.env.npm_config_global === 'true';
+if (!isGlobal) {
+    opts.targetDir = process.cwd();
 }
 
-// ── Run setup.js (pure Node.js) ───────────────────────────────────────────────
-
-const setupArgs = process.argv.slice(2); // pass through any extra flags
-const result = spawnSync(process.execPath, [setupJs, ...setupArgs], {
-    cwd: packageRoot,
-    env,
-    stdio: 'inherit',
-});
-
-process.exit(result.status || 0);
-
+const { run } = require('../lib/setup');
+run(opts);

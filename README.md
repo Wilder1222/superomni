@@ -103,6 +103,11 @@ Start with:
 | `qa` | Quality assurance pass | QA report |
 | `careful` | High-risk/destructive operations | Safety checklist |
 | `self-improvement` | Post-task performance evaluation | Improvement report + 3 actions |
+| `production-readiness` | Pre-deploy gate | Readiness report |
+| `office-hours` | Product discovery before building | Validated idea + decision |
+| `autoplan` | Automated full plan review pipeline | CEO→Design→Eng reviewed plan |
+| `freeze` | Restrict edits during risky operations | Scope lock |
+| `harness-engineering` | Audit and improve the agent harness | Health score + improvement backlog |
 
 ### Advanced (P2)
 
@@ -132,6 +137,9 @@ superomni ships with specialized agents you can spawn for focused tasks:
 | `test-writer` | Behavior-verifying test suites |
 | `security-auditor` | OWASP-aware vulnerability identification |
 | `architect` | System design and architecture review |
+| `evaluator` | Criterion-by-criterion quality evaluation with evidence-backed verdicts |
+| `ceo-advisor` | Product strategy and scope validation |
+| `designer` | UX review and AI slop detection |
 
 ### Managing Agents
 
@@ -261,6 +269,7 @@ superomni/
 │   ├── careful/              ← Safety guardrails
 │   ├── workflow/             ← Sprint pipeline orchestration
 │   ├── self-improvement/     ← Post-task performance evaluation
+│   ├── harness-engineering/  ← Agent harness audit and optimization
 │   └── agent-management/     ← Install, create, and manage agents
 │
 ├── agents/                   ← Specialized agent definitions
@@ -269,14 +278,18 @@ superomni/
 │   ├── debugger.md           ← Root-cause debugger
 │   ├── test-writer.md        ← Test suite writer
 │   ├── security-auditor.md   ← OWASP-aware security auditor
-│   └── architect.md          ← Architecture reviewer
+│   ├── architect.md          ← Architecture reviewer
+│   ├── evaluator.md          ← Quality evaluation with evidence-backed verdicts
+│   ├── ceo-advisor.md        ← Product strategy and scope validation
+│   └── designer.md           ← UX review and AI slop detection
 │
 ├── commands/                 ← Slash command definitions
 │   ├── vibe.md               ← /vibe — activate full framework + guided workflow
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md
-│   └── review.md
+│   ├── review.md
+│   └── harness-audit.md      ← /harness-audit — audit agent harness health
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills

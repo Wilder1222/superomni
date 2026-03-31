@@ -7,6 +7,26 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.0] — 2026-03
+
+### Added
+- `skills/harness-engineering/` — harness engineering audit skill; evaluates context efficiency, tool action space, evaluation gate coverage, and feedback loops; produces Harness Health Score (N/25) and prioritized improvement backlog to `.superomni/harness-audits/`. Inspired by OpenAI and Anthropic harness engineering best practices.
+- `agents/evaluator.md` — dedicated evaluation agent; produces criterion-by-criterion APPROVED/CHANGES_REQUIRED verdicts with evidence backing. Based on Anthropic's principle: "Evaluation is the load-bearing part of agent harness design."
+- `commands/harness-audit.md` — `/harness-audit` slash command; runs the full 8-phase harness audit
+- `docs/HARNESS.md` — comprehensive harness engineering guide covering core principles, superomni harness architecture, and maintenance indicators
+
+### Changed
+- `skills/executing-plans/`: Added Iron Law 2 (Evaluate Before Advancing) and Iron Law 3 (Failures Are Harness Signals); added Phase 4 (Wave Evaluation Gate) between wave execution and mid-plan check-ins — waves must now pass an evaluation gate before advancing; phases renumbered 4→5, 5→6, 6→7
+- `lib/preamble.md`: Added **Context Window Management** protocol (progressive disclosure table for all workflow stages) and **Feedback Signal Protocol** (1/2/3 failure escalation with harness signal trigger)
+- `CLAUDE.md`: Registered `harness-engineering` skill (P1); added `/harness-audit` command; added harness-audits output directory to Document Output Convention
+- `claude-skill.json`: Bumped to v0.4.0; registered `harness-audit` command
+- `docs/DESIGN.md`: Updated to v0.4.0; added Section 9 (Design Decisions: v0.4.0) documenting harness engineering decisions
+
+### Philosophy
+v0.4.0 applies harness engineering principles directly to the superomni framework itself — treating the framework as the product and agent output as its artifact. The harness-engineering skill and evaluator agent close the quality loop that was previously informal.
+
+---
+
 ## [0.3.0] — 2026-03
 
 ### Added

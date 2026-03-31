@@ -7,6 +7,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.1] — 2026-03
+
+### Fixed
+- `bin/superomni-cli`: Project-level `npx superomni` now correctly installs into the user's current working directory. When npm sets `INIT_CWD` (standard behaviour for `npx` invocations), the CLI binary now exports it as `SUPEROMNI_TARGET_DIR` before delegating to the setup script, mirroring the detection already present in `lib/postinstall.js`.
+- `setup`: Corrected stale internal `VERSION` string from `0.3.0` to `0.4.1`.
+
+---
+
 ## [0.4.0] — 2026-03
 
 ### Added

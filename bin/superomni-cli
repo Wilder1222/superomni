@@ -90,6 +90,21 @@ case "$COMMAND" in
     ;;
 
   *)
+    # ── Detect project-level / npx install ────────────────────────────────────
+    # When executed via `npx superomni`, npm sets INIT_CWD to the user's
+    # project directory while this binary runs from the temp download location.
+    # Forward INIT_CWD as SUPEROMNI_TARGET_DIR so the setup script installs
+    # config files into the project folder instead of global platform paths.
+    if [ -z "${SUPEROMNI_TARGET_DIR:-}" ]; then
+      _INIT_CWD="${INIT_CWD:-}"
+      if [ "${npm_config_global:-}" != "true" ] \
+         && [ -n "${_INIT_CWD}" ] \
+         && [ "${_INIT_CWD}" != "${PACKAGE_ROOT}" ] \
+         && [[ "${_INIT_CWD}" != *"/node_modules/"* ]]; then
+        export SUPEROMNI_TARGET_DIR="${_INIT_CWD}"
+      fi
+    fi
+
     # ── Delegate to the main setup script ──────────────────────────────────────
     exec bash "${PACKAGE_ROOT}/setup" "$@"
     ;;

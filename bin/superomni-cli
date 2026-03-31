@@ -1,112 +1,108 @@
-#!/usr/bin/env bash
-# bin/superomni-cli — superomni CLI entry point
-#
-# Supports all installation methods:
-#   npm install -g github:Wilder1222/superomni  → superomni [options]
-#   npx github:Wilder1222/superomni             → npx github:Wilder1222/superomni [options]
-#
-# Commands:
-#   superomni [setup options]  — run the setup/install script
-#   superomni upgrade          — upgrade superomni to the latest version
-#   superomni version          — print the installed version
+#!/usr/bin/env node
+// bin/superomni-cli — cross-platform CLI entry point
 
-set -e
+'use strict';
 
-# ── Resolve the real path of this script (follows symlinks) ──────────────────
-# Required so the script finds the package root even when executed as
-# a globally-installed symlink (e.g. /usr/local/bin/superomni → .../<pkg>/bin/superomni-cli)
-_resolve_path() {
-  local path="$1"
-  if command -v realpath >/dev/null 2>&1; then
-    realpath "$path"
-  elif readlink -f "$path" >/dev/null 2>&1; then
-    readlink -f "$path"
-  else
-    # Fallback: manually follow one level of symlink
-    local dir
-    dir="$(cd "$(dirname "$path")" && pwd)"
-    echo "${dir}/$(basename "$path")"
-  fi
+const { spawnSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+function toWslPath(p) {
+  const m = p.match(/^([A-Za-z]):\\(.*)$/);
+  if (!m) return p;
+  return `/mnt/${m[1].toLowerCase()}/${m[2].replace(/\\/g, '/')}`;
 }
 
-REAL_PATH="$(_resolve_path "$0")"
-SCRIPT_DIR="$(cd "$(dirname "${REAL_PATH}")" && pwd)"
-PACKAGE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+function toMsysPath(p) {
+  const m = p.match(/^([A-Za-z]):\\(.*)$/);
+  if (!m) return p;
+  return `/${m[1].toLowerCase()}/${m[2].replace(/\\/g, '/')}`;
+}
 
-# ── Sanity check ──────────────────────────────────────────────────────────────
-if [ ! -f "${PACKAGE_ROOT}/setup" ]; then
-  echo "ERROR: Cannot find setup script at ${PACKAGE_ROOT}/setup" >&2
-  echo "The superomni package may be corrupted. Try reinstalling:" >&2
-  echo "  npm install -g github:Wilder1222/superomni" >&2
-  exit 1
-fi
+function setupPathCandidates(setupScript) {
+  const out = [setupScript];
+  if (process.platform === 'win32') {
+    out.push(toWslPath(setupScript));
+    out.push(toMsysPath(setupScript));
+  }
+  return [...new Set(out)];
+}
 
-# ── Read current version ──────────────────────────────────────────────────────
-CURRENT_VERSION="$(node -p "require('${PACKAGE_ROOT}/package.json').version" 2>/dev/null || echo "unknown")"
+function runNpm(args) {
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  return spawnSync(npmCmd, args, { stdio: 'inherit' });
+}
 
-# ── Command dispatch ──────────────────────────────────────────────────────────
-COMMAND="${1:-}"
+const realPath = fs.realpathSync(process.argv[1]);
+const scriptDir = path.dirname(realPath);
+const packageRoot = path.resolve(scriptDir, '..');
+const setupScript = path.join(packageRoot, 'setup');
+const pkgPath = path.join(packageRoot, 'package.json');
+const currentVersion = fs.existsSync(pkgPath)
+  ? JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version
+  : 'unknown';
 
-case "$COMMAND" in
-  upgrade)
-    echo "superomni upgrade — checking for updates..."
-    echo "Current version: ${CURRENT_VERSION}"
+if (!fs.existsSync(setupScript)) {
+  console.error(`ERROR: Cannot find setup script at ${setupScript}`);
+  process.exit(1);
+}
 
-    # Determine if installed globally via npm or directly via npx
-    if npm list -g superomni 2>/dev/null | grep -q superomni; then
-      echo "Upgrading via npm (global install)..."
-      npm install -g "github:Wilder1222/superomni"
-    else
-      echo "Upgrading via npm install..."
-      npm install -g "github:Wilder1222/superomni"
-    fi
+const command = process.argv[2] || '';
 
-    NEW_VERSION="$(npm list -g superomni 2>/dev/null | grep superomni | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown")"
-    if [ "${NEW_VERSION}" != "${CURRENT_VERSION}" ]; then
-      echo ""
-      echo "✓ Upgraded: ${CURRENT_VERSION} → ${NEW_VERSION}"
-      echo "  Run 'superomni' to re-run setup with the latest version."
-    else
-      echo ""
-      echo "✓ Already at latest version: ${CURRENT_VERSION}"
-    fi
-    ;;
+if (command === 'upgrade') {
+  console.log('superomni upgrade — checking for updates...');
+  console.log(`Current version: ${currentVersion}`);
+  const result = runNpm(['install', '-g', 'github:Wilder1222/superomni']);
+  process.exit(result.status || 0);
+}
 
-  version|--version|-v)
-    echo "superomni ${CURRENT_VERSION}"
-    ;;
+if (command === 'version' || command === '--version' || command === '-v') {
+  console.log(`superomni ${currentVersion}`);
+  process.exit(0);
+}
 
-  help|--help|-h)
-    echo "superomni — AI coding skill framework"
-    echo ""
-    echo "Usage:"
-    echo "  superomni [setup options]  Run setup/install for your platform"
-    echo "  superomni upgrade          Upgrade to the latest version"
-    echo "  superomni version          Print installed version"
-    echo "  superomni help             Show this help"
-    echo ""
-    echo "Setup options are passed through to the setup script."
-    echo "Run 'superomni --help-setup' to see setup-specific options."
-    ;;
+if (command === 'help' || command === '--help' || command === '-h') {
+  console.log('superomni — AI coding skill framework');
+  console.log('');
+  console.log('Usage:');
+  console.log('  superomni [setup options]  Run setup/install for your platform');
+  console.log('  superomni upgrade          Upgrade to the latest version');
+  console.log('  superomni version          Print installed version');
+  console.log('  superomni help             Show this help');
+  process.exit(0);
+}
 
-  *)
-    # ── Detect project-level / npx install ────────────────────────────────────
-    # When executed via `npx superomni`, npm sets INIT_CWD to the user's
-    # project directory while this binary runs from the temp download location.
-    # Forward INIT_CWD as SUPEROMNI_TARGET_DIR so the setup script installs
-    # config files into the project folder instead of global platform paths.
-    if [ -z "${SUPEROMNI_TARGET_DIR:-}" ]; then
-      _INIT_CWD="${INIT_CWD:-}"
-      if [ "${npm_config_global:-}" != "true" ] \
-         && [ -n "${_INIT_CWD}" ] \
-         && [ "${_INIT_CWD}" != "${PACKAGE_ROOT}" ] \
-         && [[ "${_INIT_CWD}" != *"/node_modules/"* ]]; then
-        export SUPEROMNI_TARGET_DIR="${_INIT_CWD}"
-      fi
-    fi
+const env = { ...process.env };
+const initCwd = process.env.INIT_CWD;
+if (
+  !env.SUPEROMNI_TARGET_DIR &&
+  process.env.npm_config_global !== 'true' &&
+  initCwd &&
+  initCwd !== packageRoot &&
+  !initCwd.includes(`${path.sep}node_modules${path.sep}`)
+) {
+  env.SUPEROMNI_TARGET_DIR = initCwd;
+}
 
-    # ── Delegate to the main setup script ──────────────────────────────────────
-    exec bash "${PACKAGE_ROOT}/setup" "$@"
-    ;;
-esac
+const setupArgs = process.argv.slice(2);
+const candidates = setupPathCandidates(setupScript);
+let lastResult = null;
+for (const candidate of candidates) {
+  const result = spawnSync('bash', [candidate, ...setupArgs], {
+    stdio: 'inherit',
+    cwd: packageRoot,
+    env,
+  });
+  if (!result.error && result.status === 0) {
+    process.exit(0);
+  }
+  lastResult = result;
+}
+
+console.error('superomni cli: failed to run setup via bash.');
+console.error(`superomni cli: attempted setup paths: ${candidates.join(', ')}`);
+if (lastResult && lastResult.error) {
+  console.error(`superomni cli: ${lastResult.error.message}`);
+}
+process.exit((lastResult && lastResult.status) || 1);
 

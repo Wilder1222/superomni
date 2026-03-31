@@ -22,17 +22,19 @@ Plan only what you need. But what you decide to build — build it fully.
 
 ### Install
 
+Installation is **fully automatic** — use the method that matches your workflow:
+
 ---
 
 **① Claude Code — marketplace install (recommended):**
 
-Inside a Claude Code session, register and install the skill from GitHub:
+Inside a Claude Code session:
 
 ```
 /plugin marketplace add Wilder1222/superomni
 ```
 
-Claude Code will fetch the `.claude-plugin/marketplace.json` manifest, install all skills, register slash commands, and set up session hooks automatically.
+Claude Code fetches the `.claude-plugin/marketplace.json` manifest, installs all skills, registers slash commands, and sets up session hooks automatically.
 
 Then start with:
 
@@ -42,37 +44,37 @@ Then start with:
 
 ---
 
-**② Codex, Gemini CLI, GitHub Copilot — global install:**
-
-For **Codex CLI**, **Gemini CLI**, and **GitHub Copilot**:
+**② Global install (Codex, Gemini CLI, GitHub Copilot):**
 
 ```bash
 npm install -g github:Wilder1222/superomni
 ```
 
-The `postinstall` hook auto-detects your platform and links skills, commands, and hooks automatically.
+The npm `postinstall` hook automatically detects your platform and links skills, commands, and hooks to:
+- macOS: `~/Library/Application Support/...`
+- Linux: `~/.local/share/...`
+- Windows: `%APPDATA%...`
 
 ---
 
-**③ Project-level install via npx (recommended for Claude / Codex / Gemini / Copilot):**
-
-Run this from inside your project directory while a CLI session is active:
+**③ Project-level install via npx (fastest for one-off use):**
 
 ```bash
 npx github:Wilder1222/superomni
 ```
 
-This copies the skills into `.superomni/` in your project directory and creates
-the appropriate config file for your CLI:
+Automatically:
+- Creates `.superomni/` directory in your project
+- Generates config file for your AI platform:
 
-| CLI | Config file created |
-|-----|---------------------|
+| Platform | Config file |
+|----------|-------------|
 | Claude Code | `CLAUDE.md` |
 | Codex CLI | `AGENTS.md` |
 | Gemini CLI | `GEMINI.md` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
 
-Skills are available immediately in your current session — no global install needed.
+Skills are available immediately — no global install needed.
 
 ---
 
@@ -183,14 +185,18 @@ See [`docs/AGENTS.md`](docs/AGENTS.md) for the full agent library reference.
 
 superomni supports the following AI coding platforms:
 
-| Platform | Status | Setup |
-|----------|--------|-------|
-| **Claude Code** | ✅ Full support | `npx superomni` (writes `CLAUDE.md`), marketplace install, or `npm install -g` |
-| **Codex CLI** | ✅ Full support | `npx superomni` (writes `AGENTS.md`) or `npm install -g` |
-| **Gemini CLI** | ✅ Full support | `npx superomni` (writes `GEMINI.md`) or `npm install -g` |
-| **GitHub Copilot** | ✅ Full support | `npx superomni` (writes `.github/copilot-instructions.md`) |
+| Platform | Status | Install method |
+|----------|--------|-----------------|
+| **Claude Code** | ✅ Full support | Marketplace `/plugin marketplace add ...`, or `npx superomni`, or `npm install -g` |
+| **Codex CLI** | ✅ Full support | `npx superomni` or `npm install -g` |
+| **Gemini CLI** | ✅ Full support | `npx superomni` or `npm install -g` |
+| **GitHub Copilot** | ✅ Full support | `npx superomni` or `npm install -g` |
 
-The setup script detects your platform and configures hooks, skills injection, and session management accordingly.
+All installation methods are **fully automatic**:
+- The npm `postinstall` hook invokes `lib/setup.js` (pure Node.js)
+- Platform detection is automatic via `os.platform()`
+- Skills, hooks, and configuration files are created for your platform
+- No manual setup scripts to run
 
 ---
 
@@ -301,6 +307,8 @@ superomni/
 │
 ├── lib/
 │   ├── preamble.md           ← Shared preamble injected into all skills
+│   ├── setup.js              ← Core installation logic (Node.js)
+│   ├── postinstall.js        ← npm postinstall hook entry point
 │   └── gen-skill-docs.sh     ← Builds SKILL.md from SKILL.md.tmpl
 │
 ├── bin/
@@ -316,7 +324,6 @@ superomni/
 │
 ├── ETHOS.md                  ← Core philosophy
 ├── CLAUDE.md                 ← Project config for Claude
-├── setup                     ← Installation script
 └── package.json
 ```
 

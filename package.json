@@ -22,9 +22,10 @@
     },
     "scripts": {
         "build": "bash lib/gen-skill-docs.sh",
+        "ensure:lf": "node lib/ensure-setup-lf.js",
         "test": "bash lib/validate-skills.sh",
-        "setup": "bash setup",
-        "postinstall": "node lib/postinstall.js"
+        "setup": "node lib/setup.js",
+        "postinstall": "node lib/ensure-setup-lf.js && node lib/postinstall.js"
     },
     "files": [
         ".claude-plugin/",
@@ -38,8 +39,7 @@
         "CLAUDE.md",
         "ETHOS.md",
         "LICENSE",
-        "claude-skill.json",
-        "setup"
+        "claude-skill.json"
     ],
     "repository": {
         "type": "git",

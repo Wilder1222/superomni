@@ -1,6 +1,6 @@
 # superomni
 
-> **Plan Lean, Execute Complete** — A fused AI coding skill framework for Claude Code, Cursor, Codex, Gemini CLI, and OpenCode.
+> **Plan Lean, Execute Complete** — A fused AI coding skill framework for Claude Code, Codex, Gemini CLI, and GitHub Copilot.
 
 superomni combines the best ideas from [obra/superpowers](https://github.com/obra/superpowers) (methodology-driven AI skill framework) and [garrytan/gstack](https://github.com/garrytan/gstack) (engineering completeness principles) into a unified, opinionated system for AI-assisted software development.
 
@@ -42,9 +42,9 @@ Then start with:
 
 ---
 
-**② Other IDEs & CLIs — npm global install:**
+**② Codex, Gemini CLI, GitHub Copilot — global install:**
 
-For **Cursor**, **VS Code (Cline/Continue.dev)**, **JetBrains AI Assistant**, **Codex**, **Gemini CLI**, and **OpenCode**:
+For **Codex CLI**, **Gemini CLI**, and **GitHub Copilot**:
 
 ```bash
 npm install -g github:Wilder1222/superomni
@@ -54,13 +54,24 @@ The `postinstall` hook auto-detects your platform and links skills, commands, an
 
 ---
 
-**③ Project-level install (no global install):**
+**③ Project-level install via npx (recommended for Codex / Gemini / Copilot):**
+
+Run this from inside your project directory while a CLI session is active:
 
 ```bash
 npx github:Wilder1222/superomni
 ```
 
-Runs the same auto-detection and linking as the global install, without installing anything permanently.
+This copies the skills into `.superomni/` in your project directory and creates
+the appropriate config file for your CLI:
+
+| CLI | Config file created |
+|-----|---------------------|
+| Codex CLI | `AGENTS.md` |
+| Gemini CLI | `GEMINI.md` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+
+Skills are available immediately in your current session — no global install needed.
 
 ---
 
@@ -169,18 +180,14 @@ See [`docs/AGENTS.md`](docs/AGENTS.md) for the full agent library reference.
 
 ## Multi-Platform Support
 
-superomni supports multiple AI coding platforms:
+superomni supports the following AI coding platforms:
 
 | Platform | Status | Setup |
 |----------|--------|-------|
-| **Claude Code** | ✅ Full support | Auto-detected by `./setup` |
-| **Cursor** | ✅ Full support | Auto-detected by `./setup` |
-| **Codex** | ✅ Full support | Auto-detected by `./setup` |
-| **Gemini CLI** | ✅ Full support | Auto-detected by `./setup` |
-| **OpenCode** | ✅ Full support | Auto-detected by `./setup` |
-| **VS Code (Cline)** | ✅ Full support | Auto-detected by `./setup` |
-| **VS Code (Continue.dev)** | ✅ Full support | Auto-detected by `./setup` |
-| **JetBrains AI Assistant** | ✅ Full support | Auto-detected by `./setup` |
+| **Claude Code** | ✅ Full support | Marketplace install or `npm install -g` |
+| **Codex CLI** | ✅ Full support | `npx superomni` (writes `AGENTS.md`) or `npm install -g` |
+| **Gemini CLI** | ✅ Full support | `npx superomni` (writes `GEMINI.md`) or `npm install -g` |
+| **GitHub Copilot** | ✅ Full support | `npx superomni` (writes `.github/copilot-instructions.md`) |
 
 The setup script detects your platform and configures hooks, skills injection, and session management accordingly.
 

@@ -52,21 +52,21 @@ Claude Code reads `.claude-plugin/marketplace.json` to discover the plugin, then
 
 ### 2. npm global install
 
-For Cursor, VS Code (Cline/Continue.dev), JetBrains, Codex, Gemini CLI, and OpenCode:
+For Codex, Gemini CLI, and GitHub Copilot:
 
 ```bash
 npm install -g github:Wilder1222/superomni
 ```
 
-`lib/postinstall.js` is the npm postinstall hook. It runs `setup` automatically to link skills into all detected platform directories. Skips silently in CI environments or when `SUPER_OMNI_SKIP_POSTINSTALL=1` is set.
+`lib/postinstall.js` is the npm postinstall hook. It runs `setup` automatically. For npx runs, it forwards `INIT_CWD` (the user's project directory) as `SUPEROMNI_TARGET_DIR` so skills are installed into the project directory rather than global platform paths. Skips silently in CI environments or when `SUPER_OMNI_SKIP_POSTINSTALL=1` is set.
 
-### 3. npx (project-level, no global install)
+### 3. npx (project-level install into CWD)
 
 ```bash
 npx github:Wilder1222/superomni
 ```
 
-Downloads the package directly from GitHub to a temp cache, executes `bin/superomni-cli`, which resolves its own real path (following symlinks) and delegates to `setup`.
+Downloads the package to a temp cache, runs setup with `SUPEROMNI_TARGET_DIR` pointing at the directory where `npx` was invoked. Setup copies skills into `.superomni/` and creates CLI config files (`AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`) directly in the project directory. The project is self-contained after install — the temp cache can be cleaned up.
 
 ### Skipping postinstall
 

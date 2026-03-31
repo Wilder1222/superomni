@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # superomni setup script
-# Installs the skill framework for Claude Code, Cursor, Codex CLI, Gemini CLI,
-# OpenCode, VS Code (Cline/Continue.dev/Copilot), and JetBrains AI Assistant.
+# Installs the skill framework for Claude Code, Codex CLI, Gemini CLI,
+# and GitHub Copilot.
 
 set -e
 
 VERSION="0.3.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OMNI_STATE_DIR="${HOME}/.omni-skills"
+
+# When set (e.g. by postinstall.js for npx runs), install into this directory
+# instead of global platform directories.
+TARGET_DIR="${SUPEROMNI_TARGET_DIR:-}"
 
 # ── Platform detection ────────────────────────────────────────────────────────
 IS_WSL=false
@@ -35,7 +39,7 @@ Usage: setup [OPTIONS]
 
   This script is run automatically by:
     npm install -g superomni   (global install)
-    npx superomni              (project-level install)
+    npx superomni              (project-level install — installs into CWD)
 
   For Claude Code, install via the marketplace instead:
     /plugin marketplace add Wilder1222/superomni
@@ -43,23 +47,21 @@ Usage: setup [OPTIONS]
 Options:
   --help, -h        Show this help message
   --only <platform> Install for a single platform only
-                    (cursor, codex, gemini, opencode, vscode, jetbrains)
+                    (claude, codex, gemini, copilot)
   --skip <platform> Skip a specific platform (repeatable)
   --dry-run         Show what would be done without making changes
   --verbose         Show detailed output
 
 Supported platforms:
-  cursor     Cursor            (~/.cursor/skills/)
-  codex      Codex CLI         (~/.agents/skills/)
-  gemini     Gemini CLI        (~/.gemini/skills/)
-  opencode   OpenCode          (~/.opencode/skills/)
-  vscode     VS Code (Cline/Continue.dev/Copilot) (~/.vscode-superomni/)
-  jetbrains  JetBrains AI Assistant (~/.jetbrains/superomni/)
+  claude   Claude Code        (~/.claude/skills/)
+  codex    Codex CLI          (~/.agents/skills/ or <project>/AGENTS.md)
+  gemini   Gemini CLI         (~/.gemini/skills/ or <project>/GEMINI.md)
+  copilot  GitHub Copilot     (<project>/.github/copilot-instructions.md)
 
 Examples:
-  npm install -g superomni   # Auto-detect and install all platforms
-  npx superomni              # Same, without a permanent global install
-  npx superomni --only vscode
+  npm install -g superomni   # Global install — auto-detect platforms
+  npx superomni              # Project install — writes config into CWD
+  npx superomni --only codex
   npx superomni --skip gemini
 HELP
   exit 0
@@ -219,266 +221,139 @@ echo "  ✓ Skill docs generated"
 # ── 3. Detect platforms & install skills ──────────────────────────────────────
 echo "→ Detecting AI platforms..."
 
-# ── 3a. Claude Code (primary) ────────────────────────────────────────────────
+# ── Helpers for local (project-level) installs ───────────────────────────────
+# copy_skills_local <target_dir>
+#   Copies the full skills/agents/commands tree into <target_dir>/.superomni/
+#   so that the project directory is self-contained even after npx cleanup.
+#   Idempotent: skips if .superomni/ already exists.
+copy_skills_local() {
+  local dest_dir="$1/.superomni"
+
+  if $DRY_RUN; then
+    echo "  [dry-run] Would copy skills → ${dest_dir}"
+    return
+  fi
+
+  # Skip copy if already installed to avoid nested duplicates on repeated calls
+  if [ -d "${dest_dir}/skills" ]; then
+    return
+  fi
+
+  mkdir -p "${dest_dir}"
+  cp -r "${SCRIPT_DIR}/skills"   "${dest_dir}/skills"
+  cp -r "${SCRIPT_DIR}/agents"   "${dest_dir}/agents"
+  cp -r "${SCRIPT_DIR}/commands" "${dest_dir}/commands"
+  echo "  ✓ Skills copied → ${dest_dir}"
+}
+
+# write_local_config <file> <content>
+#   Writes <file> only if it does not yet reference superomni.
+write_local_config() {
+  local file="$1"
+  local content="$2"
+  local dir
+  dir="$(dirname "${file}")"
+
+  if $DRY_RUN; then
+    echo "  [dry-run] Would write ${file}"
+    return
+  fi
+
+  mkdir -p "${dir}"
+  if [ -f "${file}" ] && grep -q "superomni" "${file}" 2>/dev/null; then
+    echo "  ✓ ${file} already references superomni (skipped)"
+    return
+  fi
+  printf '%s\n' "${content}" >> "${file}"
+  echo "  ✓ Written → ${file}"
+}
+
+# ── Shared skill snippet for local config files ───────────────────────────────
+# Used by Codex (AGENTS.md), Gemini (GEMINI.md), and Copilot
+# (.github/copilot-instructions.md) local installs.
+LOCAL_SKILL_SNIPPET="# superomni Skills
+
+You are augmented with the superomni AI coding skill framework.
+
+Skills directory: .superomni/skills
+Agent library:    .superomni/agents
+
+Load and follow \`.superomni/skills/using-skills/SKILL.md\` at session start.
+See \`.superomni/agents/\` for specialized agents."
+
+# ── 3a. Claude Code (primary — always installed globally) ────────────────────
 CLAUDE_SKILLS_DIR="${HOME}/.claude/skills"
 if should_install "claude"; then
-  if has_cli claude || [ -d "${HOME}/.claude" ]; then
-    echo "  ● Claude Code detected"
-    link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
-  elif [ -n "${ONLY_PLATFORM}" ]; then
-    echo "  ● Claude Code (forced via --only)"
-    link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
-  else
-    # Always install for Claude as primary even if CLI not found
-    echo "  ● Claude Code (primary — always installed)"
-    link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
-  fi
+  echo "  ● Claude Code (primary — always installed)"
+  link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
   # Install slash commands so /vibe, /brainstorm, etc. are available in Claude Code
   install_claude_commands
 fi
 
-# ── 3b. Cursor ────────────────────────────────────────────────────────────────
-CURSOR_SKILLS_DIR="${HOME}/.cursor/skills"
-if should_install "cursor"; then
-  if has_cli cursor || [ -d "${HOME}/.cursor" ]; then
-    echo "  ● Cursor detected"
-    link_skills "${CURSOR_SKILLS_DIR}" "Cursor" "cursor"
-  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "cursor" ]; then
-    echo "  ● Cursor (forced via --only)"
-    link_skills "${CURSOR_SKILLS_DIR}" "Cursor" "cursor"
-  else
-    $VERBOSE && echo "  ○ Cursor not detected (skipped)" || true
-  fi
-fi
-
-# ── 3c. Codex CLI (OpenAI) ───────────────────────────────────────────────────
-CODEX_SKILLS_DIR="${HOME}/.agents/skills"
+# ── 3b. Codex CLI (OpenAI) ───────────────────────────────────────────────────
 if should_install "codex"; then
-  if has_cli codex || [ -d "${HOME}/.agents" ]; then
-    echo "  ● Codex CLI detected"
-    link_skills "${CODEX_SKILLS_DIR}" "Codex CLI" "codex"
-  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "codex" ]; then
-    echo "  ● Codex CLI (forced via --only)"
-    link_skills "${CODEX_SKILLS_DIR}" "Codex CLI" "codex"
+  if [ -n "${TARGET_DIR}" ]; then
+    # ── Local / npx install: write AGENTS.md into project root ───────────────
+    echo "  ● Codex CLI (local install → ${TARGET_DIR})"
+    copy_skills_local "${TARGET_DIR}"
+    write_local_config "${TARGET_DIR}/AGENTS.md" "${LOCAL_SKILL_SNIPPET}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} codex"
   else
-    $VERBOSE && echo "  ○ Codex CLI not detected (skipped)" || true
+    # ── Global install: symlink into ~/.agents/skills/ ────────────────────────
+    CODEX_SKILLS_DIR="${HOME}/.agents/skills"
+    if has_cli codex || [ -d "${HOME}/.agents" ]; then
+      echo "  ● Codex CLI detected"
+      link_skills "${CODEX_SKILLS_DIR}" "Codex CLI" "codex"
+    elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "codex" ]; then
+      echo "  ● Codex CLI (forced via --only)"
+      link_skills "${CODEX_SKILLS_DIR}" "Codex CLI" "codex"
+    else
+      $VERBOSE && echo "  ○ Codex CLI not detected (skipped)" || true
+    fi
   fi
 fi
 
-# ── 3d. Gemini CLI ───────────────────────────────────────────────────────────
-GEMINI_SKILLS_DIR="${HOME}/.gemini/skills"
+# ── 3c. Gemini CLI ───────────────────────────────────────────────────────────
 if should_install "gemini"; then
-  if has_cli gemini || [ -d "${HOME}/.gemini" ]; then
-    echo "  ● Gemini CLI detected"
-    link_skills "${GEMINI_SKILLS_DIR}" "Gemini CLI" "gemini"
-  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "gemini" ]; then
-    echo "  ● Gemini CLI (forced via --only)"
-    link_skills "${GEMINI_SKILLS_DIR}" "Gemini CLI" "gemini"
+  if [ -n "${TARGET_DIR}" ]; then
+    # ── Local / npx install: write GEMINI.md into project root ───────────────
+    echo "  ● Gemini CLI (local install → ${TARGET_DIR})"
+    copy_skills_local "${TARGET_DIR}"
+    write_local_config "${TARGET_DIR}/GEMINI.md" "${LOCAL_SKILL_SNIPPET}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} gemini"
   else
-    $VERBOSE && echo "  ○ Gemini CLI not detected (skipped)" || true
-  fi
-fi
-
-# ── 3e. OpenCode ─────────────────────────────────────────────────────────────
-OPENCODE_SKILLS_DIR="${HOME}/.opencode/skills"
-if should_install "opencode"; then
-  if has_cli opencode || [ -d "${HOME}/.opencode" ]; then
-    echo "  ● OpenCode detected"
-    link_skills "${OPENCODE_SKILLS_DIR}" "OpenCode" "opencode"
-  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "opencode" ]; then
-    echo "  ● OpenCode (forced via --only)"
-    link_skills "${OPENCODE_SKILLS_DIR}" "OpenCode" "opencode"
-  else
-    $VERBOSE && echo "  ○ OpenCode not detected (skipped)" || true
-  fi
-fi
-
-# ── 3f. VS Code (Cline / Continue.dev / GitHub Copilot) ──────────────────────
-# Writes skills into ~/.vscode-superomni/ and generates per-extension configs.
-VSCODE_OMNI_DIR="${HOME}/.vscode-superomni"
-install_vscode() {
-  local label="$1"
-  local key="$2"
-
-  if $DRY_RUN; then
-    echo "  [dry-run] Would set up VS Code support at ${VSCODE_OMNI_DIR}"
-    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
-    return
-  fi
-
-  mkdir -p "${VSCODE_OMNI_DIR}"
-
-  # Symlink the full skill set so VS Code extensions can find it
-  if [ -L "${VSCODE_OMNI_DIR}/skills" ]; then
-    rm "${VSCODE_OMNI_DIR}/skills"
-  fi
-  if [ ! -d "${VSCODE_OMNI_DIR}/skills" ]; then
-    ln -s "${SCRIPT_DIR}/skills" "${VSCODE_OMNI_DIR}/skills"
-  fi
-
-  # ── Cline (rooveterinaryinc.roo-cline / saoudrizwan.claude-dev) ───────────
-  # Cline reads custom instructions from .clinerules in the project root or
-  # from a global file. We write a global pointer.
-  CLINE_RULES_DIR="${HOME}/.cline"
-  mkdir -p "${CLINE_RULES_DIR}"
-  cat > "${CLINE_RULES_DIR}/superomni.md" <<CLINE_EOF
-# superomni Skills
-
-Skills directory: ${VSCODE_OMNI_DIR}/skills
-Agent library:    ${SCRIPT_DIR}/agents
-
-Load \`${VSCODE_OMNI_DIR}/skills/using-skills/SKILL.md\` at session start.
-See \`${SCRIPT_DIR}/agents/\` for specialized agents.
-CLINE_EOF
-
-  # ── Continue.dev ──────────────────────────────────────────────────────────
-  CONTINUE_CONFIG_DIR="${HOME}/.continue"
-  mkdir -p "${CONTINUE_CONFIG_DIR}"
-  # Only add our context provider if not already present
-  if [ -f "${CONTINUE_CONFIG_DIR}/config.json" ]; then
-    if ! grep -q "superomni" "${CONTINUE_CONFIG_DIR}/config.json" 2>/dev/null; then
-      echo "  ℹ Continue.dev config exists — add the following context path manually:"
-      echo "      ${VSCODE_OMNI_DIR}/skills"
+    # ── Global install: symlink into ~/.gemini/skills/ ────────────────────────
+    GEMINI_SKILLS_DIR="${HOME}/.gemini/skills"
+    if has_cli gemini || [ -d "${HOME}/.gemini" ]; then
+      echo "  ● Gemini CLI detected"
+      link_skills "${GEMINI_SKILLS_DIR}" "Gemini CLI" "gemini"
+    elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "gemini" ]; then
+      echo "  ● Gemini CLI (forced via --only)"
+      link_skills "${GEMINI_SKILLS_DIR}" "Gemini CLI" "gemini"
+    else
+      $VERBOSE && echo "  ○ Gemini CLI not detected (skipped)" || true
     fi
-  else
-    cat > "${CONTINUE_CONFIG_DIR}/config.json" <<CONTINUE_EOF
-{
-  "contextProviders": [
-    {
-      "name": "file",
-      "params": {
-        "nRetrieve": 10,
-        "nFinal": 5
-      }
-    }
-  ],
-  "customCommands": [
-    {
-      "name": "superomni",
-      "description": "Load superomni skills",
-      "prompt": "Load and follow the skills in ${VSCODE_OMNI_DIR}/skills/using-skills/SKILL.md. Then ask me what I need help with."
-    }
-  ],
-  "models": []
-}
-CONTINUE_EOF
-  fi
-
-  echo "  ✓ ${label}: configured → ${VSCODE_OMNI_DIR}"
-  INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
-}
-
-if should_install "vscode"; then
-  # Detect VS Code or its extensions
-  if has_cli code || [ -d "${HOME}/.vscode" ] || [ -d "${HOME}/.vscode-server" ]; then
-    echo "  ● VS Code detected"
-    install_vscode "VS Code (Cline/Continue.dev)" "vscode"
-  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "vscode" ]; then
-    echo "  ● VS Code (forced via --only)"
-    install_vscode "VS Code (Cline/Continue.dev)" "vscode"
-  else
-    $VERBOSE && echo "  ○ VS Code not detected (skipped)" || true
   fi
 fi
 
-# ── 3g. JetBrains AI Assistant ───────────────────────────────────────────────
-JETBRAINS_OMNI_DIR="${HOME}/.jetbrains/superomni"
-install_jetbrains() {
-  local label="$1"
-  local key="$2"
-
-  if $DRY_RUN; then
-    echo "  [dry-run] Would set up JetBrains support at ${JETBRAINS_OMNI_DIR}"
-    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
-    return
-  fi
-
-  mkdir -p "${JETBRAINS_OMNI_DIR}"
-
-  # Symlink skills
-  if [ -L "${JETBRAINS_OMNI_DIR}/skills" ]; then
-    rm "${JETBRAINS_OMNI_DIR}/skills"
-  fi
-  if [ ! -d "${JETBRAINS_OMNI_DIR}/skills" ]; then
-    ln -s "${SCRIPT_DIR}/skills" "${JETBRAINS_OMNI_DIR}/skills"
-  fi
-
-  # Write a prompt file for JetBrains AI Assistant custom prompts
-  # (stored in ~/.config/JetBrains/<product>/ai-prompts/ or similar)
-  # We write a portable README to guide manual setup.
-  cat > "${JETBRAINS_OMNI_DIR}/SETUP.md" <<JB_EOF
-# superomni for JetBrains AI Assistant
-
-## Setup Instructions
-
-1. Open JetBrains IDE → Settings → Tools → AI Assistant → Prompts
-2. Click "+" to add a new prompt
-3. Name: "superomni"
-4. Content:
-   \`\`\`
-   You are augmented with the superomni skill framework.
-   Skills directory: ${JETBRAINS_OMNI_DIR}/skills
-   Agent library:    ${SCRIPT_DIR}/agents
-
-   Load and follow: ${JETBRAINS_OMNI_DIR}/skills/using-skills/SKILL.md
-   \`\`\`
-
-## Available Skills
-
-Skills are located at: ${JETBRAINS_OMNI_DIR}/skills/
-
-## Available Agents
-
-Agents are located at: ${SCRIPT_DIR}/agents/
-JB_EOF
-
-  echo "  ✓ ${label}: configured → ${JETBRAINS_OMNI_DIR}"
-  echo "  ℹ See ${JETBRAINS_OMNI_DIR}/SETUP.md for JetBrains AI Assistant configuration"
-  INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} ${key}"
-}
-
-if should_install "jetbrains"; then
-  # Detect JetBrains IDEs (IDEA, PyCharm, GoLand, WebStorm, etc.)
-  # Use compgen to safely expand glob patterns; avoids iterating literal strings
-  # when no matching directory exists.
-  JB_DETECTED=false
-  JB_GLOB_PATTERNS=(
-    "${HOME}/.IntelliJIdea"
-    "${HOME}/.PyCharm"
-    "${HOME}/.GoLand"
-    "${HOME}/.WebStorm"
-    "${HOME}/.RubyMine"
-    "${HOME}/.DataGrip"
-    "${HOME}/.CLion"
-    "${HOME}/.PhpStorm"
-    "${HOME}/.Rider"
-  )
-  # Check fixed paths first
-  for jb_fixed in "${HOME}/.idea" "${HOME}/Library/Application Support/JetBrains"; do
-    if [ -d "${jb_fixed}" ]; then
-      JB_DETECTED=true
-      break
-    fi
-  done
-  # Then check versioned dirs via glob expansion
-  if ! $JB_DETECTED; then
-    for jb_prefix in "${JB_GLOB_PATTERNS[@]}"; do
-      # compgen -G returns exit code 1 if no matches — safe to ignore
-      if compgen -G "${jb_prefix}*" > /dev/null 2>&1; then
-        JB_DETECTED=true
-        break
-      fi
-    done
-  fi
-
-  if $JB_DETECTED; then
-    echo "  ● JetBrains IDE detected"
-    install_jetbrains "JetBrains AI Assistant" "jetbrains"
-  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "jetbrains" ]; then
-    echo "  ● JetBrains (forced via --only)"
-    install_jetbrains "JetBrains AI Assistant" "jetbrains"
+# ── 3d. GitHub Copilot ───────────────────────────────────────────────────────
+# Copilot reads .github/copilot-instructions.md from the project root.
+# This is always a per-project install (no meaningful global path).
+if should_install "copilot"; then
+  local_dir="${TARGET_DIR:-${PWD}}"
+  COPILOT_INSTRUCTIONS="${local_dir}/.github/copilot-instructions.md"
+  if has_cli gh || has_cli copilot || [ -d "${local_dir}/.github" ] || [ -n "${TARGET_DIR}" ]; then
+    echo "  ● GitHub Copilot (local install → ${local_dir})"
+    copy_skills_local "${local_dir}"
+    write_local_config "${COPILOT_INSTRUCTIONS}" "${LOCAL_SKILL_SNIPPET}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} copilot"
+  elif [ -n "${ONLY_PLATFORM}" ] && [ "${ONLY_PLATFORM}" = "copilot" ]; then
+    echo "  ● GitHub Copilot (forced via --only)"
+    copy_skills_local "${local_dir}"
+    write_local_config "${COPILOT_INSTRUCTIONS}" "${LOCAL_SKILL_SNIPPET}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} copilot"
   else
-    $VERBOSE && echo "  ○ JetBrains IDEs not detected (skipped)" || true
+    $VERBOSE && echo "  ○ GitHub Copilot not detected (skipped)" || true
   fi
 fi
 
@@ -545,23 +420,33 @@ echo ""
 echo "Installed platforms:"
 for key in ${INSTALLED_PLATFORMS}; do
   case "${key}" in
-    claude)    echo "  • Claude Code              → ~/.claude/skills/superomni"
-               echo "                               ~/.claude/commands/ (slash commands)" ;;
-    cursor)    echo "  • Cursor                   → ~/.cursor/skills/superomni" ;;
-    codex)     echo "  • Codex CLI                → ~/.agents/skills/superomni" ;;
-    gemini)    echo "  • Gemini CLI               → ~/.gemini/skills/superomni" ;;
-    opencode)  echo "  • OpenCode                 → ~/.opencode/skills/superomni" ;;
-    vscode)    echo "  • VS Code (Cline/Continue) → ~/.vscode-superomni/" ;;
-    jetbrains) echo "  • JetBrains AI Assistant   → ~/.jetbrains/superomni/" ;;
+    claude)  echo "  • Claude Code      → ~/.claude/skills/superomni"
+             echo "                       ~/.claude/commands/ (slash commands)" ;;
+    codex)   if [ -n "${TARGET_DIR}" ]; then
+               echo "  • Codex CLI        → ${TARGET_DIR}/AGENTS.md"
+             else
+               echo "  • Codex CLI        → ~/.agents/skills/superomni"
+             fi ;;
+    gemini)  if [ -n "${TARGET_DIR}" ]; then
+               echo "  • Gemini CLI       → ${TARGET_DIR}/GEMINI.md"
+             else
+               echo "  • Gemini CLI       → ~/.gemini/skills/superomni"
+             fi ;;
+    copilot) echo "  • GitHub Copilot   → ${TARGET_DIR:-${PWD}}/.github/copilot-instructions.md" ;;
   esac
 done
 
 echo ""
 echo "Next steps:"
-echo "  1. Open your project in your AI IDE"
-echo "  2. Skills activate automatically via session hooks"
-echo "  3. For Claude Code users: install via the marketplace instead:"
-echo "       /plugin marketplace add Wilder1222/superomni"
+if [ -n "${TARGET_DIR}" ]; then
+  echo "  1. Commit the generated config files (.superomni/, AGENTS.md, GEMINI.md, etc.) or add them to .gitignore"
+  echo "  2. Open your project in your AI CLI — skills activate automatically"
+else
+  echo "  1. Open your project in your AI CLI or IDE"
+  echo "  2. Skills activate automatically via session hooks"
+fi
+echo "  For Claude Code users: install via the marketplace instead:"
+echo "    /plugin marketplace add Wilder1222/superomni"
 echo ""
 echo "To disable auto-skill triggers:"
 echo "  ${SCRIPT_DIR}/bin/config set proactive false"

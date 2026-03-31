@@ -11,9 +11,9 @@
         "superpowers",
         "developer-productivity",
         "agents",
-        "vscode",
-        "jetbrains",
-        "cursor",
+        "codex",
+        "gemini",
+        "github-copilot",
         "claude-skill",
         "npx"
     ],

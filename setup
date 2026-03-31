@@ -53,7 +53,7 @@ Options:
   --verbose         Show detailed output
 
 Supported platforms:
-  claude   Claude Code        (~/.claude/skills/)
+  claude   Claude Code        (~/.claude/skills/ or <project>/CLAUDE.md)
   codex    Codex CLI          (~/.agents/skills/ or <project>/AGENTS.md)
   gemini   Gemini CLI         (~/.gemini/skills/ or <project>/GEMINI.md)
   copilot  GitHub Copilot     (<project>/.github/copilot-instructions.md)
@@ -269,8 +269,28 @@ write_local_config() {
 }
 
 # ── Shared skill snippet for local config files ───────────────────────────────
-# Used by Codex (AGENTS.md), Gemini (GEMINI.md), and Copilot
-# (.github/copilot-instructions.md) local installs.
+# Used by Claude (CLAUDE.md), Codex (AGENTS.md), Gemini (GEMINI.md), and
+# Copilot (.github/copilot-instructions.md) local installs.
+build_command_catalog() {
+  local cmds_dir="$1"
+  local catalog=""
+
+  for cmd_file in "${cmds_dir}"/*.md; do
+    [ -f "${cmd_file}" ] || continue
+    local cmd_name
+    cmd_name="$(basename "${cmd_file}" .md)"
+    catalog="${catalog}\n- /${cmd_name}"
+  done
+
+  if [ -z "${catalog}" ]; then
+    catalog="\n- /vibe"
+  fi
+
+  printf '%b' "${catalog}"
+}
+
+COMMAND_CATALOG="$(build_command_catalog "${SCRIPT_DIR}/commands")"
+
 LOCAL_SKILL_SNIPPET="# superomni Skills
 
 You are augmented with the superomni AI coding skill framework.
@@ -279,15 +299,29 @@ Skills directory: .superomni/skills
 Agent library:    .superomni/agents
 
 Load and follow \`.superomni/skills/using-skills/SKILL.md\` at session start.
-See \`.superomni/agents/\` for specialized agents."
+See \`.superomni/agents/\` for specialized agents.
 
-# ── 3a. Claude Code (primary — always installed globally) ────────────────────
+Available slash-style commands:${COMMAND_CATALOG}
+
+If this CLI does not support native slash commands, treat the command names above
+as intents and execute the matching command file from .superomni/commands/."
+
+# ── 3a. Claude Code ───────────────────────────────────────────────────────────
 CLAUDE_SKILLS_DIR="${HOME}/.claude/skills"
 if should_install "claude"; then
-  echo "  ● Claude Code (primary — always installed)"
-  link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
-  # Install slash commands so /vibe, /brainstorm, etc. are available in Claude Code
-  install_claude_commands
+  if [ -n "${TARGET_DIR}" ]; then
+    # ── Local / npx install: write CLAUDE.md into project root ───────────────
+    echo "  ● Claude Code (local install → ${TARGET_DIR})"
+    copy_skills_local "${TARGET_DIR}"
+    write_local_config "${TARGET_DIR}/CLAUDE.md" "${LOCAL_SKILL_SNIPPET}"
+    INSTALLED_PLATFORMS="${INSTALLED_PLATFORMS} claude"
+  else
+    # ── Global install: symlink into ~/.claude/skills/ and commands/ ─────────
+    echo "  ● Claude Code (global install)"
+    link_skills "${CLAUDE_SKILLS_DIR}" "Claude Code" "claude"
+    # Install slash commands so /vibe, /brainstorm, etc. are available in Claude Code
+    install_claude_commands
+  fi
 fi
 
 # ── 3b. Codex CLI (OpenAI) ───────────────────────────────────────────────────
@@ -362,15 +396,17 @@ HOOKS_SOURCE="${SCRIPT_DIR}/hooks/hooks.json"
 CLAUDE_HOOKS_DIR="${HOME}/.claude/hooks"
 
 if should_install "claude"; then
-  echo "→ Registering Claude Code hooks..."
-  if ! $DRY_RUN; then
-    mkdir -p "${CLAUDE_HOOKS_DIR}"
-    if [ -f "${HOOKS_SOURCE}" ]; then
-      cp "${HOOKS_SOURCE}" "${CLAUDE_HOOKS_DIR}/superomni-hooks.json"
-      echo "  ✓ Hooks registered"
+  if [ -z "${TARGET_DIR}" ]; then
+    echo "→ Registering Claude Code hooks..."
+    if ! $DRY_RUN; then
+      mkdir -p "${CLAUDE_HOOKS_DIR}"
+      if [ -f "${HOOKS_SOURCE}" ]; then
+        cp "${HOOKS_SOURCE}" "${CLAUDE_HOOKS_DIR}/superomni-hooks.json"
+        echo "  ✓ Hooks registered"
+      fi
+    else
+      echo "  [dry-run] Would copy hooks.json → ${CLAUDE_HOOKS_DIR}"
     fi
-  else
-    echo "  [dry-run] Would copy hooks.json → ${CLAUDE_HOOKS_DIR}"
   fi
 fi
 
@@ -420,8 +456,12 @@ echo ""
 echo "Installed platforms:"
 for key in ${INSTALLED_PLATFORMS}; do
   case "${key}" in
-    claude)  echo "  • Claude Code      → ~/.claude/skills/superomni"
-             echo "                       ~/.claude/commands/ (slash commands)" ;;
+    claude)  if [ -n "${TARGET_DIR}" ]; then
+               echo "  • Claude Code      → ${TARGET_DIR}/CLAUDE.md"
+             else
+               echo "  • Claude Code      → ~/.claude/skills/superomni"
+               echo "                       ~/.claude/commands/ (slash commands)"
+             fi ;;
     codex)   if [ -n "${TARGET_DIR}" ]; then
                echo "  • Codex CLI        → ${TARGET_DIR}/AGENTS.md"
              else
@@ -439,7 +479,7 @@ done
 echo ""
 echo "Next steps:"
 if [ -n "${TARGET_DIR}" ]; then
-  echo "  1. Commit the generated config files (.superomni/, AGENTS.md, GEMINI.md, etc.) or add them to .gitignore"
+  echo "  1. Commit the generated config files (.superomni/, CLAUDE.md, AGENTS.md, GEMINI.md, etc.) or add them to .gitignore"
   echo "  2. Open your project in your AI CLI — skills activate automatically"
 else
   echo "  1. Open your project in your AI CLI or IDE"

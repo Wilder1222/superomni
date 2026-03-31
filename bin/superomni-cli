@@ -1,5 +1,13 @@
 #!/usr/bin/env node
-// bin/superomni-cli — cross-platform CLI entry point
+// bin/superomni-cli — CLI entry point for superomni
+//
+// When invoked via `npx github:Wilder1222/superomni`, runs in the user's
+// current working directory and installs the skill framework there.
+//
+// Usage:
+//   npx github:Wilder1222/superomni              # Install in current project
+//   npx github:Wilder1222/superomni --only claude
+//   npx github:Wilder1222/superomni --dry-run
 
 'use strict';
 
@@ -7,102 +15,77 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-function toWslPath(p) {
-  const m = p.match(/^([A-Za-z]):\\(.*)$/);
-  if (!m) return p;
-  return `/mnt/${m[1].toLowerCase()}/${m[2].replace(/\\/g, '/')}`;
-}
-
-function toMsysPath(p) {
-  const m = p.match(/^([A-Za-z]):\\(.*)$/);
-  if (!m) return p;
-  return `/${m[1].toLowerCase()}/${m[2].replace(/\\/g, '/')}`;
-}
-
-function setupPathCandidates(setupScript) {
-  const out = [setupScript];
-  if (process.platform === 'win32') {
-    out.push(toWslPath(setupScript));
-    out.push(toMsysPath(setupScript));
-  }
-  return [...new Set(out)];
-}
-
-function runNpm(args) {
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  return spawnSync(npmCmd, args, { stdio: 'inherit' });
-}
-
 const realPath = fs.realpathSync(process.argv[1]);
 const scriptDir = path.dirname(realPath);
 const packageRoot = path.resolve(scriptDir, '..');
-const setupScript = path.join(packageRoot, 'setup');
+const setupJs = path.join(packageRoot, 'lib', 'setup.js');
 const pkgPath = path.join(packageRoot, 'package.json');
 const currentVersion = fs.existsSync(pkgPath)
-  ? JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version
-  : 'unknown';
-
-if (!fs.existsSync(setupScript)) {
-  console.error(`ERROR: Cannot find setup script at ${setupScript}`);
-  process.exit(1);
-}
+    ? JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version
+    : 'unknown';
 
 const command = process.argv[2] || '';
 
 if (command === 'upgrade') {
-  console.log('superomni upgrade — checking for updates...');
-  console.log(`Current version: ${currentVersion}`);
-  const result = runNpm(['install', '-g', 'github:Wilder1222/superomni']);
-  process.exit(result.status || 0);
+    console.log('superomni upgrade — reinstalling latest version...');
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const result = spawnSync(npmCmd, ['install', '-g', 'github:Wilder1222/superomni'], {
+        stdio: 'inherit',
+    });
+    process.exit(result.status || 0);
 }
 
 if (command === 'version' || command === '--version' || command === '-v') {
-  console.log(`superomni ${currentVersion}`);
-  process.exit(0);
+    console.log(`superomni ${currentVersion}`);
+    process.exit(0);
 }
 
 if (command === 'help' || command === '--help' || command === '-h') {
-  console.log('superomni — AI coding skill framework');
-  console.log('');
-  console.log('Usage:');
-  console.log('  superomni [setup options]  Run setup/install for your platform');
-  console.log('  superomni upgrade          Upgrade to the latest version');
-  console.log('  superomni version          Print installed version');
-  console.log('  superomni help             Show this help');
-  process.exit(0);
+    console.log(`superomni ${currentVersion} — AI coding skill framework`);
+    console.log('');
+    console.log('Usage:');
+    console.log('  npx superomni                    Install into current project');
+    console.log('  npx superomni --only <platform>  Install for one platform only');
+    console.log('  npx superomni --skip <platform>  Skip a specific platform');
+    console.log('  npx superomni --dry-run          Preview without making changes');
+    console.log('  npx superomni --verbose          Show detailed output');
+    console.log('  npx superomni upgrade            Upgrade to latest version');
+    console.log('  npx superomni version            Print version');
+    console.log('');
+    console.log('Platforms: claude, codex, gemini, copilot');
+    process.exit(0);
 }
 
-const env = { ...process.env };
-const initCwd = process.env.INIT_CWD;
-if (
-  !env.SUPEROMNI_TARGET_DIR &&
-  process.env.npm_config_global !== 'true' &&
-  initCwd &&
-  initCwd !== packageRoot &&
-  !initCwd.includes(`${path.sep}node_modules${path.sep}`)
-) {
-  env.SUPEROMNI_TARGET_DIR = initCwd;
+// ── Locate setup script ───────────────────────────────────────────────────────
+
+if (!fs.existsSync(setupJs)) {
+    process.stderr.write(
+        `superomni: setup script not found at ${setupJs}\n` +
+        `superomni: package installation may be incomplete.\n`
+    );
+    process.exit(1);
 }
 
-const setupArgs = process.argv.slice(2);
-const candidates = setupPathCandidates(setupScript);
-let lastResult = null;
-for (const candidate of candidates) {
-  const result = spawnSync('bash', [candidate, ...setupArgs], {
-    stdio: 'inherit',
+// ── Determine target directory ────────────────────────────────────────────────
+// process.cwd() is always the user's project directory when running via npx.
+
+const env = Object.assign({}, process.env);
+
+const isGlobalInstall = process.env.npm_config_global === 'true';
+
+if (!isGlobalInstall && !env.SUPEROMNI_TARGET_DIR) {
+    // npx run: install into the user's current working directory
+    env.SUPEROMNI_TARGET_DIR = process.cwd();
+}
+
+// ── Run setup.js (pure Node.js) ───────────────────────────────────────────────
+
+const setupArgs = process.argv.slice(2); // pass through any extra flags
+const result = spawnSync(process.execPath, [setupJs, ...setupArgs], {
     cwd: packageRoot,
     env,
-  });
-  if (!result.error && result.status === 0) {
-    process.exit(0);
-  }
-  lastResult = result;
-}
+    stdio: 'inherit',
+});
 
-console.error('superomni cli: failed to run setup via bash.');
-console.error(`superomni cli: attempted setup paths: ${candidates.join(', ')}`);
-if (lastResult && lastResult.error) {
-  console.error(`superomni cli: ${lastResult.error.message}`);
-}
-process.exit((lastResult && lastResult.status) || 1);
+process.exit(result.status || 0);
 

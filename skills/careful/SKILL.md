@@ -114,6 +114,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Careful — Safety Guardrails
 
 **Goal:** Prevent costly mistakes by enforcing risk assessment, blast radius calculation, and user confirmation before any high-risk operation.

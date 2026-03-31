@@ -115,6 +115,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Production Readiness Gate
 
 **Goal:** Verify that code is ready for production deployment — beyond just passing tests.

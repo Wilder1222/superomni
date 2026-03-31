@@ -114,6 +114,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Writing Skills (Meta-Skill)
 
 **Goal:** Create a new, well-designed skill that integrates cleanly into the superomni framework.

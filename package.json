@@ -25,7 +25,7 @@
         "ensure:lf": "node lib/ensure-setup-lf.js",
         "test": "bash lib/validate-skills.sh",
         "setup": "node lib/setup.js",
-        "postinstall": "node lib/ensure-setup-lf.js && node lib/postinstall.js"
+        "postinstall": "node lib/postinstall.js"
     },
     "files": [
         ".claude-plugin/",

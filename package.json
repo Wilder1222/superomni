@@ -1,52 +1,52 @@
 {
-  "name": "superomni",
-  "version": "0.4.0",
-  "description": "superomni — A fused AI coding skill framework combining methodology-driven practices with engineering completeness. Plan Lean, Execute Complete.",
-  "license": "MIT",
-  "author": "Wilder1222",
-  "keywords": [
-    "claude-code",
-    "ai-skills",
-    "coding-assistant",
-    "superpowers",
-    "developer-productivity",
-    "agents",
-    "vscode",
-    "jetbrains",
-    "cursor",
-    "claude-skill",
-    "npx"
-  ],
-  "bin": {
-    "superomni": "./bin/superomni-cli"
-  },
-  "scripts": {
-    "build": "bash lib/gen-skill-docs.sh",
-    "test": "bash lib/validate-skills.sh",
-    "setup": "bash setup",
-    "postinstall": "node lib/postinstall.js"
-  },
-  "files": [
-    ".claude-plugin/",
-    "agents/",
-    "bin/",
-    "commands/",
-    "docs/",
-    "hooks/",
-    "lib/",
-    "skills/",
-    "CLAUDE.md",
-    "ETHOS.md",
-    "LICENSE",
-    "claude-skill.json",
-    "setup"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Wilder1222/superomni.git"
-  },
-  "homepage": "https://github.com/Wilder1222/superomni#readme",
-  "bugs": {
-    "url": "https://github.com/Wilder1222/superomni/issues"
-  }
+    "name": "superomni",
+    "version": "0.4.0",
+    "description": "superomni — A fused AI coding skill framework combining methodology-driven practices with engineering completeness. Plan Lean, Execute Complete.",
+    "license": "MIT",
+    "author": "Wilder1222",
+    "keywords": [
+        "claude-code",
+        "ai-skills",
+        "coding-assistant",
+        "superpowers",
+        "developer-productivity",
+        "agents",
+        "vscode",
+        "jetbrains",
+        "cursor",
+        "claude-skill",
+        "npx"
+    ],
+    "bin": {
+        "superomni": "./bin/superomni-cli"
+    },
+    "scripts": {
+        "build": "bash lib/gen-skill-docs.sh",
+        "test": "bash lib/validate-skills.sh",
+        "setup": "bash setup",
+        "postinstall": "node lib/postinstall.js"
+    },
+    "files": [
+        ".claude-plugin/",
+        "agents/",
+        "bin/",
+        "commands/",
+        "docs/",
+        "hooks/",
+        "lib/",
+        "skills/",
+        "CLAUDE.md",
+        "ETHOS.md",
+        "LICENSE",
+        "claude-skill.json",
+        "setup"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Wilder1222/superomni.git"
+    },
+    "homepage": "https://github.com/Wilder1222/superomni#readme",
+    "bugs": {
+        "url": "https://github.com/Wilder1222/superomni/issues"
+    }
 }

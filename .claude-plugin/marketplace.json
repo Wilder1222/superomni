@@ -1,33 +1,33 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "superomni",
-  "version": "0.3.0",
-  "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
-  "owner": {
-    "name": "Wilder1222"
-  },
-  "plugins": [
-    {
-      "name": "superomni",
-      "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code. Provides /vibe, /brainstorm, /write-plan, /execute-plan, and /review commands.",
-      "version": "0.3.0",
-      "author": {
+    "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+    "name": "superomni",
+    "version": "0.4.0",
+    "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
+    "owner": {
         "name": "Wilder1222"
-      },
-      "source": "./",
-      "category": "productivity",
-      "homepage": "https://github.com/Wilder1222/superomni#readme",
-      "repository": "https://github.com/Wilder1222/superomni",
-      "license": "MIT",
-      "keywords": [
-        "skills",
-        "workflow",
-        "brainstorm",
-        "planning",
-        "code-review",
-        "productivity",
-        "ai-assistant"
-      ]
-    }
-  ]
+    },
+    "plugins": [
+        {
+            "name": "superomni",
+            "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code. Provides /vibe, /brainstorm, /write-plan, /execute-plan, and /review commands.",
+            "version": "0.4.0",
+            "author": {
+                "name": "Wilder1222"
+            },
+            "source": "./",
+            "category": "productivity",
+            "homepage": "https://github.com/Wilder1222/superomni#readme",
+            "repository": "https://github.com/Wilder1222/superomni",
+            "license": "MIT",
+            "keywords": [
+                "skills",
+                "workflow",
+                "brainstorm",
+                "planning",
+                "code-review",
+                "productivity",
+                "ai-assistant"
+            ]
+        }
+    ]
 }

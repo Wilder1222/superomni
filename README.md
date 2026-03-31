@@ -54,7 +54,7 @@ The `postinstall` hook auto-detects your platform and links skills, commands, an
 
 ---
 
-**③ Project-level install via npx (recommended for Codex / Gemini / Copilot):**
+**③ Project-level install via npx (recommended for Claude / Codex / Gemini / Copilot):**
 
 Run this from inside your project directory while a CLI session is active:
 
@@ -67,6 +67,7 @@ the appropriate config file for your CLI:
 
 | CLI | Config file created |
 |-----|---------------------|
+| Claude Code | `CLAUDE.md` |
 | Codex CLI | `AGENTS.md` |
 | Gemini CLI | `GEMINI.md` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
@@ -184,7 +185,7 @@ superomni supports the following AI coding platforms:
 
 | Platform | Status | Setup |
 |----------|--------|-------|
-| **Claude Code** | ✅ Full support | Marketplace install or `npm install -g` |
+| **Claude Code** | ✅ Full support | `npx superomni` (writes `CLAUDE.md`), marketplace install, or `npm install -g` |
 | **Codex CLI** | ✅ Full support | `npx superomni` (writes `AGENTS.md`) or `npm install -g` |
 | **Gemini CLI** | ✅ Full support | `npx superomni` (writes `GEMINI.md`) or `npm install -g` |
 | **GitHub Copilot** | ✅ Full support | `npx superomni` (writes `.github/copilot-instructions.md`) |

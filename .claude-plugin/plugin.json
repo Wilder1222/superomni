@@ -1,19 +1,19 @@
 {
-  "name": "superomni",
-  "version": "0.3.0",
-  "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
-  "author": {
-    "name": "Wilder1222"
-  },
-  "homepage": "https://github.com/Wilder1222/superomni#readme",
-  "license": "MIT",
-  "keywords": [
-    "skills",
-    "workflow",
-    "brainstorm",
-    "planning",
-    "code-review",
-    "productivity",
-    "ai-assistant"
-  ]
+    "name": "superomni",
+    "version": "0.4.0",
+    "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
+    "author": {
+        "name": "Wilder1222"
+    },
+    "homepage": "https://github.com/Wilder1222/superomni#readme",
+    "license": "MIT",
+    "keywords": [
+        "skills",
+        "workflow",
+        "brainstorm",
+        "planning",
+        "code-review",
+        "productivity",
+        "ai-assistant"
+    ]
 }

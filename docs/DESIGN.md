@@ -2,8 +2,8 @@
 
 ## superomni — Architecture and Fusion Strategy
 
-**Version:** 0.3.0
-**Status:** Implemented (v0.3.0)
+**Version:** 0.4.0
+**Status:** Implemented (v0.4.0)
 
 ---
 
@@ -367,3 +367,51 @@ The `designer` agent adds the missing design review dimension to the framework �
 | Multi-platform support fragmentation | Platform detection is isolated to setup/hooks; skills stay platform-agnostic |
 | workflow skill over-orchestration | workflow suggests, doesn't force; individual skills remain independently usable |
 | security-audit false sense of security | Clearly documented as AI-assisted, not a replacement for professional security review |
+
+---
+
+## 9. Design Decisions: v0.4.0 — Harness Engineering
+
+### Decision 5: Harness Engineering as a First-Class Skill
+
+**Problem:** As superomni grows, the framework itself accumulates entropy: bloated preamble, misaligned tool sets, missing evaluation gates, weak feedback loops. There was no systematic way to maintain the harness.
+
+**Decision:** Add `harness-engineering` as a P1 skill with a formal audit protocol covering context efficiency, tool minimalism, evaluation gate coverage, feedback loops, and documentation freshness.
+
+**Implementation:** `skills/harness-engineering/` with 8-phase audit, Harness Health Score (N/25), and prioritized improvement backlog output to `.superomni/harness-audits/`.
+
+### Decision 6: Evaluator as a Dedicated Agent
+
+**Problem:** The framework had evaluation concepts (verification skill, code-reviewer agent) but no dedicated evaluation persona that could be invoked at any quality gate — independent of the skill that produced the output.
+
+**Decision:** Add the `evaluator` agent — a ruthlessly objective quality judge that produces criterion-by-criterion verdicts with evidence. Based on Anthropic's principle that *"judgment is the load-bearing part of agent harness design."*
+
+**Implementation:** `agents/evaluator.md` with APPROVED / APPROVED_WITH_NOTES / CHANGES_REQUIRED / EVALUATION_INCOMPLETE verdicts.
+
+### Decision 7: Wave Evaluation Gates in Executing-Plans
+
+**Problem:** The `executing-plans` skill executed waves in parallel but had no gate between waves — wave N+1 could begin before wave N's outputs were verified.
+
+**Decision:** Add an explicit evaluation gate phase between each wave. Gates check tests, regressions, and output contracts before the next wave begins. Failed gates trigger harness signal analysis before retry.
+
+**Implementation:** Phase 4 (Wave Evaluation Gate) added to `executing-plans/SKILL.md.tmpl`. `evaluator` agent can be spawned for complex wave gates.
+
+### New Skills in v0.4.0
+
+| Skill | Origin | Purpose |
+|-------|--------|---------|
+| `harness-engineering` | OpenAI/Anthropic inspired | Design and maintain the agent harness |
+
+### New Agents in v0.4.0
+
+| Agent | Specialty |
+|-------|-----------|
+| `evaluator` | Criterion-by-criterion quality evaluation with evidence-backed verdicts |
+
+The `evaluator` agent completes the quality gate coverage: previously `code-reviewer` covered code reviews, but there was no generic evaluation agent for output quality at any stage.
+
+### New Documents in v0.4.0
+
+| Document | Purpose |
+|---------|---------|
+| `docs/HARNESS.md` | Comprehensive harness engineering guide and architecture diagram |

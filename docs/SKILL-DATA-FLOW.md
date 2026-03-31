@@ -24,6 +24,7 @@ All inter-skill artifacts are stored in `.superomni/` with predictable paths:
 ├── subagents/         ← subagent-development session records
 ├── production-readiness/  ← production-readiness output
 ├── improvements/      ← self-improvement output
+├── harness-audits/    ← harness-engineering output
 spec.md                ← brainstorming output (project root)
 plan.md                ← writing-plans output (project root)
 ```

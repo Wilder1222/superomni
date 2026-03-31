@@ -110,6 +110,37 @@ Each agent has:
 
 ---
 
+### `evaluator`
+
+**Specialty:** Criterion-by-criterion quality evaluation with evidence-backed verdicts.
+
+**Iron Law:** Every finding requires evidence. Every verdict requires justification.
+
+**Use when:**
+- An independent quality gate is needed at any workflow transition
+- Output quality needs scoring against defined acceptance criteria
+- Regression checking is required before advancing to the next stage
+
+**Output:** Evaluation report with APPROVED / APPROVED_WITH_NOTES / CHANGES_REQUIRED / EVALUATION_INCOMPLETE verdict and P0/P1/P2 findings.
+
+---
+
+### `ceo-advisor`
+
+**Specialty:** Product strategy, scope validation, and demand analysis.
+
+**Use when:** A product decision needs strategic validation before building.
+
+---
+
+### `designer`
+
+**Specialty:** UX review, missing state detection, and AI slop identification.
+
+**Use when:** A UI or UX change needs design quality review.
+
+---
+
 ## Installing Agents
 
 ### From a URL (GitHub or any HTTPS source)

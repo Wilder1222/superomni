@@ -143,6 +143,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Update docs after shipping | `document-release` |
 | Verifying production readiness before deploy | `production-readiness` |
 | Post-task performance evaluation and improvement | `self-improvement` |
+| Audit and maintain the agent harness health | `harness-engineering` |
 
 ## Project-First Tool Selection
 

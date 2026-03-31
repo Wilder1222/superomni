@@ -115,6 +115,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Investigate
 
 **Goal:** Build a shared, accurate mental model of an unfamiliar system, codebase, or problem space.

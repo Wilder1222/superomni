@@ -117,6 +117,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # /office-hours — Product Discovery
 
 **Goal:** Before writing a single line of code, understand the real problem, the real user, and the real market. Save a `design-doc.md` that downstream skills can use.

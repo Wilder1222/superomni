@@ -75,12 +75,28 @@ When asking the user a question, match the confirmation requirement to the compl
 
 When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
 
-### Escalation Policy
-It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
+### Context Window Management
+Load context progressively — only what is needed for the current phase:
 
-- **3 attempts without success** → STOP and report BLOCKED
+| Phase | Load these | Defer these |
+|-------|-----------|------------|
+| Planning | `spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `plan.md`, relevant source files | Unrelated modules, docs |
+| Review/Debug | diff, failing test output, minimal repro | Full history, specs |
+
+**If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
+
+### Feedback Signal Protocol
+Agent failures are harness signals — not reasons to retry the same approach:
+
+- **1 failure** → retry with a different approach
+- **2 failures** → surface to user: "Tried [A] and [B], both failed. Recommend [C]."
+- **3 consecutive failures** → STOP. Report BLOCKED. Treat as a harness deficiency signal.
+  Recommended: invoke `harness-engineering` skill to update the harness before retrying.
 - **Uncertain about security** → STOP and report NEEDS_CONTEXT
 - **Scope exceeds verification capacity** → STOP and flag blast radius
+
+It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
 ### Performance Checkpoint
 After completing any skill session, run a 3-question self-check before writing the final status:

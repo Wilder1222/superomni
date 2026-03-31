@@ -13,10 +13,19 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 
 **Goal:** Execute a written implementation plan precisely, with verification at each stage — running independent steps in parallel to minimize elapsed time.
 
-## Iron Law: Dependencies First, Then Parallelize
+## Iron Laws
 
+**1. Dependencies First, Then Parallelize**
 Never execute a step before its dependencies are complete.
 But DO run all independent steps in parallel within a wave — never serialize work that can be parallelized.
+
+**2. Evaluate Before Advancing**
+Every wave must pass an evaluation gate before the next wave begins.
+A wave is not "done" until its outputs are verified — not just executed.
+
+**3. Failures Are Harness Signals**
+When a step fails on 3 consecutive attempts using different approaches, stop executing and treat the failure as a harness signal:
+update the plan, skill, or constraint — then retry. Never brute-force through 3 failed approaches.
 
 ## Phase 1: Load the Plan
 
@@ -127,7 +136,28 @@ Continue to step verification
     D) Other — describe your own approach: ___________
 ```
 
-## Phase 4: Mid-Plan Check-ins
+## Phase 4: Wave Evaluation Gate
+
+**Before advancing to the next wave, run the evaluation gate:**
+
+```
+WAVE [N] EVALUATION GATE
+─────────────────────────────────
+Steps completed: [list]
+Tests passing:   [run: npm test or equivalent]
+Regressions:     [any pre-existing tests broken?]
+Output contract: [do outputs match what dependent steps expect?]
+Gate result:     PASS → proceed to Wave N+1 | FAIL → address before advancing
+```
+
+If the gate **FAILS**:
+1. Identify which step produced the failing output
+2. Determine if this is a harness signal (update plan/skill) or an implementation error (fix and re-run)
+3. Do NOT advance to the next wave until the gate passes
+
+Spawn the `evaluator` agent for complex waves or when the gate result is ambiguous.
+
+## Phase 5: Mid-Plan Check-ins
 
 After every wave completes, or when scope is expanding:
 
@@ -136,7 +166,7 @@ After every wave completes, or when scope is expanding:
 3. Surface any blast radius discovered mid-execution
 4. Ask before proceeding if scope has changed
 
-## Phase 5: Handling Plan Deviations
+## Phase 6: Handling Plan Deviations
 
 If you discover the plan is wrong or incomplete:
 
@@ -153,7 +183,7 @@ Recommendation: [Proposed resolution]
 Awaiting: [Your decision before continuing]
 ```
 
-## Phase 6: Completion
+## Phase 7: Completion
 
 When all steps are done:
 

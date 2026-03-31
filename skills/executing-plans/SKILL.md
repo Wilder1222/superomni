@@ -72,12 +72,28 @@ When asking the user a question, match the confirmation requirement to the compl
 
 When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
 
-### Escalation Policy
-It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
+### Context Window Management
+Load context progressively — only what is needed for the current phase:
 
-- **3 attempts without success** → STOP and report BLOCKED
+| Phase | Load these | Defer these |
+|-------|-----------|------------|
+| Planning | `spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `plan.md`, relevant source files | Unrelated modules, docs |
+| Review/Debug | diff, failing test output, minimal repro | Full history, specs |
+
+**If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
+
+### Feedback Signal Protocol
+Agent failures are harness signals — not reasons to retry the same approach:
+
+- **1 failure** → retry with a different approach
+- **2 failures** → surface to user: "Tried [A] and [B], both failed. Recommend [C]."
+- **3 consecutive failures** → STOP. Report BLOCKED. Treat as a harness deficiency signal.
+  Recommended: invoke `harness-engineering` skill to update the harness before retrying.
 - **Uncertain about security** → STOP and report NEEDS_CONTEXT
 - **Scope exceeds verification capacity** → STOP and flag blast radius
+
+It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
 ### Performance Checkpoint
 After completing any skill session, run a 3-question self-check before writing the final status:
@@ -102,10 +118,19 @@ Nothing is sent to external servers. Data is stored only in `~/.omni-skills/anal
 
 **Goal:** Execute a written implementation plan precisely, with verification at each stage — running independent steps in parallel to minimize elapsed time.
 
-## Iron Law: Dependencies First, Then Parallelize
+## Iron Laws
 
+**1. Dependencies First, Then Parallelize**
 Never execute a step before its dependencies are complete.
 But DO run all independent steps in parallel within a wave — never serialize work that can be parallelized.
+
+**2. Evaluate Before Advancing**
+Every wave must pass an evaluation gate before the next wave begins.
+A wave is not "done" until its outputs are verified — not just executed.
+
+**3. Failures Are Harness Signals**
+When a step fails on 3 consecutive attempts using different approaches, stop executing and treat the failure as a harness signal:
+update the plan, skill, or constraint — then retry. Never brute-force through 3 failed approaches.
 
 ## Phase 1: Load the Plan
 
@@ -216,7 +241,28 @@ Continue to step verification
     D) Other — describe your own approach: ___________
 ```
 
-## Phase 4: Mid-Plan Check-ins
+## Phase 4: Wave Evaluation Gate
+
+**Before advancing to the next wave, run the evaluation gate:**
+
+```
+WAVE [N] EVALUATION GATE
+─────────────────────────────────
+Steps completed: [list]
+Tests passing:   [run: npm test or equivalent]
+Regressions:     [any pre-existing tests broken?]
+Output contract: [do outputs match what dependent steps expect?]
+Gate result:     PASS → proceed to Wave N+1 | FAIL → address before advancing
+```
+
+If the gate **FAILS**:
+1. Identify which step produced the failing output
+2. Determine if this is a harness signal (update plan/skill) or an implementation error (fix and re-run)
+3. Do NOT advance to the next wave until the gate passes
+
+Spawn the `evaluator` agent for complex waves or when the gate result is ambiguous.
+
+## Phase 5: Mid-Plan Check-ins
 
 After every wave completes, or when scope is expanding:
 
@@ -225,7 +271,7 @@ After every wave completes, or when scope is expanding:
 3. Surface any blast radius discovered mid-execution
 4. Ask before proceeding if scope has changed
 
-## Phase 5: Handling Plan Deviations
+## Phase 6: Handling Plan Deviations
 
 If you discover the plan is wrong or incomplete:
 
@@ -242,7 +288,7 @@ Recommendation: [Proposed resolution]
 Awaiting: [Your decision before continuing]
 ```
 
-## Phase 6: Completion
+## Phase 7: Completion
 
 When all steps are done:
 

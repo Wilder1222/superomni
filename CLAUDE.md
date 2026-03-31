@@ -39,6 +39,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | document-release | "update docs", "sync docs", "post-ship docs" | P2 |
 | production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |
 | self-improvement | "self-improve", "evaluate performance", "reflect on execution", "how did we do", "improve process" | P1 |
+| harness-engineering | "harness", "harness audit", "improve harness", "agent environment", "evaluation gates", "feedback loop" | P1 |
 
 ## Commands
 
@@ -49,6 +50,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
+| `/harness-audit` | Audit the agent harness health and produce improvement backlog |
 
 ## Configuration
 
@@ -73,6 +75,8 @@ All review content, execution results, and sub-agent session records are saved a
 | Execution results | `.superomni/executions/` | `execution-[branch]-[date].md` |
 | Sub-agent sessions | `.superomni/subagents/` | `subagent-[branch]-[date].md` |
 | Production readiness | `.superomni/production-readiness/` | `production-readiness-[branch]-[date].md` |
+| Harness audits | `.superomni/harness-audits/` | `harness-audit-[branch]-[date].md` |
+| Improvement reports | `.superomni/improvements/` | `improvement-[branch]-[date].md` |
 | Specs | project root | `spec.md` |
 | Plans | project root | `plan.md` |
 

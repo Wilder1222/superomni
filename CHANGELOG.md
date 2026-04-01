@@ -89,7 +89,7 @@ v0.4.0 applies harness engineering principles directly to the superomni framewor
 
 ### Added
 - Initial fusion of obra/superpowers + garrytan/gstack
-- 22 core skills: `using-skills`, `brainstorming`, `writing-plans`, `executing-plans`, `systematic-debugging`, `test-driven-development`, `verification`, `code-review`, `plan-review`, `subagent-development`, `git-worktrees`, `finishing-branch`, `dispatching-parallel`, `investigate`, `retro`, `ship`, `writing-skills`, `agent-management`, `document-release`
+- 22 core skills: `using-skills`, `brainstorm`, `writing-plans`, `executing-plans`, `systematic-debugging`, `test-driven-development`, `verification`, `code-review`, `plan-review`, `subagent-development`, `git-worktrees`, `finishing-branch`, `dispatching-parallel`, `investigate`, `retro`, `ship`, `writing-skills`, `agent-management`, `document-release`
 - `ETHOS.md`: Plan Lean / Execute Complete philosophy + 6 Decision Principles
 - `lib/preamble.md`: PROACTIVE mode toggle + unified status protocol
 - `{{PREAMBLE}}` template system with `lib/gen-skill-docs.sh` build step

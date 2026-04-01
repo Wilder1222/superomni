@@ -30,7 +30,7 @@ brainstorm → write-plan → execute-plan → review
 | Command | What it does |
 |---------|-------------|
 | `/vibe` | Activate the framework and launch the guided workflow |
-| `/brainstorm` | Design a feature — produces `spec.md` |
+| `/brainstorm` | Design a feature — produces `docs/superomni/spec.md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |

@@ -5,7 +5,7 @@ One command, fully reviewed plan out.
 ## Usage
 
 ```
-/autoplan              — auto-review current plan.md
+/autoplan              — auto-review current docs/superomni/plan.md
 /autoplan <file>       — auto-review a specific plan file
 ```
 

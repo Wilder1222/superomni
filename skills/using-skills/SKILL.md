@@ -31,7 +31,7 @@ Each skill in `skills/` is a behavior specification. When a relevant situation a
 
 ### Step 1 — Scan for existing context
 ```bash
-ls spec.md plan.md .superomni/ 2>/dev/null
+ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
 git log --oneline -3 2>/dev/null
 git status --short 2>/dev/null
 ```
@@ -41,14 +41,14 @@ Use the scan results to locate the current pipeline stage:
 
 | Context found | Current stage | Skill to use |
 |---------------|--------------|--------------|
-| No artifacts | THINK | `brainstorming` |
-| `spec.md` only | PLAN | `writing-plans` |
-| `spec.md` + `plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
-| `plan.md` all checked, no review | REVIEW | `code-review` |
+| No artifacts | THINK | `brainstorm` |
+| `docs/superomni/spec.md` only | PLAN | `writing-plans` |
+| `docs/superomni/spec.md` + `docs/superomni/plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
+| `docs/superomni/plan.md` all checked, no review | REVIEW | `code-review` |
 | PR approved, tests green | TEST / PROD-CHECK | `qa` → `verification` → `production-readiness` |
-| `.superomni/production-readiness/` files exist | SHIP | `ship` |
-| `.superomni/executions/` files exist | Continuing run | Resume with the same skill |
-| `.superomni/reviews/` files exist | Post-review | `receiving-code-review` |
+| `docs/superomni/production-readiness/` files exist | SHIP | `ship` |
+| `docs/superomni/executions/` files exist | Continuing run | Resume with the same skill |
+| `docs/superomni/reviews/` files exist | Post-review | `receiving-code-review` |
 
 ### Step 3 — Announce continuity
 Before handling the user's new request, say:
@@ -76,20 +76,24 @@ Check your PROACTIVE setting:
 
 - Any task spanning multiple files or concerns → use `subagent-development`
 - Only skip sub-agents for trivially small tasks (< 5 min, single file, single concern)
-- Sub-agent sessions, code reviews, and execution results are **always saved as Markdown documents** in `.superomni/` for the user to review
+- Sub-agent sessions, code reviews, and execution results are **always saved as Markdown documents** in `docs/superomni/` for the user to review
+- Internal state (improvements, evaluations, harness audits) stays in `.superomni/`
 
 ## Document Output Convention
 
-All major skill outputs are saved as Markdown documents for user review:
+User-facing outputs go in `docs/superomni/`, internal state stays in `.superomni/`:
 
 | Output | Location |
 |--------|----------|
-| Code reviews | `.superomni/reviews/review-[branch]-[date].md` |
-| Execution results | `.superomni/executions/execution-[branch]-[date].md` |
-| Sub-agent sessions | `.superomni/subagents/subagent-[branch]-[date].md` |
-| Production readiness | `.superomni/production-readiness/production-readiness-[branch]-[date].md` |
-| Specs | `spec.md` |
-| Plans | `plan.md` |
+| Specs | `docs/superomni/spec.md` |
+| Plans | `docs/superomni/plan.md` |
+| Code reviews | `docs/superomni/reviews/review-[branch]-[date].md` |
+| Execution results | `docs/superomni/executions/execution-[branch]-[date].md` |
+| Sub-agent sessions | `docs/superomni/subagents/subagent-[branch]-[date].md` |
+| Production readiness | `docs/superomni/production-readiness/production-readiness-[branch]-[date].md` |
+| Improvements (internal) | `.superomni/improvements/improvement-[branch]-[date].md` |
+| Evaluations (internal) | `.superomni/evaluations/evaluation-[branch]-[date].md` |
+| Harness audits (internal) | `.superomni/harness-audits/harness-audit-[branch]-[date].md` |
 
 ## Status Protocol
 
@@ -115,7 +119,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Situation | Use Skill |
 |-----------|----------|
 | Any non-trivial task (default) | `subagent-development` |
-| Starting a new feature/project idea | `brainstorming` |
+| Starting a new feature/project idea | `brainstorm` |
 | Creating an implementation plan | `writing-plans` |
 | Executing a plan step by step | `executing-plans` |
 | Encountering any bug or error | `systematic-debugging` |

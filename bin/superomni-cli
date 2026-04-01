@@ -32,6 +32,8 @@ if (firstArg === 'help' || firstArg === '--help' || firstArg === '-h') {
     console.log('  npx github:Wilder1222/superomni                 Install into current project');
     console.log('  npx github:Wilder1222/superomni --only claude   Claude Code only');
     console.log('  npx github:Wilder1222/superomni --only codex    Codex CLI only');
+    console.log('  npx github:Wilder1222/superomni --only copilot  GitHub Copilot only');
+    console.log('  npx github:Wilder1222/superomni --force         Force reinstall');
     console.log('  npx github:Wilder1222/superomni --dry-run       Preview changes');
     console.log('  npx github:Wilder1222/superomni --verbose       Detailed output');
     console.log('  superomni upgrade                               Upgrade to latest');
@@ -45,6 +47,7 @@ for (let i = 0; i < args.length; i++) {
     if (a === '--only')         { opts.only = args[++i]; }
     else if (a === '--skip')    { opts.skip.push(args[++i]); }
     else if (a === '--dry-run') { opts.dryRun = true; }
+    else if (a === '--force')   { opts.force = true; }
     else if (a === '--verbose') { opts.verbose = true; }
 }
 

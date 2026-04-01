@@ -116,7 +116,7 @@ Harnesses accumulate entropy over time: stale docs, drifted constraints, dead co
 │                                                              │
 │  ┌─────────────────────────────────────────────────────┐     │
 │  │              SKILLS (behavior specs)                │     │
-│  │  P0: using-skills, brainstorming, writing-plans,    │     │
+│  │  P0: using-skills, brainstorm, writing-plans,    │     │
 │  │      executing-plans, systematic-debugging           │     │
 │  │  P1: verification, code-review, self-improvement,   │     │
 │  │      production-readiness, harness-engineering       │     │

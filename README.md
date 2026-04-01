@@ -8,7 +8,7 @@ superomni combines the best ideas from [obra/superpowers](https://github.com/obr
 
 ## What Is This?
 
-superomni is a collection of **skills** — structured behavior specifications for AI coding assistants. Each skill tells Claude Code exactly how to handle a specific type of work: brainstorming, planning, debugging, testing, reviewing, shipping.
+superomni is a collection of **skills** — structured behavior specifications for AI coding assistants. Each skill tells Claude Code exactly how to handle a specific type of work: brainstorm, planning, debugging, testing, reviewing, shipping.
 
 The framework is built on one core philosophy:
 
@@ -22,72 +22,102 @@ Plan only what you need. But what you decide to build — build it fully.
 
 ### Install
 
-Installation is **fully automatic** — use the method that matches your workflow:
+Pick the method that matches your AI CLI:
 
 ---
 
-**① Claude Code — marketplace install (recommended):**
-
-Inside a Claude Code session:
+#### Claude Code (marketplace plugin — recommended)
 
 ```
 /plugin marketplace add Wilder1222/superomni
 ```
 
-Claude Code fetches the `.claude-plugin/marketplace.json` manifest, installs all skills, registers slash commands, and sets up session hooks automatically.
-
-Then start with:
-
-```
-/vibe
-```
+Installs skills, slash commands, and session hooks automatically. Then type `/vibe` to start.
 
 ---
 
-**② Global install (Codex, Gemini CLI, GitHub Copilot):**
+#### Codex CLI
 
 ```bash
+# Project-level install (generates AGENTS.md + .superomni/)
+npx github:Wilder1222/superomni --only codex
+
+# Global install (symlinks to ~/.codex/skills/ + generates ~/.codex/AGENTS.md)
 npm install -g github:Wilder1222/superomni
 ```
 
-The npm `postinstall` hook automatically detects your platform and links skills, commands, and hooks to:
-- macOS: `~/Library/Application Support/...`
-- Linux: `~/.local/share/...`
-- Windows: `%APPDATA%...`
+Open your project in Codex — it reads `AGENTS.md` automatically.
 
 ---
 
-**③ Project-level install via npx (fastest for one-off use):**
+#### GitHub Copilot
 
 ```bash
-npx github:Wilder1222/superomni
+# Project-level install (generates .github/copilot-instructions.md + .superomni/)
+npx github:Wilder1222/superomni --only copilot
 ```
 
-Automatically:
-- Creates `.superomni/` directory in your project
-- Generates config file for your AI platform:
-
-| Platform | Config file |
-|----------|-------------|
-| Claude Code | `CLAUDE.md` |
-| Codex CLI | `AGENTS.md` |
-| Gemini CLI | `GEMINI.md` |
-| GitHub Copilot | `.github/copilot-instructions.md` |
-
-Skills are available immediately — no global install needed.
+Copilot loads `.github/copilot-instructions.md` on every chat session.
 
 ---
 
-### Use in Claude Code
+#### Gemini CLI
 
-Open your project in Claude Code. Skills activate automatically via session hooks.
+```bash
+# Project-level install (generates GEMINI.md + .superomni/)
+npx github:Wilder1222/superomni --only gemini
 
-Start with:
-- `/vibe` — **activate the full framework** and launch the guided default workflow
+# Global install (symlinks to ~/.gemini/skills/ + generates ~/.gemini/GEMINI.md)
+npm install -g github:Wilder1222/superomni
+```
+
+---
+
+#### All platforms at once
+
+```bash
+# Project-level: generates config files for all detected platforms
+npx github:Wilder1222/superomni
+
+# Global: symlinks skills to all detected CLI tool directories
+npm install -g github:Wilder1222/superomni
+```
+
+| Platform | Project config file | Global config location |
+|----------|--------------------|-----------------------|
+| Claude Code | `CLAUDE.md` | `~/.claude/skills/superomni` |
+| Codex CLI | `AGENTS.md` | `~/.codex/AGENTS.md` |
+| Gemini CLI | `GEMINI.md` | `~/.gemini/GEMINI.md` |
+| GitHub Copilot | `.github/copilot-instructions.md` | (project-only) |
+
+#### CLI Options
+
+```bash
+npx github:Wilder1222/superomni --only claude   # Single platform
+npx github:Wilder1222/superomni --skip gemini   # Skip a platform
+npx github:Wilder1222/superomni --force          # Overwrite existing files
+npx github:Wilder1222/superomni --dry-run        # Preview without changes
+superomni upgrade                                 # Upgrade global install
+```
+
+---
+
+### Use
+
+Open your project in your AI CLI. Skills activate automatically.
+
+**Claude Code** — use slash commands:
+- `/vibe` — activate the full framework
 - `/brainstorm` — design a feature from scratch
 - `/write-plan` — turn an idea into an executable plan
 - `/execute-plan` — run the plan step by step
 - `/review` — structured code review
+
+**Codex / Copilot / Gemini** — use trigger phrases:
+- "brainstorm this feature" — activates brainstorm skill
+- "write a plan" — activates writing-plans skill
+- "review this code" — activates code-review skill
+- "debug this" — activates systematic-debugging skill
 
 ---
 
@@ -98,8 +128,8 @@ Start with:
 | Skill | When to Use | Key Output |
 |-------|------------|------------|
 | `using-skills` | Always active | Loads the framework |
-| `brainstorming` | New feature/design | `spec.md` |
-| `writing-plans` | Planning implementation | `plan.md` |
+| `brainstorm` | New feature/design | `docs/superomni/spec.md` |
+| `writing-plans` | Planning implementation | `docs/superomni/plan.md` |
 | `executing-plans` | Running a plan | Code changes + report |
 | `systematic-debugging` | Any bug/error | Debug report + fix |
 
@@ -261,7 +291,7 @@ superomni/
 │
 ├── skills/                   ← Skill definitions
 │   ├── using-skills/         ← Meta-skill (always active)
-│   ├── brainstorming/        ← Design → Spec
+│   ├── brainstorm/        ← Design → Spec
 │   ├── writing-plans/        ← Spec → Plan
 │   ├── executing-plans/      ← Plan → Code
 │   ├── systematic-debugging/ ← Debug with Scope Lock + Debug Report

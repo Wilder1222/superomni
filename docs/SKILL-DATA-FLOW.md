@@ -14,28 +14,30 @@ previous skill produced. This is fragile. Each skill should:
 
 ## Contract Directory
 
-All inter-skill artifacts are stored in `.superomni/` with predictable paths:
+User-facing artifacts go in `docs/superomni/`, internal state stays in `.superomni/`:
 
 ```
-.superomni/
-├── reviews/           ← code-review output
-├── executions/        ← executing-plans output
-├── evaluations/       ← verification output (task evaluation reports)
-├── subagents/         ← subagent-development session records
+docs/superomni/
+├── spec.md                ← brainstorm output
+├── plan.md                ← writing-plans output
+├── reviews/               ← code-review output
+├── executions/            ← executing-plans output
+├── subagents/             ← subagent-development session records
 ├── production-readiness/  ← production-readiness output
-├── improvements/      ← self-improvement output
-├── harness-audits/    ← harness-engineering output
-spec.md                ← brainstorming output (project root)
-plan.md                ← writing-plans output (project root)
+
+.superomni/
+├── evaluations/       ← verification output (internal)
+├── improvements/      ← self-improvement output (internal)
+├── harness-audits/    ← harness-engineering output (internal)
 ```
 
 ## Per-Skill Contracts
 
-### `brainstorming` → `writing-plans`
+### `brainstorm` → `writing-plans`
 
-**Produces:** `spec.md`
+**Produces:** `docs/superomni/spec.md`
 
-Required sections in `spec.md`:
+Required sections in `docs/superomni/spec.md`:
 ```markdown
 ## Problem Statement
 [Clear description of the problem]
@@ -54,15 +56,15 @@ Required sections in `spec.md`:
 - [ ] [Criterion 2] — verifiable, specific
 ```
 
-**Consumed by:** `writing-plans` reads `spec.md` to build `plan.md`
+**Consumed by:** `writing-plans` reads `docs/superomni/spec.md` to build `docs/superomni/plan.md`
 
 ---
 
 ### `writing-plans` → `executing-plans`
 
-**Produces:** `plan.md`
+**Produces:** `docs/superomni/plan.md`
 
-Required structure in `plan.md`:
+Required structure in `docs/superomni/plan.md`:
 ```markdown
 ## Steps
 
@@ -76,19 +78,19 @@ Required structure in `plan.md`:
 ### Step 2: ...
 
 ## Acceptance Criteria
-[Copied from spec.md or restated here]
+[Copied from docs/superomni/spec.md or restated here]
 
 ## Risk Flags
 - [Risk 1]: [Mitigation]
 ```
 
-**Consumed by:** `executing-plans` reads `plan.md` step by step
+**Consumed by:** `executing-plans` reads `docs/superomni/plan.md` step by step
 
 ---
 
 ### `executing-plans` → `verification`
 
-**Produces:** `.superomni/executions/execution-[branch]-[date].md`
+**Produces:** `docs/superomni/executions/execution-[branch]-[date].md`
 
 Required sections:
 ```markdown
@@ -138,7 +140,7 @@ Required sections:
 
 ## Goal Alignment
 
-Spec/plan used: [spec.md | plan.md | user request]
+Spec/plan used: [docs/superomni/spec.md | docs/superomni/plan.md | user request]
 
 | Criterion | Met? | Evidence |
 |-----------|------|----------|
@@ -155,7 +157,7 @@ Spec/plan used: [spec.md | plan.md | user request]
 
 ### `code-review` → `receiving-code-review`
 
-**Produces:** `.superomni/reviews/review-[branch]-[date].md`
+**Produces:** `docs/superomni/reviews/review-[branch]-[date].md`
 
 Required sections:
 ```markdown
@@ -179,7 +181,7 @@ Required sections:
 
 ### `production-readiness` → `ship`
 
-**Produces:** `.superomni/production-readiness/production-readiness-[branch]-[date].md`
+**Produces:** `docs/superomni/production-readiness/production-readiness-[branch]-[date].md`
 
 Required sections:
 ```markdown
@@ -308,10 +310,10 @@ if [ -n "$LATEST_EVAL" ]; then
 fi
 
 # Read spec for acceptance criteria
-cat spec.md 2>/dev/null | grep -A 20 "Acceptance Criteria" | head -25 || true
+cat docs/superomni/spec.md 2>/dev/null | grep -A 20 "Acceptance Criteria" | head -25 || true
 
 # Read latest review for open comments
-LATEST_REVIEW=$(find .superomni/reviews -name "*.md" -type f 2>/dev/null | sort | tail -1)
+LATEST_REVIEW=$(find docs/superomni/reviews -name "*.md" -type f 2>/dev/null | sort | tail -1)
 if [ -n "$LATEST_REVIEW" ]; then
   grep "^- \[" "$LATEST_REVIEW" | head -20
 fi

@@ -273,7 +273,7 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 ## 7. Fusion Outcome: What's New vs What's Absorbed
 
 ### Directly absorbed from superpowers (10 skills)
-- brainstorming (+ Search Before Building)
+- brainstorm (+ Search Before Building)
 - writing-plans (+ 6 principles, Completeness Check)
 - executing-plans (+ Status Protocol)
 - subagent-development (full prompt template suite)

@@ -45,7 +45,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls spec.md plan.md .superomni/ 2>/dev/null
+   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -80,8 +80,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -117,7 +117,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # /autoplan — Automated Plan Review Pipeline
 
 **Goal:** One command. Rough plan in, fully reviewed plan out. Auto-decides mechanical questions using the 6 Decision Principles. Surfaces only taste decisions for human approval.
@@ -145,7 +144,7 @@ Auto-decisions are provisional. The final approval gate is mandatory — all tas
 
 ```bash
 # Look for plan documents
-ls plan.md PLAN.md plan/*.md docs/plan.md 2>/dev/null || echo "No plan file found"
+ls docs/superomni/plan.md plan.md PLAN.md 2>/dev/null || echo "No plan file found"
 git diff --name-only HEAD~1 2>/dev/null | grep -i plan || true
 ```
 
@@ -246,7 +245,7 @@ Reply with one option — your choice is immediate confirmation, no second submi
 
 **Confirmation rule:** This is a single-choice question. The moment the user types A, B, C, or D (with custom text for D), treat that as confirmed and act immediately — do NOT ask "Are you sure?" or prompt again.
 
-If approved → write the final reviewed `plan.md` with all auto-decisions incorporated.
+If approved → write the final reviewed `docs/superomni/plan.md` with all auto-decisions incorporated.
 If reviewing individually → present each taste decision as its own single-choice (pick A or B, or type your own idea); each answer confirms that decision immediately before moving to the next.
 
 ---
@@ -259,7 +258,7 @@ AUTOPLAN COMPLETE
 Phases:      Strategy | Design (if UI) | Engineering
 Auto-decided: [N] mechanical decisions
 Taste decisions: [N] (all resolved at gate)
-Plan:        plan.md (updated)
+Plan:        docs/superomni/plan.md (updated)
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════

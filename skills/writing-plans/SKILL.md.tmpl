@@ -25,7 +25,7 @@ Before writing, confirm:
 - [ ] What already exists that can be reused? (DRY principle)
 - [ ] What are the hard constraints? (timeline, tech stack, team)
 
-Run: `ls -la && find . -name "spec.md" -o -name "*.spec.md" 2>/dev/null | head -5`
+Run: `ls -la docs/superomni/ && find . -name "spec.md" -path "*/superomni/*" 2>/dev/null | head -5`
 
 ## Phase 2: Completeness Check
 
@@ -42,7 +42,7 @@ Apply the **Completeness is Cheap** principle. Before writing the plan, list:
 
 ## Phase 3: Plan Structure
 
-Write `plan.md` (or specified path) with this structure:
+Write `docs/superomni/plan.md` with this structure:
 
 ```markdown
 # Implementation Plan: [Feature Name]

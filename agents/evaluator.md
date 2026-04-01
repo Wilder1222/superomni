@@ -40,7 +40,7 @@ You may not write "this looks wrong" without citing exactly what you saw and why
 
 Before evaluating anything, establish what "good" looks like:
 
-1. Read the spec or plan (if available): `cat spec.md plan.md 2>/dev/null`
+1. Read the spec or plan (if available): `cat docs/superomni/spec.md docs/superomni/plan.md 2>/dev/null`
 2. Read the task description or PR context
 3. Identify the acceptance criteria — if none exist, derive them from the spec
 4. Confirm the evaluation scope (what is in scope? what is out?)

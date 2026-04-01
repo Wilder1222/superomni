@@ -43,7 +43,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls spec.md plan.md .superomni/ 2>/dev/null
+   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -78,8 +78,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
-
 
 # Sub-Agent Development
 
@@ -280,8 +279,8 @@ After the sub-agent session is complete, save the full session record as a Markd
 _SA_DATE=$(date +%Y%m%d-%H%M%S)
 _SA_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
 _SA_FILE="subagent-${_SA_BRANCH}-${_SA_DATE}.md"
-mkdir -p .superomni/subagents
-cat > ".superomni/subagents/${_SA_FILE}" << EOF
+mkdir -p docs/superomni/subagents
+cat > "docs/superomni/subagents/${_SA_FILE}" << EOF
 # Sub-Agent Session: ${_SA_BRANCH}
 
 **Date:** ${_SA_DATE}
@@ -304,7 +303,7 @@ cat > ".superomni/subagents/${_SA_FILE}" << EOF
 [DONE | DONE_WITH_CONCERNS | BLOCKED]
 [Any concerns or issues]
 EOF
-echo "Sub-agent session saved to .superomni/subagents/${_SA_FILE}"
+echo "Sub-agent session saved to docs/superomni/subagents/${_SA_FILE}"
 ```
 
-Write the full session record (agents dispatched, wave breakdown, outputs, integration summary, and final status, formatted as Markdown) to `.superomni/subagents/subagent-[branch]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.
+Write the full session record (agents dispatched, wave breakdown, outputs, integration summary, and final status, formatted as Markdown) to `docs/superomni/subagents/subagent-[branch]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.

@@ -1,6 +1,6 @@
 # /brainstorm
 
-Trigger the **brainstorming** skill.
+Trigger the **brainstorm** skill.
 
 Use this command when you want to:
 - Design a new feature from scratch
@@ -21,17 +21,17 @@ Examples:
 
 ## What Happens
 
-1. The brainstorming skill activates
+1. The brainstorm skill activates
 2. The agent asks ONE clarifying question at a time
 3. Multiple options are generated and evaluated
 4. A visual diagram is created if helpful
-5. A `spec.md` document is written
+5. A `docs/superomni/spec.md` document is written
 6. The spec is reviewed for quality
 
 ## Output
 
-A reviewed `spec.md` file ready to feed into `/write-plan`.
+A reviewed `docs/superomni/spec.md` file ready to feed into `/write-plan`.
 
 ## Skill Reference
 
-See `skills/brainstorming/SKILL.md` for the full protocol.
+See `skills/brainstorm/SKILL.md` for the full protocol.

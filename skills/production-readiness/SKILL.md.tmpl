@@ -30,12 +30,12 @@ Before checking operational concerns, confirm the output actually achieves what 
 
 ```bash
 # Read acceptance criteria from spec
-cat spec.md 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
-  cat plan.md 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
-  echo "No spec.md or plan.md found — document what you are verifying against"
+cat docs/superomni/spec.md 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
+  cat docs/superomni/plan.md 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
+  echo "No docs/superomni/spec.md or docs/superomni/plan.md found — document what you are verifying against"
 ```
 
-For **each acceptance criterion** found in spec.md:
+For **each acceptance criterion** found in docs/superomni/spec.md:
 
 | Criterion | Status | Evidence |
 |-----------|--------|----------|
@@ -44,7 +44,7 @@ For **each acceptance criterion** found in spec.md:
 
 **Gate:** ALL P0 acceptance criteria must be ✓ before proceeding.
 
-If no spec.md exists:
+If no docs/superomni/spec.md exists:
 - Document what user goal this change fulfills
 - List the observable outcomes that prove the goal is met
 
@@ -204,8 +204,8 @@ If verdict is NOT_READY:
 _PR_DATE=$(date +%Y%m%d-%H%M%S)
 _PR_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
 _PR_FILE="production-readiness-${_PR_BRANCH}-${_PR_DATE}.md"
-mkdir -p .superomni/production-readiness
-echo "Production readiness report saved to .superomni/production-readiness/${_PR_FILE}"
+mkdir -p docs/superomni/production-readiness
+echo "Production readiness report saved to docs/superomni/production-readiness/${_PR_FILE}"
 ```
 
-Write the full PRODUCTION READINESS REPORT block to `.superomni/production-readiness/production-readiness-[branch]-[date].md`.
+Write the full PRODUCTION READINESS REPORT block to `docs/superomni/production-readiness/production-readiness-[branch]-[date].md`.

@@ -24,8 +24,7 @@
         "build": "bash lib/gen-skill-docs.sh",
         "ensure:lf": "node lib/ensure-setup-lf.js",
         "test": "bash lib/validate-skills.sh",
-        "setup": "node lib/setup.js",
-        "postinstall": "node lib/postinstall.js"
+        "setup": "node lib/setup.js"
     },
     "files": [
         ".claude-plugin/",

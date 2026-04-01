@@ -3,7 +3,7 @@ name: executing-plans
 description: |
   Use when executing an implementation plan step by step.
   Triggers: "execute plan", "implement this plan", "start executing", "run the plan".
-  Requires: a plan.md or similar plan document to exist.
+  Requires: a docs/superomni/plan.md or similar plan document to exist.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -42,7 +42,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls spec.md plan.md .superomni/ 2>/dev/null
+   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -77,8 +77,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Executing Plans
 
 **Goal:** Execute a written implementation plan precisely, with verification at each stage — running independent steps in parallel to minimize elapsed time.
@@ -137,7 +136,7 @@ update the plan, skill, or constraint — then retry. Never brute-force through 
 
 ```bash
 # Find the plan document
-find . -name "plan.md" -o -name "*.plan.md" 2>/dev/null | head -5
+find . -name "plan.md" -path "*/superomni/*" 2>/dev/null | head -5
 ```
 
 Read the plan. Confirm:
@@ -315,8 +314,8 @@ After completing execution, save the results as a Markdown document:
 _EXEC_DATE=$(date +%Y%m%d-%H%M%S)
 _EXEC_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
 _EXEC_FILE="execution-${_EXEC_BRANCH}-${_EXEC_DATE}.md"
-mkdir -p .superomni/executions
-cat > ".superomni/executions/${_EXEC_FILE}" << EOF
+mkdir -p docs/superomni/executions
+cat > "docs/superomni/executions/${_EXEC_FILE}" << EOF
 # Execution Results: ${_EXEC_BRANCH}
 
 **Date:** ${_EXEC_DATE}
@@ -332,9 +331,9 @@ cat > ".superomni/executions/${_EXEC_FILE}" << EOF
 
 [Paste all step completion/blocked entries here]
 EOF
-echo "Execution results saved to .superomni/executions/${_EXEC_FILE}"
+echo "Execution results saved to docs/superomni/executions/${_EXEC_FILE}"
 ```
 
-Write the full execution log (wave plan, all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `.superomni/executions/execution-[branch]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
+Write the full execution log (wave plan, all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `docs/superomni/executions/execution-[branch]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
 
 Then trigger the `verification` skill.

@@ -12,7 +12,7 @@ Philosophy: **Plan Lean, Execute Complete**
 |-------|---------|----------|
 | using-skills | Always active | P0 |
 | subagent-development | Default working mode — use for all non-trivial tasks | P0 |
-| brainstorming | "brainstorm", "design", "spec" | P0 |
+| brainstorm | "brainstorm", "design", "spec" | P0 |
 | writing-plans | "write plan", "plan this" | P0 |
 | executing-plans | "execute", "implement" | P0 |
 | systematic-debugging | Any bug/error | P0 |
@@ -46,7 +46,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | Command | Description |
 |---------|-------------|
 | `/vibe` | Activate full framework + launch guided default workflow |
-| `/brainstorm` | Design a feature — produces `spec.md` |
+| `/brainstorm` | Design a feature — produces `docs/superomni/spec.md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
@@ -67,20 +67,21 @@ Skills store state in `~/.omni-skills/`:
 
 ## Document Output Convention
 
-All review content, execution results, and sub-agent session records are saved as Markdown documents in the project directory under `.superomni/`:
+User-facing outputs go in `docs/superomni/`, internal state stays in `.superomni/`:
 
 | Output Type | Directory | File Pattern |
 |-------------|-----------|-------------|
-| Code reviews | `.superomni/reviews/` | `review-[branch]-[date].md` |
-| Execution results | `.superomni/executions/` | `execution-[branch]-[date].md` |
-| Sub-agent sessions | `.superomni/subagents/` | `subagent-[branch]-[date].md` |
-| Production readiness | `.superomni/production-readiness/` | `production-readiness-[branch]-[date].md` |
-| Harness audits | `.superomni/harness-audits/` | `harness-audit-[branch]-[date].md` |
-| Improvement reports | `.superomni/improvements/` | `improvement-[branch]-[date].md` |
-| Specs | project root | `spec.md` |
-| Plans | project root | `plan.md` |
+| Specs | `docs/superomni/` | `spec.md` |
+| Plans | `docs/superomni/` | `plan.md` |
+| Code reviews | `docs/superomni/reviews/` | `review-[branch]-[date].md` |
+| Execution results | `docs/superomni/executions/` | `execution-[branch]-[date].md` |
+| Sub-agent sessions | `docs/superomni/subagents/` | `subagent-[branch]-[date].md` |
+| Production readiness | `docs/superomni/production-readiness/` | `production-readiness-[branch]-[date].md` |
+| Improvements (internal) | `.superomni/improvements/` | `improvement-[branch]-[date].md` |
+| Evaluations (internal) | `.superomni/evaluations/` | `evaluation-[branch]-[date].md` |
+| Harness audits (internal) | `.superomni/harness-audits/` | `harness-audit-[branch]-[date].md` |
 
-These documents serve as a permanent, reviewable audit trail for the user.
+User-facing documents in `docs/superomni/` serve as a permanent, reviewable audit trail.
 
 ## Notes for Claude
 
@@ -89,4 +90,4 @@ These documents serve as a permanent, reviewable audit trail for the user.
 - **Project tools first:** Always prefer built-in skills (`skills/`) and agents (`agents/`) over any external tools. Only reach for external tools when no project-local skill or agent is suitable.
 - Respect PROACTIVE mode — if false, only run skills when explicitly asked
 - Use status protocol: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
-- **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`spec.md`, `plan.md`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
+- **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/spec.md`, `docs/superomni/plan.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.

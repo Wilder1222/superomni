@@ -43,7 +43,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls spec.md plan.md .superomni/ 2>/dev/null
+   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -78,8 +78,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -115,7 +115,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Production Readiness Gate
 
 **Goal:** Verify that code is ready for production deployment — beyond just passing tests.
@@ -136,12 +135,12 @@ Before checking operational concerns, confirm the output actually achieves what 
 
 ```bash
 # Read acceptance criteria from spec
-cat spec.md 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
-  cat plan.md 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
-  echo "No spec.md or plan.md found — document what you are verifying against"
+cat docs/superomni/spec.md 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
+  cat docs/superomni/plan.md 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
+  echo "No docs/superomni/spec.md or docs/superomni/plan.md found — document what you are verifying against"
 ```
 
-For **each acceptance criterion** found in spec.md:
+For **each acceptance criterion** found in docs/superomni/spec.md:
 
 | Criterion | Status | Evidence |
 |-----------|--------|----------|
@@ -150,7 +149,7 @@ For **each acceptance criterion** found in spec.md:
 
 **Gate:** ALL P0 acceptance criteria must be ✓ before proceeding.
 
-If no spec.md exists:
+If no docs/superomni/spec.md exists:
 - Document what user goal this change fulfills
 - List the observable outcomes that prove the goal is met
 
@@ -310,8 +309,8 @@ If verdict is NOT_READY:
 _PR_DATE=$(date +%Y%m%d-%H%M%S)
 _PR_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
 _PR_FILE="production-readiness-${_PR_BRANCH}-${_PR_DATE}.md"
-mkdir -p .superomni/production-readiness
-echo "Production readiness report saved to .superomni/production-readiness/${_PR_FILE}"
+mkdir -p docs/superomni/production-readiness
+echo "Production readiness report saved to docs/superomni/production-readiness/${_PR_FILE}"
 ```
 
-Write the full PRODUCTION READINESS REPORT block to `.superomni/production-readiness/production-readiness-[branch]-[date].md`.
+Write the full PRODUCTION READINESS REPORT block to `docs/superomni/production-readiness/production-readiness-[branch]-[date].md`.

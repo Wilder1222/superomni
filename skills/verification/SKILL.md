@@ -42,7 +42,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls spec.md plan.md .superomni/ 2>/dev/null
+   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -77,8 +77,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Verification Before Completion
 
 **Goal:** Systematically verify that work is complete and correct before declaring done.
@@ -134,18 +133,18 @@ Before any technical checks, verify the output achieves what the user originally
 
 ```bash
 # Read acceptance criteria from spec or plan
-cat spec.md 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
-  cat plan.md 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
-  echo "No spec.md or plan.md found"
+cat docs/superomni/spec.md 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
+  cat docs/superomni/plan.md 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
+  echo "No docs/superomni/spec.md or docs/superomni/plan.md found"
 ```
 
-For **each acceptance criterion** in spec.md or plan.md:
+For **each acceptance criterion** in docs/superomni/spec.md or docs/superomni/plan.md:
 
 | Criterion | Met? | Evidence |
 |-----------|------|----------|
 | [criterion from spec] | ✓/✗ | [specific proof: test output, observable behavior, or code reference] |
 
-**If spec.md does not exist:**
+**If docs/superomni/spec.md does not exist:**
 - State what user goal this change fulfills
 - List observable outcomes that prove the goal is met
 
@@ -247,7 +246,7 @@ Task:              [what was being implemented/fixed]
 Tests run:         [N tests, N passing, N failing]
 
 Goal Alignment:
-  Spec/plan used:  [spec.md | plan.md | user request]
+  Spec/plan used:  [docs/superomni/spec.md | docs/superomni/plan.md | user request]
   ✓/✗ [acceptance criterion 1] — [evidence]
   ✓/✗ [acceptance criterion 2] — [evidence]
   User goal achieved: YES | PARTIAL | NO
@@ -300,7 +299,7 @@ Write the full VERIFICATION REPORT block (including all checklist results, test 
 
 ## Goal Alignment
 
-Spec/plan used: [spec.md | plan.md | user request]
+Spec/plan used: [docs/superomni/spec.md | docs/superomni/plan.md | user request]
 
 | Criterion | Met? | Evidence |
 |-----------|------|----------|

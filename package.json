@@ -39,7 +39,8 @@
         "CLAUDE.md",
         "ETHOS.md",
         "LICENSE",
-        "claude-skill.json"
+        "claude-skill.json",
+        "INSTALL_ARCHITECTURE.md"
     ],
     "repository": {
         "type": "git",

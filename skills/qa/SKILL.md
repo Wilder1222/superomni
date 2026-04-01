@@ -114,6 +114,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Quality Assurance
 
 **Goal:** Ensure code changes are correct, well-tested, and free of regressions through systematic test analysis, gap filling, and edge case exploration.

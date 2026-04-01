@@ -39,11 +39,11 @@ Installs skills, slash commands, and session hooks automatically. Then type `/vi
 #### Codex CLI
 
 ```bash
-# Project-level install (generates AGENTS.md + .superomni/)
-npx github:Wilder1222/superomni --only codex
+# Quick install (recommended)
+bash <(curl -fsSL https://raw.githubusercontent.com/Wilder1222/superomni/main/install.sh) --only codex
 
-# Global install (symlinks to ~/.codex/skills/ + generates ~/.codex/AGENTS.md)
-npm install -g github:Wilder1222/superomni
+# Or clone + run manually
+git clone --depth 1 https://github.com/Wilder1222/superomni.git /tmp/superomni && node /tmp/superomni/bin/superomni-cli --only codex && rm -rf /tmp/superomni
 ```
 
 Open your project in Codex — it reads `AGENTS.md` automatically.
@@ -53,8 +53,11 @@ Open your project in Codex — it reads `AGENTS.md` automatically.
 #### GitHub Copilot
 
 ```bash
-# Project-level install (generates .github/copilot-instructions.md + .superomni/)
-npx github:Wilder1222/superomni --only copilot
+# Quick install (recommended)
+bash <(curl -fsSL https://raw.githubusercontent.com/Wilder1222/superomni/main/install.sh) --only copilot
+
+# Or clone + run manually
+git clone --depth 1 https://github.com/Wilder1222/superomni.git /tmp/superomni && node /tmp/superomni/bin/superomni-cli --only copilot && rm -rf /tmp/superomni
 ```
 
 Copilot loads `.github/copilot-instructions.md` on every chat session.
@@ -64,11 +67,8 @@ Copilot loads `.github/copilot-instructions.md` on every chat session.
 #### Gemini CLI
 
 ```bash
-# Project-level install (generates GEMINI.md + .superomni/)
-npx github:Wilder1222/superomni --only gemini
-
-# Global install (symlinks to ~/.gemini/skills/ + generates ~/.gemini/GEMINI.md)
-npm install -g github:Wilder1222/superomni
+# Quick install
+bash <(curl -fsSL https://raw.githubusercontent.com/Wilder1222/superomni/main/install.sh) --only gemini
 ```
 
 ---
@@ -76,11 +76,11 @@ npm install -g github:Wilder1222/superomni
 #### All platforms at once
 
 ```bash
-# Project-level: generates config files for all detected platforms
-npx github:Wilder1222/superomni
+# Quick install (auto-detects all platforms)
+bash <(curl -fsSL https://raw.githubusercontent.com/Wilder1222/superomni/main/install.sh)
 
-# Global: symlinks skills to all detected CLI tool directories
-npm install -g github:Wilder1222/superomni
+# Windows PowerShell: clone + run
+git clone --depth 1 https://github.com/Wilder1222/superomni.git $env:TEMP\superomni; node $env:TEMP\superomni\bin\superomni-cli; Remove-Item -Recurse $env:TEMP\superomni
 ```
 
 | Platform | Project config file | Global config location |
@@ -93,11 +93,11 @@ npm install -g github:Wilder1222/superomni
 #### CLI Options
 
 ```bash
-npx github:Wilder1222/superomni --only claude   # Single platform
-npx github:Wilder1222/superomni --skip gemini   # Skip a platform
-npx github:Wilder1222/superomni --force          # Overwrite existing files
-npx github:Wilder1222/superomni --dry-run        # Preview without changes
-superomni upgrade                                 # Upgrade global install
+# All flags work with install.sh or direct node invocation:
+bash <(curl -fsSL .../install.sh) --only claude   # Single platform
+bash <(curl -fsSL .../install.sh) --skip gemini   # Skip a platform
+bash <(curl -fsSL .../install.sh) --force          # Overwrite existing files
+bash <(curl -fsSL .../install.sh) --dry-run        # Preview without changes
 ```
 
 ---

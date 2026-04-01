@@ -114,6 +114,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # /retro — Engineering Retrospective
 
 **Goal:** Understand what was shipped, patterns in how you work, and trends over time.

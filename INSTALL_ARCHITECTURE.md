@@ -35,7 +35,7 @@ Each platform gets a tailored instruction file generated from `lib/templates/`:
 | Platform | Template | Output file | Notes |
 |----------|----------|-------------|-------|
 | Claude Code | `claude-instructions.js` | `CLAUDE.md` | Includes slash commands |
-| Codex CLI | `codex-instructions.js` | `AGENTS.md` | Trigger phrases, no slash commands |
+| Codex CLI | `codex-instructions.js` | `AGENTS.md` | Slash commands + trigger phrases |
 | Gemini CLI | `codex-instructions.js` | `GEMINI.md` | Same format as Codex |
 | GitHub Copilot | `copilot-instructions.js` | `.github/copilot-instructions.md` | References skill directories |
 
@@ -63,7 +63,9 @@ lib/setup.js
 ```
 npm install -g github:Wilder1222/superomni
     ↓
-postinstall.js detects global → calls lib/setup.js
+superomni setup        (user runs manually after install)
+    ↓
+bin/superomni-cli "setup" command → lib/setup.js (no targetDir = global mode)
     ↓
 lib/setup.js
     ├── Claude:  symlink → ~/.claude/skills/superomni + commands + hooks
@@ -98,7 +100,7 @@ Claude Code reads .claude-plugin/marketplace.json
 | File | Purpose |
 |------|---------|
 | `lib/setup.js` | Core installer (600+ lines, pure Node.js) |
-| `lib/postinstall.js` | npm postinstall hook (delegates to setup.js) |
+| `lib/postinstall.js` | Legacy postinstall hook (no longer used in package.json) |
 | `bin/superomni-cli` | CLI entry point (arg parsing, mode detection) |
 | `lib/templates/claude-instructions.js` | Claude Code instruction template |
 | `lib/templates/codex-instructions.js` | Codex CLI instruction template |

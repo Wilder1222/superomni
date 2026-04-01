@@ -7,6 +7,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.0] — 2026-04
+
+### Changed
+- **Installation redesign**: `npx github:Wilder1222/superomni` is now the primary project-level install method for all platforms (Claude, Codex, Copilot, Gemini). Global install via `npm install -g` + `superomni setup`.
+- **Platform-specific instruction templates**: Each CLI gets tailored config files — `CLAUDE.md` (with slash commands), `AGENTS.md` (with trigger phrases + command file mapping for Codex), `.github/copilot-instructions.md` (with skill directory references for Copilot), `GEMINI.md`.
+- **Document output paths**: User-facing outputs (spec, plan, reviews, executions, subagent sessions, production readiness) now write to `docs/superomni/`. Internal state (improvements, evaluations, harness audits) stays in `.superomni/`.
+- Renamed `brainstorming` skill to `brainstorm` for consistency across the project.
+- Renamed `scripts.build` to `scripts.gen-skills` to avoid triggering npm git dep preparation.
+- CLI rewritten with explicit `install` (default, project-level) and `setup` (global) commands.
+
+### Fixed
+- Removed `scripts.postinstall` — it triggered npm 11's git dep preparation bug (npm/cli#8131), causing `npx` to fail silently.
+- Added `--force` flag to overwrite existing installations.
+
+### Added
+- `lib/templates/claude-instructions.js` — Claude Code instruction generator
+- `lib/templates/codex-instructions.js` — Codex CLI instruction generator (includes slash command → file mapping)
+- `lib/templates/copilot-instructions.js` — GitHub Copilot instruction generator
+- `install.sh` — curl-pipe-bash installer as fallback
+
+---
+
 ## [0.4.1] — 2026-03
 
 ### Fixed

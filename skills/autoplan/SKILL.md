@@ -117,6 +117,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # /autoplan — Automated Plan Review Pipeline
 
 **Goal:** One command. Rough plan in, fully reviewed plan out. Auto-decides mechanical questions using the 6 Decision Principles. Surfaces only taste decisions for human approval.

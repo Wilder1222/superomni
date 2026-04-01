@@ -114,6 +114,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Plan Review Pipeline
 
 **Goal:** Review a plan through multiple lenses before execution begins. Catch problems before they become expensive mistakes.

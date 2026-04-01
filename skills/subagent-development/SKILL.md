@@ -115,6 +115,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Sub-Agent Development
 
 **Goal:** Decompose work across specialized sub-agents, each with a focused context and clear output contract. **This is the default working mode for all non-trivial tasks.**

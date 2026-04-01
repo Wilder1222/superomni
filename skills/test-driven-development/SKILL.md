@@ -116,6 +116,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Test-Driven Development
 
 **Goal:** Write code that is correct by construction, with tests as the specification.

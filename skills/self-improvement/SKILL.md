@@ -117,7 +117,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Self-Improvement — First-Principles Performance Review
 
 **Goal:** Close the feedback loop on every sprint by systematically evaluating process adherence, agent behavior, and skill effectiveness — then produce concrete improvement actions for the next session.

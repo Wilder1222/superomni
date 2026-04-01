@@ -113,7 +113,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Writing Implementation Plans
 
 **Goal:** Transform a spec or goal into a step-by-step, executable plan that an AI agent can follow.

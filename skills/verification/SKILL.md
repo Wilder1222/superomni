@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Verification Before Completion
 
 **Goal:** Systematically verify that work is complete and correct before declaring done.

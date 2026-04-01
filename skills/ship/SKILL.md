@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # /ship — Release Workflow
 
 **Goal:** Safely release software through a structured, verifiable process.
@@ -201,7 +200,7 @@ npm test 2>&1 | tail -20
 # or: pytest -v && or: go test ./...
 
 # Build verification (if applicable)
-npm run build 2>&1 | tail -10
+npm run gen-skills 2>&1 | tail -10
 # or: go build ./... or: python -m build
 ```
 

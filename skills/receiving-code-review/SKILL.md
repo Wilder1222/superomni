@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Receiving Code Review
 
 **Goal:** Process code review feedback systematically, fix what needs fixing, discuss what needs discussing, and re-request review with a clean diff.

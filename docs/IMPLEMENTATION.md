@@ -102,7 +102,7 @@ Skills are written as `.tmpl` files with `{{PREAMBLE}}` macro:
 bash lib/gen-skill-docs.sh
 
 # Or via npm
-npm run build
+npm run gen-skills
 
 # Build a single skill
 bash lib/gen-skill-docs.sh skills/systematic-debugging/SKILL.md.tmpl

@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Finishing a Branch
 
 **Goal:** Safely and cleanly finish a feature branch and prepare it for merge.

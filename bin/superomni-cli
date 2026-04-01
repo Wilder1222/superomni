@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
-const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 const packageRoot = path.resolve(__dirname, '..');
 const pkgPath = path.join(packageRoot, 'package.json');
@@ -13,6 +13,8 @@ const currentVersion = fs.existsSync(pkgPath)
 
 const args = process.argv.slice(2);
 const firstArg = args[0] || '';
+
+// ── Sub-commands ────────────────────────────────────────────────────────────
 
 if (firstArg === 'upgrade') {
     console.log('superomni upgrade — reinstalling latest...');
@@ -27,33 +29,70 @@ if (firstArg === 'version' || firstArg === '--version' || firstArg === '-v') {
 }
 
 if (firstArg === 'help' || firstArg === '--help' || firstArg === '-h') {
-    console.log('superomni ' + currentVersion + ' — AI coding skill framework\n');
-    console.log('Usage:');
-    console.log('  npx github:Wilder1222/superomni                 Install into current project');
-    console.log('  npx github:Wilder1222/superomni --only claude   Claude Code only');
-    console.log('  npx github:Wilder1222/superomni --only codex    Codex CLI only');
-    console.log('  npx github:Wilder1222/superomni --only copilot  GitHub Copilot only');
-    console.log('  npx github:Wilder1222/superomni --force         Force reinstall');
-    console.log('  npx github:Wilder1222/superomni --dry-run       Preview changes');
-    console.log('  npx github:Wilder1222/superomni --verbose       Detailed output');
-    console.log('  superomni upgrade                               Upgrade to latest');
-    console.log('\nPlatforms: claude, codex, gemini, copilot');
+    console.log(`superomni ${currentVersion} — AI coding skill framework
+
+USAGE:
+  npx github:Wilder1222/superomni                 Install into current project
+  npx github:Wilder1222/superomni install          Same as above
+  npx github:Wilder1222/superomni install --force  Force reinstall
+  superomni setup                                  Global install (after npm -g)
+
+PUBLIC COMMANDS:
+  install           Install skills into current project (default)
+  setup             Global install (link skills to ~/.claude, ~/.codex, etc.)
+  upgrade           Upgrade global install to latest
+
+OPTIONS:
+  --only <platform> Install for a single platform (claude, codex, gemini, copilot)
+  --skip <platform> Skip a specific platform
+  --force           Overwrite existing files
+  --dry-run         Preview without changes
+  --verbose         Detailed output
+  --help, -h        Show this help
+
+PLATFORMS: claude, codex, gemini, copilot
+
+EXAMPLES:
+  npx github:Wilder1222/superomni
+  npx github:Wilder1222/superomni --only codex
+  npx github:Wilder1222/superomni --force
+  npm install -g github:Wilder1222/superomni && superomni setup
+`);
     process.exit(0);
 }
 
+// ── Parse flags ─────────────────────────────────────────────────────────────
+
+// Determine command: "install" (default for npx) or "setup" (global)
+let command = 'install';
+const flagArgs = [];
+
+for (const a of args) {
+    if (a === 'install' || a === 'setup') {
+        command = a;
+    } else {
+        flagArgs.push(a);
+    }
+}
+
 const opts = { skip: [] };
-for (let i = 0; i < args.length; i++) {
-    const a = args[i];
-    if (a === '--only')         { opts.only = args[++i]; }
-    else if (a === '--skip')    { opts.skip.push(args[++i]); }
+for (let i = 0; i < flagArgs.length; i++) {
+    const a = flagArgs[i];
+    if (a === '--only')         { opts.only = flagArgs[++i]; }
+    else if (a === '--skip')    { opts.skip.push(flagArgs[++i]); }
     else if (a === '--dry-run') { opts.dryRun = true; }
     else if (a === '--force')   { opts.force = true; }
     else if (a === '--verbose') { opts.verbose = true; }
 }
 
-const isGlobal = process.env.npm_config_global === 'true';
-if (!isGlobal) {
+// ── Execute ─────────────────────────────────────────────────────────────────
+
+if (command === 'install') {
+    // Project-level install: copy skills into cwd
     opts.targetDir = process.cwd();
+} else if (command === 'setup') {
+    // Global install: symlink to ~/.claude, ~/.codex, etc.
+    // No targetDir = global mode
 }
 
 const { run } = require('../lib/setup');

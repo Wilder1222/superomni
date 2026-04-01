@@ -116,7 +116,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Harness Engineering
 
 **Goal:** Design and maintain the agent harness — the scaffolding of environment, context, tools, constraints, evaluation gates, and feedback loops that determine how well agents perform.

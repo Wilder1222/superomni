@@ -116,7 +116,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # /freeze — Restrict Edits to a Directory
 
 **Goal:** Prevent accidental changes outside a defined scope. Set a freeze boundary so that only files within a specified directory can be edited this session.

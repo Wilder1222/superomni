@@ -377,7 +377,7 @@ superomni/
 
 ```bash
 # Build all skills
-npm run build
+npm run gen-skills
 # or
 bash lib/gen-skill-docs.sh
 

@@ -114,7 +114,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Git Worktrees
 
 **Goal:** Set up and manage Git worktrees to enable parallel development on multiple branches without stashing or switching.

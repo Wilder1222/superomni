@@ -24,9 +24,9 @@ The superomni framework lacks a unified entry point skill. `/vibe` is defined in
      - `/vibe reset` — clear superomni artifacts and restart from THINK
   4. Implement stage detection logic:
      - No artifacts → THINK stage → suggest `brainstorm`
-     - `docs/superomni/spec.md` exists → PLAN stage → suggest `writing-plans`
-     - `docs/superomni/plan.md` exists with open items → BUILD stage → suggest `executing-plans`
-     - `docs/superomni/plan.md` all checked → REVIEW stage → suggest `code-review`
+     - `docs/superomni/specs/spec.md` exists → PLAN stage → suggest `writing-plans`
+     - `docs/superomni/plans/plan.md` exists with open items → BUILD stage → suggest `executing-plans`
+     - `docs/superomni/plans/plan.md` all checked → REVIEW stage → suggest `code-review`
      - Review approved → TEST stage → suggest `qa` / `verification`
      - Tests green → PROD-CHECK → suggest `production-readiness`
      - Readiness confirmed → SHIP → suggest `ship`

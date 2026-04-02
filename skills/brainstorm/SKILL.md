@@ -42,7 +42,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -77,8 +77,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -178,7 +178,7 @@ See `visual-companion.md` for diagram formats.
 
 ## Phase 4: Spec Document Output
 
-Produce `docs/superomni/spec.md` with this structure:
+Produce `docs/superomni/specs/spec.md` with this structure:
 
 ```markdown
 # [Feature Name] — Spec

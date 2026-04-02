@@ -42,7 +42,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -77,8 +77,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -147,8 +147,8 @@ if [ -n "$LATEST_IMPROVE" ]; then
 fi
 
 # Check what spec/plan artifacts already exist
-test -f docs/superomni/spec.md && echo "spec.md found" || echo "No spec.md"
-test -f docs/superomni/plan.md && echo "plan.md found" || echo "No plan.md"
+test -f docs/superomni/specs/spec.md && echo "spec.md found" || echo "No spec.md"
+test -f docs/superomni/plans/plan.md && echo "plan.md found" || echo "No plan.md"
 ```
 
 **Process:**
@@ -157,46 +157,46 @@ test -f docs/superomni/plan.md && echo "plan.md found" || echo "No plan.md"
 3. Generate 3 candidate approaches, evaluate tradeoffs
 4. Produce a spec document
 
-**Output:** `docs/superomni/spec.md` — problem statement, goals, non-goals, proposed solution, acceptance criteria.
+**Output:** `docs/superomni/specs/spec.md` — problem statement, goals, non-goals, proposed solution, acceptance criteria.
 
 **Data flow:**
 ```
-user request → brainstorm → docs/superomni/spec.md
+user request → brainstorm → docs/superomni/specs/spec.md
                                   │
                                   ▼
                              [next stage]
 ```
 
-**"What's next" check:** Does `docs/superomni/spec.md` exist and have acceptance criteria? → Move to PLAN.
+**"What's next" check:** Does `docs/superomni/specs/spec.md` exist and have acceptance criteria? → Move to PLAN.
 
 ## Stage 2: PLAN — Break It Down
 
 **Skills:** `writing-plans`, `plan-review`
 
-**Input:** `docs/superomni/spec.md` from Stage 1.
+**Input:** `docs/superomni/specs/spec.md` from Stage 1.
 
 **Process:**
 1. Use `writing-plans` to decompose the spec into ordered, testable steps
 2. Each step must have: description, files to touch, verification criterion
 3. Use `plan-review` to validate the plan before execution
 
-**Output:** `docs/superomni/plan.md` — ordered steps with verification criteria, dependency graph, risk flags.
+**Output:** `docs/superomni/plans/plan.md` — ordered steps with verification criteria, dependency graph, risk flags.
 
 **Data flow:**
 ```
-docs/superomni/spec.md → writing-plans → docs/superomni/plan.md → plan-review → docs/superomni/plan.md (reviewed)
+docs/superomni/specs/spec.md → writing-plans → docs/superomni/plans/plan.md → plan-review → docs/superomni/plans/plan.md (reviewed)
                                                        │
                                                        ▼
                                                   [next stage]
 ```
 
-**"What's next" check:** Does `docs/superomni/plan.md` exist and pass review? → Move to BUILD.
+**"What's next" check:** Does `docs/superomni/plans/plan.md` exist and pass review? → Move to BUILD.
 
 ## Stage 3: BUILD — Execute the Plan
 
 **Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
 
-**Input:** `docs/superomni/plan.md` from Stage 2.
+**Input:** `docs/superomni/plans/plan.md` from Stage 2.
 
 **Process:**
 1. Use `executing-plans` to work through the plan step by step
@@ -209,7 +209,7 @@ docs/superomni/spec.md → writing-plans → docs/superomni/plan.md → plan-rev
 
 **Data flow:**
 ```
-docs/superomni/plan.md → executing-plans ──┬──→ code changes (committed)
+docs/superomni/plans/plan.md → executing-plans ──┬──→ code changes (committed)
                             │
               test-driven-development → test files
                             │
@@ -260,7 +260,7 @@ code (branch) → code-review (self) → PR
 1. Use `qa` for comprehensive quality assurance:
    - Run existing tests, write missing tests, explore edge cases
 2. Use `security-audit` if changes touch auth, data handling, or external input
-3. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against docs/superomni/spec.md acceptance criteria
+3. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against docs/superomni/specs/spec.md acceptance criteria
 
 **Output:** Verified code — all tests green, security reviewed, goal alignment confirmed.
 
@@ -390,13 +390,13 @@ If you're joining a sprint already in progress, use `/vibe` or `/vibe status` to
 
 ```bash
 # Check what exists
-ls docs/superomni/spec.md docs/superomni/plan.md 2>/dev/null
+ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md 2>/dev/null
 git log --oneline -10
 git status --short
 ```
 
-- `docs/superomni/spec.md` exists but no `docs/superomni/plan.md` → You're at PLAN stage
-- `docs/superomni/plan.md` exists with unchecked items → You're at BUILD stage
+- `docs/superomni/specs/spec.md` exists but no `docs/superomni/plans/plan.md` → You're at PLAN stage
+- `docs/superomni/plans/plan.md` exists with unchecked items → You're at BUILD stage
 - Feature branch with code but no review → You're at REVIEW stage
 - PR approved but not merged → You're at TEST or PROD-CHECK stage
 - `docs/superomni/production-readiness/` files exist but not yet shipped → You're at SHIP stage
@@ -409,8 +409,8 @@ WORKFLOW STATUS
 ════════════════════════════════════════
 Current stage:    [THINK/PLAN/BUILD/REVIEW/TEST/PROD-CHECK/SHIP/REFLECT]
 Artifacts:
-  docs/superomni/spec.md:  [exists/missing]
-  docs/superomni/plan.md:  [exists/missing]
+  docs/superomni/specs/spec.md:  [exists/missing]
+  docs/superomni/plans/plan.md:  [exists/missing]
   code:           [branch name or N/A]
   tests:          [passing/failing/none]
   review:         [approved/pending/not started]

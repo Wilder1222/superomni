@@ -42,7 +42,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -77,8 +77,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -136,8 +136,8 @@ Scan for existing artifacts to determine where the project is in the sprint pipe
 
 ```bash
 # Artifact detection
-_HAS_SPEC=$(test -f docs/superomni/spec.md && echo "yes" || echo "no")
-_HAS_PLAN=$(test -f docs/superomni/plan.md && echo "yes" || echo "no")
+_HAS_SPEC=$(test -f docs/superomni/specs/spec.md && echo "yes" || echo "no")
+_HAS_PLAN=$(test -f docs/superomni/plans/plan.md && echo "yes" || echo "no")
 _HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
 _HAS_REVIEWS=$(ls docs/superomni/reviews/*.md 2>/dev/null | head -1)
 _HAS_PROD_READINESS=$(ls docs/superomni/production-readiness/*.md 2>/dev/null | head -1)
@@ -145,8 +145,8 @@ _HAS_IMPROVEMENTS=$(ls .superomni/improvements/*.md 2>/dev/null | head -1)
 
 # Plan completion check (if plan exists)
 if [ "$_HAS_PLAN" = "yes" ]; then
-  _PLAN_OPEN=$(grep -c '^\- \[ \]' docs/superomni/plan.md 2>/dev/null || echo "0")
-  _PLAN_DONE=$(grep -c '^\- \[x\]' docs/superomni/plan.md 2>/dev/null || echo "0")
+  _PLAN_OPEN=$(grep -c '^\- \[ \]' docs/superomni/plans/plan.md 2>/dev/null || echo "0")
+  _PLAN_DONE=$(grep -c '^\- \[x\]' docs/superomni/plans/plan.md 2>/dev/null || echo "0")
 fi
 
 # Recent git activity
@@ -248,8 +248,8 @@ Warn before clearing artifacts:
 
 ```
 WARNING: This will remove all superomni artifacts:
-  - docs/superomni/spec.md
-  - docs/superomni/plan.md
+  - docs/superomni/specs/spec.md
+  - docs/superomni/plans/plan.md
   - docs/superomni/executions/
   - docs/superomni/reviews/
   - docs/superomni/subagents/
@@ -262,7 +262,7 @@ Proceed? (Y/N)
 
 If confirmed:
 ```bash
-rm -f docs/superomni/spec.md docs/superomni/plan.md
+rm -f docs/superomni/specs/spec.md docs/superomni/plans/plan.md
 rm -rf docs/superomni/executions/ docs/superomni/reviews/ docs/superomni/subagents/ docs/superomni/production-readiness/
 echo "Reset complete. Starting fresh from THINK stage."
 ```

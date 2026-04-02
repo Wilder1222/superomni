@@ -35,9 +35,9 @@ docs/superomni/
 
 ### `brainstorm` → `writing-plans`
 
-**Produces:** `docs/superomni/spec.md`
+**Produces:** `docs/superomni/specs/spec.md`
 
-Required sections in `docs/superomni/spec.md`:
+Required sections in `docs/superomni/specs/spec.md`:
 ```markdown
 ## Problem Statement
 [Clear description of the problem]
@@ -56,15 +56,15 @@ Required sections in `docs/superomni/spec.md`:
 - [ ] [Criterion 2] — verifiable, specific
 ```
 
-**Consumed by:** `writing-plans` reads `docs/superomni/spec.md` to build `docs/superomni/plan.md`
+**Consumed by:** `writing-plans` reads `docs/superomni/specs/spec.md` to build `docs/superomni/plans/plan.md`
 
 ---
 
 ### `writing-plans` → `executing-plans`
 
-**Produces:** `docs/superomni/plan.md`
+**Produces:** `docs/superomni/plans/plan.md`
 
-Required structure in `docs/superomni/plan.md`:
+Required structure in `docs/superomni/plans/plan.md`:
 ```markdown
 ## Steps
 
@@ -78,13 +78,13 @@ Required structure in `docs/superomni/plan.md`:
 ### Step 2: ...
 
 ## Acceptance Criteria
-[Copied from docs/superomni/spec.md or restated here]
+[Copied from docs/superomni/specs/spec.md or restated here]
 
 ## Risk Flags
 - [Risk 1]: [Mitigation]
 ```
 
-**Consumed by:** `executing-plans` reads `docs/superomni/plan.md` step by step
+**Consumed by:** `executing-plans` reads `docs/superomni/plans/plan.md` step by step
 
 ---
 
@@ -140,7 +140,7 @@ Required sections:
 
 ## Goal Alignment
 
-Spec/plan used: [docs/superomni/spec.md | docs/superomni/plan.md | user request]
+Spec/plan used: [docs/superomni/specs/spec.md | docs/superomni/plans/plan.md | user request]
 
 | Criterion | Met? | Evidence |
 |-----------|------|----------|
@@ -310,7 +310,7 @@ if [ -n "$LATEST_EVAL" ]; then
 fi
 
 # Read spec for acceptance criteria
-cat docs/superomni/spec.md 2>/dev/null | grep -A 20 "Acceptance Criteria" | head -25 || true
+cat docs/superomni/specs/spec.md 2>/dev/null | grep -A 20 "Acceptance Criteria" | head -25 || true
 
 # Read latest review for open comments
 LATEST_REVIEW=$(find docs/superomni/reviews -name "*.md" -type f 2>/dev/null | sort | tail -1)

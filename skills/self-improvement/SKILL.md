@@ -45,7 +45,7 @@ What's next → [skill-name]: [one-sentence reason]
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
    git log --oneline -3 2>/dev/null
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
@@ -80,8 +80,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -147,7 +147,7 @@ git log --oneline -10
 git diff --stat HEAD~3 2>/dev/null | tail -5
 
 # What artifacts were produced
-ls docs/superomni/spec.md docs/superomni/plan.md 2>/dev/null
+ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md 2>/dev/null
 ls docs/superomni/ .superomni/ 2>/dev/null
 
 # Read the latest evaluation report (from verification skill)
@@ -273,8 +273,8 @@ Verify:   [how to confirm this improvement was applied in the next session]
 ACTION 1: WRITE SPEC BEFORE IMPLEMENTATION
 Problem:  Started coding directly from the issue title without a spec
 Root cause: Process drift — skipped THINK stage under time pressure
-Fix:      Before any implementation task, spend 5 minutes writing docs/superomni/spec.md with problem, goals, non-goals, acceptance criteria
-Verify:   Next session starts with `ls docs/superomni/spec.md` — must exist before first code change
+Fix:      Before any implementation task, spend 5 minutes writing docs/superomni/specs/spec.md with problem, goals, non-goals, acceptance criteria
+Verify:   Next session starts with `ls docs/superomni/specs/spec.md` — must exist before first code change
 ```
 
 ## Phase 7: Save Improvement Report

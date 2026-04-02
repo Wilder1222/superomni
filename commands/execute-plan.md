@@ -14,8 +14,8 @@ Use this command when you want to:
 ```
 
 Examples:
-- `/execute-plan` (looks for docs/superomni/plan.md automatically)
-- `/execute-plan docs/superomni/plan.md`
+- `/execute-plan` (looks for docs/superomni/plans/plan.md automatically)
+- `/execute-plan docs/superomni/plans/plan.md`
 
 ## What Happens
 

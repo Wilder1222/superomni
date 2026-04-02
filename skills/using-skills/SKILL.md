@@ -31,7 +31,7 @@ Each skill in `skills/` is a behavior specification. When a relevant situation a
 
 ### Step 1 — Scan for existing context
 ```bash
-ls docs/superomni/spec.md docs/superomni/plan.md docs/superomni/ .superomni/ 2>/dev/null
+ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
 git log --oneline -3 2>/dev/null
 git status --short 2>/dev/null
 ```
@@ -42,9 +42,9 @@ Use the scan results to locate the current pipeline stage:
 | Context found | Current stage | Skill to use |
 |---------------|--------------|--------------|
 | No artifacts | THINK | `brainstorm` |
-| `docs/superomni/spec.md` only | PLAN | `writing-plans` |
-| `docs/superomni/spec.md` + `docs/superomni/plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
-| `docs/superomni/plan.md` all checked, no review | REVIEW | `code-review` |
+| `docs/superomni/specs/spec.md` only | PLAN | `writing-plans` |
+| `docs/superomni/specs/spec.md` + `docs/superomni/plans/plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
+| `docs/superomni/plans/plan.md` all checked, no review | REVIEW | `code-review` |
 | PR approved, tests green | TEST / PROD-CHECK | `qa` → `verification` → `production-readiness` |
 | `docs/superomni/production-readiness/` files exist | SHIP | `ship` |
 | `docs/superomni/executions/` files exist | Continuing run | Resume with the same skill |
@@ -85,8 +85,8 @@ User-facing outputs go in `docs/superomni/`, internal state stays in `.superomni
 
 | Output | Location |
 |--------|----------|
-| Specs | `docs/superomni/spec.md` |
-| Plans | `docs/superomni/plan.md` |
+| Specs | `docs/superomni/specs/spec.md` |
+| Plans | `docs/superomni/plans/plan.md` |
 | Code reviews | `docs/superomni/reviews/review-[branch]-[date].md` |
 | Execution results | `docs/superomni/executions/execution-[branch]-[date].md` |
 | Sub-agent sessions | `docs/superomni/subagents/subagent-[branch]-[date].md` |

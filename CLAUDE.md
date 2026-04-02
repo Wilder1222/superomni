@@ -47,7 +47,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | Command | Description |
 |---------|-------------|
 | `/vibe` | Activate full framework, detect pipeline stage, launch guided workflow. Subcommands: `/vibe status`, `/vibe reset` |
-| `/brainstorm` | Design a feature — produces `docs/superomni/spec.md` |
+| `/brainstorm` | Design a feature — produces `docs/superomni/specs/spec.md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
@@ -72,8 +72,8 @@ User-facing outputs go in `docs/superomni/`, internal state stays in `.superomni
 
 | Output Type | Directory | File Pattern |
 |-------------|-----------|-------------|
-| Specs | `docs/superomni/` | `spec.md` |
-| Plans | `docs/superomni/` | `plan.md` |
+| Specs | `docs/superomni/specs/` | `spec.md` |
+| Plans | `docs/superomni/plans/` | `plan.md` |
 | Code reviews | `docs/superomni/reviews/` | `review-[branch]-[date].md` |
 | Execution results | `docs/superomni/executions/` | `execution-[branch]-[date].md` |
 | Sub-agent sessions | `docs/superomni/subagents/` | `subagent-[branch]-[date].md` |
@@ -91,4 +91,4 @@ User-facing documents in `docs/superomni/` serve as a permanent, reviewable audi
 - **Project tools first:** Always prefer built-in skills (`skills/`) and agents (`agents/`) over any external tools. Only reach for external tools when no project-local skill or agent is suitable.
 - Respect PROACTIVE mode — if false, only run skills when explicitly asked
 - Use status protocol: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
-- **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/spec.md`, `docs/superomni/plan.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
+- **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/specs/spec.md`, `docs/superomni/plans/plan.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.

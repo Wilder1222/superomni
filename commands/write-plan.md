@@ -14,8 +14,8 @@ Use this command when you want to:
 ```
 
 Examples:
-- `/write-plan` (when docs/superomni/spec.md already exists)
-- `/write-plan the authentication feature from docs/superomni/spec.md`
+- `/write-plan` (when docs/superomni/specs/spec.md already exists)
+- `/write-plan the authentication feature from docs/superomni/specs/spec.md`
 - `/write-plan add rate limiting to the API`
 
 ## What Happens
@@ -23,13 +23,13 @@ Examples:
 1. The writing-plans skill activates
 2. Scope and constraints are identified
 3. Completeness check is applied
-4. A structured `docs/superomni/plan.md` is written with steps, files, and verification criteria
+4. A structured `docs/superomni/plans/plan.md` is written with steps, files, and verification criteria
 5. The 6 Decision Principles are applied
 6. The plan is reviewed by the plan-document-reviewer
 
 ## Output
 
-A reviewed `docs/superomni/plan.md` file with:
+A reviewed `docs/superomni/plans/plan.md` file with:
 - Numbered steps
 - Exact files to touch
 - Verification criteria per step

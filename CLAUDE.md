@@ -10,6 +10,7 @@ Philosophy: **Plan Lean, Execute Complete**
 
 | Skill | Trigger | Priority |
 |-------|---------|----------|
+| vibe | "/vibe", "activate framework", "start workflow" | P0 |
 | using-skills | Always active | P0 |
 | subagent-development | Default working mode — use for all non-trivial tasks | P0 |
 | brainstorm | "brainstorm", "design", "spec" | P0 |
@@ -45,7 +46,7 @@ Philosophy: **Plan Lean, Execute Complete**
 
 | Command | Description |
 |---------|-------------|
-| `/vibe` | Activate full framework + launch guided default workflow |
+| `/vibe` | Activate full framework, detect pipeline stage, launch guided workflow. Subcommands: `/vibe status`, `/vibe reset` |
 | `/brainstorm` | Design a feature — produces `docs/superomni/spec.md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |

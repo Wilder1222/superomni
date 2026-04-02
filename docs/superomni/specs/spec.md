@@ -261,7 +261,7 @@ Update the pipeline string and any stage references.
 
 #### D4. Update `skills/vibe/SKILL.md` pipeline string
 
-All instances of `THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT` become `THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT`.
+All instances of `THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT` become `THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → REFLECT`.
 
 ---
 

@@ -7,6 +7,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.1] — 2026-04
+
+### Added
+- **`/vibe` entry point skill** (`skills/vibe/SKILL.md`): Unified framework activation command that auto-detects the current pipeline stage (THINK→PLAN→BUILD→REVIEW→TEST→PROD-CHECK→SHIP→REFLECT) from existing artifacts and routes to the appropriate skill. Supports `/vibe`, `/vibe status`, and `/vibe reset` subcommands.
+- **`[session]` identifier in file naming**: All generated documents now use the pattern `[type]-[branch]-[session]-[date].md` where `[session]` is a short kebab-case label auto-generated from conversation context (e.g., `vibe-skill`, `auth-refactor`). Enables agents to search and retrieve relevant prior sessions.
+
+### Changed
+- **Document output reorganization**: `spec.md` moved to `docs/superomni/specs/`, `plan.md` moved to `docs/superomni/plans/`. All generated artifacts now live in categorized subdirectories — no loose files in `docs/superomni/` root.
+- **Self-improvement docs now user-facing**: Improvement reports, evaluation reports, and harness audit reports moved from `.superomni/` (internal) to `docs/superomni/` (user-facing). Agents can now index these for self-improvement across sessions.
+- Updated all 50+ files with new document paths and naming conventions.
+
+---
+
 ## [0.5.0] — 2026-04
 
 ### Changed

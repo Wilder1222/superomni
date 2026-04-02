@@ -118,6 +118,7 @@ Open your project in your AI CLI. Skills activate automatically.
 
 | Skill | When to Use | Key Output |
 |-------|------------|------------|
+| `vibe` | Framework activation / entry point | Auto-detects pipeline stage |
 | `using-skills` | Always active | Loads the framework |
 | `brainstorm` | New feature/design | `docs/superomni/specs/spec.md` |
 | `writing-plans` | Planning implementation | `docs/superomni/plans/plan.md` |
@@ -281,6 +282,7 @@ superomni/
 │   └── hooks.json
 │
 ├── skills/                   ← Skill definitions
+│   ├── vibe/                 ← Entry point — auto-detects pipeline stage
 │   ├── using-skills/         ← Meta-skill (always active)
 │   ├── brainstorm/        ← Design → Spec
 │   ├── writing-plans/        ← Spec → Plan
@@ -339,6 +341,15 @@ superomni/
 │   └── analytics-log         ← Local telemetry writer
 │
 ├── docs/
+│   ├── superomni/            ← Generated session artifacts
+│   │   ├── specs/            ← Spec documents
+│   │   ├── plans/            ← Implementation plans
+│   │   ├── executions/       ← Execution logs
+│   │   ├── reviews/          ← Code reviews
+│   │   ├── subagents/        ← Sub-agent sessions
+│   │   ├── improvements/     ← Self-improvement reports
+│   │   ├── evaluations/      ← Verification evaluations
+│   │   └── harness-audits/   ← Harness audit reports
 │   ├── AGENTS.md             ← Agent library reference
 │   ├── DESIGN.md             ← Architectural design
 │   └── IMPLEMENTATION.md     ← Implementation details

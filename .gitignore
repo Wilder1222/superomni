@@ -1,0 +1,15 @@
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# superomni session artifacts (transient, not source-controlled)
+docs/superomni/executions/
+docs/superomni/reviews/
+docs/superomni/subagents/
+docs/superomni/production-readiness/
+docs/superomni/improvements/
+docs/superomni/evaluations/
+docs/superomni/harness-audits/

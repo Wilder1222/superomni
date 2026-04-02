@@ -31,13 +31,21 @@ Report status using one of these at the end of every skill session:
 - **BLOCKED** — Cannot proceed. State what blocks you and what was tried.
 - **NEEDS_CONTEXT** — Missing information. State exactly what you need.
 
-### Session Continuity
-After reporting any terminal status (DONE / DONE_WITH_CONCERNS), **always** close with a
-"What's next?" line that names the next logical superomni skill:
+### Auto-Advance Rule
 
-```
-What's next → [skill-name]: [one-sentence reason]
-```
+When a skill reports **DONE** (no concerns, no blockers):
+1. Write the session artifact to `docs/superomni/`
+2. Print a single-line transition: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
+3. Immediately invoke the next pipeline skill without waiting for user input
+
+When a skill reports **DONE_WITH_CONCERNS**, **BLOCKED**, or **NEEDS_CONTEXT**:
+1. Write the session artifact
+2. STOP and present the status to the user
+3. Wait for user decision before proceeding
+
+Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+
+### Session Continuity
 
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
@@ -83,6 +91,10 @@ Load context progressively — only what is needed for the current phase:
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
 
+### Output Directory
+All skill artifacts are written to `docs/superomni/` (relative to project root).
+See the Document Output Convention in CLAUDE.md for the full directory map.
+
 ### Feedback Signal Protocol
 Agent failures are harness signals — not reasons to retry the same approach:
 
@@ -114,6 +126,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+
 # Workflow — Sprint Pipeline
 
 **Goal:** Guide a complete feature from idea to shipped code by orchestrating the right skills in the right order, with clear data handoffs between each stage.
@@ -121,15 +134,13 @@ Nothing is sent to external servers. Data is stored only in `~/.omni-skills/anal
 ## The Pipeline
 
 ```
-THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → REFLECT
-  │        │       │        │        │        │          │       │
-  ▼        ▼       ▼        ▼        ▼        ▼          ▼       ▼
-spec.md  plan.md  code   feedback  green  ready-report release  retro
+THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+  │        │       │        │        │       │       │         │
+  ▼        ▼       ▼        ▼        ▼       ▼       ▼         ▼
+spec.md  plan.md  code   feedback  green  release  actions    retro
 ```
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
-
-**Entry point:** Use `/vibe` to activate the framework and auto-detect your current stage. It scans for artifacts and routes you to the right skill.
 
 ## Stage 1: THINK — Define the Problem
 
@@ -248,11 +259,11 @@ code (branch) → code-review (self) → PR
                                                   [next stage]
 ```
 
-**"What's next" check:** PR approved with no open P0/P1 comments? → Move to TEST.
+**"What's next" check:** PR approved with no open P0/P1 comments? → Move to VERIFY.
 
-## Stage 5: TEST — Verify Quality
+## Stage 5: VERIFY — Quality & Production Readiness
 
-**Skills:** `qa`, `security-audit`, `verification`
+**Skills:** `qa`, `security-audit`, `verification`, `production-readiness`
 
 **Input:** Approved code from Stage 4.
 
@@ -261,56 +272,28 @@ code (branch) → code-review (self) → PR
    - Run existing tests, write missing tests, explore edge cases
 2. Use `security-audit` if changes touch auth, data handling, or external input
 3. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against docs/superomni/specs/spec.md acceptance criteria
+4. Use `production-readiness` to run the pre-deploy gate:
+   - Check observability (logging, metrics), reliability (health, timeouts, degradation), operability (rollback, runbook, alerts)
+   - Verdict must be READY or READY_WITH_CONCERNS before proceeding
 
-**Output:** Verified code — all tests green, security reviewed, goal alignment confirmed.
-
-**Data flow:**
-```
-approved code → qa ──────────────→ QA report
-                │
-                ├── security-audit → security report (if applicable)
-                │
-                └── verification ──→ verification report (with goal alignment)
-                                          │
-                                          ▼
-                                     [next stage]
-```
-
-**"What's next" check:** QA passed? Security clean? Verification complete? Goal alignment confirmed? → Move to PROD-CHECK.
-
-## Stage 5.5: PROD-CHECK — Production Readiness
-
-**Skills:** `production-readiness`
-
-**Input:** Verified code from Stage 5.
-
-**Process:**
-1. Use `production-readiness` to run the pre-deploy gate
-2. Check observability (logging, metrics), reliability (health, timeouts, degradation), and operability (rollback, runbook, alerts)
-3. Verdict must be READY or READY_WITH_CONCERNS before proceeding
-
-**Output:** Production readiness report saved to `docs/superomni/production-readiness/`.
+**Output:** Verified code — all tests green, security reviewed, goal alignment confirmed, production readiness report saved to `docs/superomni/production-readiness/`.
 
 **Data flow:**
 ```
-verified code → production-readiness ──→ readiness report
-                                               │
-                              READY or READY_WITH_CONCERNS?
-                                               │ YES
-                                               ▼
-                                          [next stage]
-                                               │ NO (NOT_READY)
-                                               ▼
-                                    fix blockers → re-run check
+approved code → qa → security-audit → verification → production-readiness
+                                                            │
+                                           READY or READY_WITH_CONCERNS?
+                                                            │ YES → [next stage]
+                                                            │ NO  → fix blockers → re-run
 ```
 
-**"What's next" check:** Verdict is READY or READY_WITH_CONCERNS? → Move to SHIP.
+**"What's next" check:** QA passed? Security clean? Verification complete? Production readiness READY? → Move to SHIP.
 
 ## Stage 6: SHIP — Release
 
 **Skills:** `ship`, `finishing-branch`, `careful`
 
-**Input:** Verified code from Stage 5.
+**Input:** Verified and production-ready code from Stage 5.
 
 **Process:**
 1. Use `finishing-branch` to prepare the branch for merge
@@ -321,43 +304,63 @@ verified code → production-readiness ──→ readiness report
 
 **Data flow:**
 ```
-verified code → finishing-branch → merge to main
-                                       │
-                                   ship → version bump → changelog → deploy
-                                                                       │
-                                                                       ▼
-                                                                  [next stage]
+verified code → finishing-branch → merge to main → ship → deploy
+                                                            │
+                                                            ▼
+                                                       [next stage]
 ```
 
-**"What's next" check:** Code merged? Deployed? Version tagged? → Move to REFLECT.
+**"What's next" check:** Code merged? Deployed? Version tagged? → Move to IMPROVE.
 
-## Stage 7: REFLECT — Learn and Improve
+## Stage 7: IMPROVE — Self-Evaluation
 
-**Skills:** `retro`, `self-improvement`
+**Skills:** `self-improvement`
 
 **Input:** Completed feature — the full journey from idea to deployment.
 
 **Process:**
-1. Use `retro` to analyze what was shipped: commits, LOC, active days, streak
-2. Use `self-improvement` to evaluate *how* you worked:
+1. Use `self-improvement` to evaluate *how* you worked:
    - Process adherence (were phases followed?)
    - Agent behavior (scope management, instruction following, escalation)
    - Skill effectiveness (were the right skills used correctly?)
-3. Generate 3 concrete improvement actions for the next sprint
-4. Save both the retro report and the improvement report
+2. Generate 3 concrete improvement actions for the next sprint
+3. Save the improvement report
 
-**Output:** Retrospective notes + Improvement report with 3 action items.
+**Output:** Improvement report with 3 action items saved to `docs/superomni/improvements/`.
 
 **Data flow:**
 ```
-completed feature → retro → retrospective notes (.context/retros/)
-                  ↓
-           self-improvement → improvement report (docs/superomni/improvements/)
-                  ↓
-          3 action items → [next sprint — feed into THINK stage]
+shipped feature → self-improvement → improvement report (docs/superomni/improvements/)
+                                            │
+                                     3 action items
+                                            │
+                                            ▼
+                                       [next stage]
 ```
 
-**"What's next" check:** Retro saved? Improvement actions defined? → Start next sprint at THINK.
+**"What's next" check:** Improvement report saved with action items? → Move to REFLECT.
+
+## Stage 8: REFLECT — Retrospective
+
+**Skills:** `retro`
+
+**Input:** Improvement report from Stage 7 + full sprint history.
+
+**Process:**
+1. Use `retro` to analyze what was shipped: commits, LOC, active days, streak
+2. Review improvement actions from Stage 7
+3. Capture team/process patterns and lessons learned
+
+**Output:** Retrospective notes.
+
+**Data flow:**
+```
+improvement report → retro → retrospective notes
+                               │
+                        feed into next sprint THINK stage
+```
+
+**"What's next" check:** Retro saved? → Start next sprint at THINK.
 
 ## Quick Reference: Which Skill When?
 
@@ -386,7 +389,7 @@ completed feature → retro → retrospective notes (.context/retros/)
 
 ## Picking Up Mid-Sprint
 
-If you're joining a sprint already in progress, use `/vibe` or `/vibe status` to auto-detect your current stage. Or scan manually:
+If you're joining a sprint already in progress:
 
 ```bash
 # Check what exists
@@ -395,29 +398,21 @@ git log --oneline -10
 git status --short
 ```
 
+- Nothing exists → You're at THINK stage
 - `docs/superomni/specs/spec.md` exists but no `docs/superomni/plans/plan.md` → You're at PLAN stage
 - `docs/superomni/plans/plan.md` exists with unchecked items → You're at BUILD stage
 - Feature branch with code but no review → You're at REVIEW stage
-- PR approved but not merged → You're at TEST or PROD-CHECK stage
+- PR approved but not verified/production-ready → You're at VERIFY stage
 - `docs/superomni/production-readiness/` files exist but not yet shipped → You're at SHIP stage
-- Nothing exists → You're at THINK stage
+- Shipped but no improvement report → You're at IMPROVE stage
+- `docs/superomni/improvements/` files exist → You're at REFLECT stage
 
 ## Report
 
 ```
-WORKFLOW STATUS
-════════════════════════════════════════
-Current stage:    [THINK/PLAN/BUILD/REVIEW/TEST/PROD-CHECK/SHIP/REFLECT]
-Artifacts:
-  docs/superomni/specs/spec.md:  [exists/missing]
-  docs/superomni/plans/plan.md:  [exists/missing]
-  code:           [branch name or N/A]
-  tests:          [passing/failing/none]
-  review:         [approved/pending/not started]
-  prod-check:     [READY/READY_WITH_CONCERNS/NOT_READY/not run]
-  release:        [deployed/not deployed]
-Next step:        [specific action to take]
-Blocking issues:  [none or list]
+Pipeline: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+Stage: [current] | Branch: [branch]
+Artifacts: spec.md [Y/N] | plan.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Next → [skill-name]: [reason]
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-════════════════════════════════════════
 ```

@@ -30,13 +30,21 @@ Report status using one of these at the end of every skill session:
 - **BLOCKED** — Cannot proceed. State what blocks you and what was tried.
 - **NEEDS_CONTEXT** — Missing information. State exactly what you need.
 
-### Session Continuity
-After reporting any terminal status (DONE / DONE_WITH_CONCERNS), **always** close with a
-"What's next?" line that names the next logical superomni skill:
+### Auto-Advance Rule
 
-```
-What's next → [skill-name]: [one-sentence reason]
-```
+When a skill reports **DONE** (no concerns, no blockers):
+1. Write the session artifact to `docs/superomni/`
+2. Print a single-line transition: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
+3. Immediately invoke the next pipeline skill without waiting for user input
+
+When a skill reports **DONE_WITH_CONCERNS**, **BLOCKED**, or **NEEDS_CONTEXT**:
+1. Write the session artifact
+2. STOP and present the status to the user
+3. Wait for user decision before proceeding
+
+Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+
+### Session Continuity
 
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
@@ -82,6 +90,10 @@ Load context progressively — only what is needed for the current phase:
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
 
+### Output Directory
+All skill artifacts are written to `docs/superomni/` (relative to project root).
+See the Document Output Convention in CLAUDE.md for the full directory map.
+
 ### Feedback Signal Protocol
 Agent failures are harness signals — not reasons to retry the same approach:
 
@@ -112,6 +124,7 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
+
 
 # Code Review
 
@@ -255,8 +268,7 @@ After completing the review, save the full review output as a Markdown document:
 ```bash
 _REVIEW_DATE=$(date +%Y%m%d-%H%M%S)
 _REVIEW_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_REVIEW_SESSION="<session>"  # Auto-generate from conversation context, e.g. "vibe-skill", "auth-refactor"
-_REVIEW_FILE="review-${_REVIEW_BRANCH}-${_REVIEW_SESSION}-${_REVIEW_DATE}.md"
+_REVIEW_FILE="review-${_REVIEW_BRANCH}-${_REVIEW_DATE}.md"
 mkdir -p docs/superomni/reviews
 cat > "docs/superomni/reviews/${_REVIEW_FILE}" << EOF
 # Code Review: ${_REVIEW_BRANCH}

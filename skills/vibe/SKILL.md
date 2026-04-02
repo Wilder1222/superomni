@@ -31,13 +31,21 @@ Report status using one of these at the end of every skill session:
 - **BLOCKED** — Cannot proceed. State what blocks you and what was tried.
 - **NEEDS_CONTEXT** — Missing information. State exactly what you need.
 
-### Session Continuity
-After reporting any terminal status (DONE / DONE_WITH_CONCERNS), **always** close with a
-"What's next?" line that names the next logical superomni skill:
+### Auto-Advance Rule
 
-```
-What's next → [skill-name]: [one-sentence reason]
-```
+When a skill reports **DONE** (no concerns, no blockers):
+1. Write the session artifact to `docs/superomni/`
+2. Print a single-line transition: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
+3. Immediately invoke the next pipeline skill without waiting for user input
+
+When a skill reports **DONE_WITH_CONCERNS**, **BLOCKED**, or **NEEDS_CONTEXT**:
+1. Write the session artifact
+2. STOP and present the status to the user
+3. Wait for user decision before proceeding
+
+Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+
+### Session Continuity
 
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
@@ -82,6 +90,10 @@ Load context progressively — only what is needed for the current phase:
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
+
+### Output Directory
+All skill artifacts are written to `docs/superomni/` (relative to project root).
+See the Document Output Convention in CLAUDE.md for the full directory map.
 
 ### Feedback Signal Protocol
 Agent failures are harness signals — not reasons to retry the same approach:
@@ -162,49 +174,37 @@ git status --short 2>/dev/null
 
 Use the following priority-ordered rules (first match wins):
 
-| Priority | Condition | Stage | Suggested Skill |
-|----------|-----------|-------|-----------------|
+| Priority | Condition | Stage | Skill |
+|----------|-----------|-------|-------|
 | 1 | No artifacts at all | **THINK** | `brainstorm` |
 | 2 | `spec.md` exists, no `plan.md` | **PLAN** | `writing-plans` |
 | 3 | `plan.md` exists with open items (`- [ ]`) | **BUILD** | `executing-plans` |
 | 4 | `plan.md` all checked, no review docs | **REVIEW** | `code-review` |
-| 5 | Review docs exist, no execution/QA verification | **TEST** | `qa` then `verification` |
-| 6 | Verified, no production-readiness report | **PROD-CHECK** | `production-readiness` |
-| 7 | Production readiness confirmed | **SHIP** | `ship` |
-| 8 | Shipped (tagged release or merged PR), no improvement report | **EVALUATE** | `self-improvement` |
-| 9 | Improvement report exists | **REFLECT** | `retro` |
+| 5 | Review docs exist, no verification/prod-readiness | **VERIFY** | `qa` → `verification` → `production-readiness` |
+| 6 | Verified + production-ready | **SHIP** | `ship` |
+| 7 | Shipped, no improvement report | **IMPROVE** | `self-improvement` |
+| 8 | Improvement report exists | **REFLECT** | `retro` |
+
+### Auto-Advance Rule
+
+After stage detection, if the detected stage's prerequisite artifact exists with a clean DONE status, **auto-invoke the next skill immediately** without showing a menu or waiting for user input. Print a single-line transition:
+
+```
+[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])
+```
+
+Only show the guided menu when:
+- No clear next step can be determined
+- The user invoked `/vibe` without arguments
+- The previous stage ended with DONE_WITH_CONCERNS, BLOCKED, or NEEDS_CONTEXT
 
 If the user passes **arguments** with `/vibe` (e.g., `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
 
-## Phase 2: Display Welcome Banner
+## Phase 2: Show Guided Menu
 
-Print the following banner after stage detection:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  superomni — Plan Lean, Execute Complete
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Branch:    [current branch]
-  Stage:     [detected stage] ← YOU ARE HERE
-  Pipeline:  THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-Show the pipeline with the current stage highlighted:
+Present the available commands only when auto-advance does not apply:
 
 ```
-  THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT
-    ^
-    YOU ARE HERE
-```
-
-## Phase 3: Show Guided Menu
-
-After the banner, present the available commands:
-
-```
-Available commands:
-
 | Command | What it does |
 |---------|-------------|
 | /brainstorm | Design a feature — produces spec.md |
@@ -223,30 +223,17 @@ Available commands:
 Suggested next step → [skill-name]: [reason based on detected stage]
 ```
 
-If the user provided arguments with `/vibe`, skip the menu and immediately invoke the suggested skill with the user's arguments as context.
-
-## Phase 4: Handle Subcommands
+## Phase 3: Handle Subcommands
 
 ### `/vibe status`
 
 Run the stage detection from Phase 1 and display:
 
 ```
-PIPELINE STATUS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Branch:  [branch]
-  Stage:   [stage]
-
-  Artifacts found:
-    spec.md:              [exists / missing]
-    plan.md:              [exists / missing] ([N open / M total] items)
-    executions/:          [N files / empty]
-    reviews/:             [N files / empty]
-    production-readiness/: [N files / empty]
-    improvements/:        [N files / empty]
-
-  Suggested next → [skill-name]: [reason]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pipeline: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+Stage: [current] | Branch: [branch]
+Artifacts: spec.md [Y/N] | plan.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Next → [skill-name]: [reason]
 ```
 
 ### `/vibe reset`

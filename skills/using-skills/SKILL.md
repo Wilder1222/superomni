@@ -49,9 +49,9 @@ Use the scan results to locate the current pipeline stage:
 | `docs/superomni/specs/spec.md` only | PLAN | `writing-plans` |
 | `docs/superomni/specs/spec.md` + `docs/superomni/plans/plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
 | `docs/superomni/plans/plan.md` all checked, no review | REVIEW | `code-review` |
-| PR approved, tests green | TEST / PROD-CHECK | `qa` → `verification` → `production-readiness` |
+| PR approved, no verification/prod-readiness | VERIFY | `qa` → `verification` → `production-readiness` |
 | `docs/superomni/production-readiness/` files exist | SHIP | `ship` |
-| Shipped (tagged release or merged PR), no improvement report | EVALUATE | `self-improvement` |
+| Shipped (tagged release or merged PR), no improvement report | IMPROVE | `self-improvement` |
 | `docs/superomni/improvements/` files exist | REFLECT | `retro` |
 | `docs/superomni/executions/` files exist | Continuing run | Resume with the same skill |
 | `docs/superomni/reviews/` files exist | Post-review | `receiving-code-review` |

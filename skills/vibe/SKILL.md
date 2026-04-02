@@ -141,7 +141,7 @@ _HAS_PLAN=$(test -f docs/superomni/plans/plan.md && echo "yes" || echo "no")
 _HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
 _HAS_REVIEWS=$(ls docs/superomni/reviews/*.md 2>/dev/null | head -1)
 _HAS_PROD_READINESS=$(ls docs/superomni/production-readiness/*.md 2>/dev/null | head -1)
-_HAS_IMPROVEMENTS=$(ls .superomni/improvements/*.md 2>/dev/null | head -1)
+_HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
 
 # Plan completion check (if plan exists)
 if [ "$_HAS_PLAN" = "yes" ]; then
@@ -255,7 +255,10 @@ WARNING: This will remove all superomni artifacts:
   - docs/superomni/subagents/
   - docs/superomni/production-readiness/
 
-Internal state (.superomni/) will be preserved.
+Self-improvement history will be preserved:
+  - docs/superomni/improvements/
+  - docs/superomni/evaluations/
+  - docs/superomni/harness-audits/
 
 Proceed? (Y/N)
 ```

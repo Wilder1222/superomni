@@ -40,7 +40,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [0.4.0] — 2026-03
 
 ### Added
-- `skills/harness-engineering/` — harness engineering audit skill; evaluates context efficiency, tool action space, evaluation gate coverage, and feedback loops; produces Harness Health Score (N/25) and prioritized improvement backlog to `.superomni/harness-audits/`. Inspired by OpenAI and Anthropic harness engineering best practices.
+- `skills/harness-engineering/` — harness engineering audit skill; evaluates context efficiency, tool action space, evaluation gate coverage, and feedback loops; produces Harness Health Score (N/25) and prioritized improvement backlog to `docs/superomni/harness-audits/`. Inspired by OpenAI and Anthropic harness engineering best practices.
 - `agents/evaluator.md` — dedicated evaluation agent; produces criterion-by-criterion APPROVED/CHANGES_REQUIRED verdicts with evidence backing. Based on Anthropic's principle: "Evaluation is the load-bearing part of agent harness design."
 - `commands/harness-audit.md` — `/harness-audit` slash command; runs the full 8-phase harness audit
 - `docs/HARNESS.md` — comprehensive harness engineering guide covering core principles, superomni harness architecture, and maintenance indicators

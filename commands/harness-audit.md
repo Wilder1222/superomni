@@ -25,7 +25,7 @@ Invokes the `harness-engineering` skill, which:
 
 ## Output
 
-A structured Harness Audit Report saved to `.superomni/harness-audits/harness-audit-[branch]-[timestamp].md`.
+A structured Harness Audit Report saved to `docs/superomni/harness-audits/harness-audit-[branch]-[timestamp].md`.
 
 ## When to Run
 

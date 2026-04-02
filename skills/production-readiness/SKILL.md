@@ -308,9 +308,10 @@ If verdict is NOT_READY:
 ```bash
 _PR_DATE=$(date +%Y%m%d-%H%M%S)
 _PR_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_PR_FILE="production-readiness-${_PR_BRANCH}-${_PR_DATE}.md"
+_PR_SESSION="<session>"  # Auto-generate from conversation context, e.g. "vibe-skill", "auth-refactor"
+_PR_FILE="production-readiness-${_PR_BRANCH}-${_PR_SESSION}-${_PR_DATE}.md"
 mkdir -p docs/superomni/production-readiness
 echo "Production readiness report saved to docs/superomni/production-readiness/${_PR_FILE}"
 ```
 
-Write the full PRODUCTION READINESS REPORT block to `docs/superomni/production-readiness/production-readiness-[branch]-[date].md`.
+Write the full PRODUCTION READINESS REPORT block to `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md`.

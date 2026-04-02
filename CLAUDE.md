@@ -68,21 +68,23 @@ Skills store state in `~/.omni-skills/`:
 
 ## Document Output Convention
 
-User-facing outputs go in `docs/superomni/`, internal state stays in `.superomni/`:
+All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 
 | Output Type | Directory | File Pattern |
 |-------------|-----------|-------------|
 | Specs | `docs/superomni/specs/` | `spec.md` |
 | Plans | `docs/superomni/plans/` | `plan.md` |
-| Code reviews | `docs/superomni/reviews/` | `review-[branch]-[date].md` |
-| Execution results | `docs/superomni/executions/` | `execution-[branch]-[date].md` |
-| Sub-agent sessions | `docs/superomni/subagents/` | `subagent-[branch]-[date].md` |
-| Production readiness | `docs/superomni/production-readiness/` | `production-readiness-[branch]-[date].md` |
-| Improvements (internal) | `.superomni/improvements/` | `improvement-[branch]-[date].md` |
-| Evaluations (internal) | `.superomni/evaluations/` | `evaluation-[branch]-[date].md` |
-| Harness audits (internal) | `.superomni/harness-audits/` | `harness-audit-[branch]-[date].md` |
+| Code reviews | `docs/superomni/reviews/` | `review-[branch]-[session]-[date].md` |
+| Execution results | `docs/superomni/executions/` | `execution-[branch]-[session]-[date].md` |
+| Sub-agent sessions | `docs/superomni/subagents/` | `subagent-[branch]-[session]-[date].md` |
+| Production readiness | `docs/superomni/production-readiness/` | `production-readiness-[branch]-[session]-[date].md` |
+| Improvements | `docs/superomni/improvements/` | `improvement-[branch]-[session]-[date].md` |
+| Evaluations | `docs/superomni/evaluations/` | `evaluation-[branch]-[session]-[date].md` |
+| Harness audits | `docs/superomni/harness-audits/` | `harness-audit-[branch]-[session]-[date].md` |
 
-User-facing documents in `docs/superomni/` serve as a permanent, reviewable audit trail.
+**`[session]` naming:** Auto-generate a short kebab-case identifier from conversation context (e.g., `vibe-skill`, `auth-refactor`). Max 30 chars. Enables agents to search and retrieve relevant prior sessions.
+
+Documents in `docs/superomni/` serve as a permanent, indexable audit trail for agent self-improvement.
 
 ## Notes for Claude
 

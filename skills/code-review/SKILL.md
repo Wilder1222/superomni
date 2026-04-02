@@ -255,7 +255,8 @@ After completing the review, save the full review output as a Markdown document:
 ```bash
 _REVIEW_DATE=$(date +%Y%m%d-%H%M%S)
 _REVIEW_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_REVIEW_FILE="review-${_REVIEW_BRANCH}-${_REVIEW_DATE}.md"
+_REVIEW_SESSION="<session>"  # Auto-generate from conversation context, e.g. "vibe-skill", "auth-refactor"
+_REVIEW_FILE="review-${_REVIEW_BRANCH}-${_REVIEW_SESSION}-${_REVIEW_DATE}.md"
 mkdir -p docs/superomni/reviews
 cat > "docs/superomni/reviews/${_REVIEW_FILE}" << EOF
 # Code Review: ${_REVIEW_BRANCH}
@@ -269,4 +270,4 @@ EOF
 echo "Review saved to docs/superomni/reviews/${_REVIEW_FILE}"
 ```
 
-Write the full CODE REVIEW block (formatted as Markdown) to `docs/superomni/reviews/review-[branch]-[date].md`. This file serves as the permanent record of the review for the user to revisit.
+Write the full CODE REVIEW block (formatted as Markdown) to `docs/superomni/reviews/review-[branch]-[session]-[date].md`. This file serves as the permanent record of the review for the user to revisit.

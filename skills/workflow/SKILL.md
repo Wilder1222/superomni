@@ -129,6 +129,8 @@ spec.md  plan.md  code   feedback  green  ready-report release  retro
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
 
+**Entry point:** Use `/vibe` to activate the framework and auto-detect your current stage. It scans for artifacts and routes you to the right skill.
+
 ## Stage 1: THINK — Define the Problem
 
 **Skills:** `brainstorm`, `investigate`
@@ -384,7 +386,7 @@ completed feature → retro → retrospective notes (.context/retros/)
 
 ## Picking Up Mid-Sprint
 
-If you're joining a sprint already in progress:
+If you're joining a sprint already in progress, use `/vibe` or `/vibe status` to auto-detect your current stage. Or scan manually:
 
 ```bash
 # Check what exists

@@ -118,6 +118,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 
 | Situation | Use Skill |
 |-----------|----------|
+| Framework activation / entry point | `vibe` |
 | Any non-trivial task (default) | `subagent-development` |
 | Starting a new feature/project idea | `brainstorm` |
 | Creating an implementation plan | `writing-plans` |

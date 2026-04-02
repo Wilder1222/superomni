@@ -25,6 +25,10 @@ Each skill in `skills/` is a behavior specification. When a relevant situation a
 4. **Report** using the status protocol when complete
 5. **Continue** — after DONE, suggest the next skill and re-engage on follow-up messages
 
+## CRITICAL: No EnterPlanMode in superomni
+
+When ANY superomni skill is active, NEVER use Claude Code's built-in `EnterPlanMode` tool. Always follow each skill's own workflow phases. For planning, use the `writing-plans` skill. For implementation, use `executing-plans` or `subagent-development`. `EnterPlanMode` bypasses the superomni pipeline and is forbidden during superomni sessions.
+
 ## Follow-up Message Protocol
 
 **After any superomni skill session completes**, the agent stays in superomni mode for all subsequent messages in the conversation. When the user sends a new message:
@@ -47,6 +51,8 @@ Use the scan results to locate the current pipeline stage:
 | `docs/superomni/plans/plan.md` all checked, no review | REVIEW | `code-review` |
 | PR approved, tests green | TEST / PROD-CHECK | `qa` → `verification` → `production-readiness` |
 | `docs/superomni/production-readiness/` files exist | SHIP | `ship` |
+| Shipped (tagged release or merged PR), no improvement report | EVALUATE | `self-improvement` |
+| `docs/superomni/improvements/` files exist | REFLECT | `retro` |
 | `docs/superomni/executions/` files exist | Continuing run | Resume with the same skill |
 | `docs/superomni/reviews/` files exist | Post-review | `receiving-code-review` |
 

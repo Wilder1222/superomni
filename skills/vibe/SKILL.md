@@ -130,6 +130,10 @@ Nothing is sent to external servers. Data is stored only in `~/.omni-skills/anal
 
 `/vibe` is the single unified entry point. It never executes work itself — it **detects** the current stage and **delegates** to the appropriate skill.
 
+## CRITICAL: Do NOT use EnterPlanMode
+
+When `/vibe` is invoked, you MUST follow this skill's phases (Phase 1-5) directly. **NEVER** trigger Claude Code's built-in `EnterPlanMode` tool at any point during the vibe workflow or any subsequent superomni skill session. `EnterPlanMode` bypasses the superomni pipeline entirely. For planning, delegate to the `writing-plans` skill. For implementation, delegate to `executing-plans` or `subagent-development`.
+
 ## Phase 1: Detect Current Pipeline Stage
 
 Scan for existing artifacts to determine where the project is in the sprint pipeline:
@@ -167,7 +171,8 @@ Use the following priority-ordered rules (first match wins):
 | 5 | Review docs exist, no execution/QA verification | **TEST** | `qa` then `verification` |
 | 6 | Verified, no production-readiness report | **PROD-CHECK** | `production-readiness` |
 | 7 | Production readiness confirmed | **SHIP** | `ship` |
-| 8 | Shipped (tagged release or merged PR) | **REFLECT** | `retro` |
+| 8 | Shipped (tagged release or merged PR), no improvement report | **EVALUATE** | `self-improvement` |
+| 9 | Improvement report exists | **REFLECT** | `retro` |
 
 If the user passes **arguments** with `/vibe` (e.g., `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
 
@@ -181,14 +186,14 @@ Print the following banner after stage detection:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Branch:    [current branch]
   Stage:     [detected stage] ← YOU ARE HERE
-  Pipeline:  THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → REFLECT
+  Pipeline:  THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 Show the pipeline with the current stage highlighted:
 
 ```
-  THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → REFLECT
+  THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT
     ^
     YOU ARE HERE
 ```
@@ -210,6 +215,7 @@ Available commands:
 | /verify | Verify task completion |
 | /production-readiness | Pre-deploy readiness check |
 | /investigate | Exploratory investigation |
+| /self-improve | Post-task performance evaluation |
 | /retro | Engineering retrospective |
 | /workflow | See the full sprint pipeline |
 | /ship | Release workflow |
@@ -237,6 +243,7 @@ PIPELINE STATUS
     executions/:          [N files / empty]
     reviews/:             [N files / empty]
     production-readiness/: [N files / empty]
+    improvements/:        [N files / empty]
 
   Suggested next → [skill-name]: [reason]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

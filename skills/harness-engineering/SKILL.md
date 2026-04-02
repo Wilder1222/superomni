@@ -279,7 +279,7 @@ When an agent fails a task repeatedly (3+ attempts), is there a defined process 
 ### 5b. Performance → Improvement
 Does the self-improvement skill output get consumed?
 ```bash
-ls .superomni/improvements/ 2>/dev/null | head -5
+ls docs/superomni/improvements/ 2>/dev/null | head -5
 ```
 - [ ] Improvement reports exist?
 - [ ] Action items from last report applied to current sprint?
@@ -332,11 +332,12 @@ Generate a prioritized backlog. P0 items must be fixed before the next sprint.
 ## Phase 8: Save Harness Audit Report
 
 ```bash
-HARNESS_DIR=".superomni/harness-audits"
+HARNESS_DIR="docs/superomni/harness-audits"
 mkdir -p "$HARNESS_DIR"
 BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "main")
+SESSION="<session>"  # Auto-generate from conversation context, e.g. "vibe-skill", "auth-refactor"
 TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)
-REPORT_FILE="$HARNESS_DIR/harness-audit-${BRANCH}-${TIMESTAMP}.md"
+REPORT_FILE="$HARNESS_DIR/harness-audit-${BRANCH}-${SESSION}-${TIMESTAMP}.md"
 echo "Saving harness audit to $REPORT_FILE"
 ```
 
@@ -357,7 +358,7 @@ Top finding:        [single most important issue]
 P0 improvements:    [N]
 P1 improvements:    [N]
 P2 improvements:    [N]
-Report saved:       [.superomni/harness-audits/...]
+Report saved:       [docs/superomni/harness-audits/...]
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
 ```

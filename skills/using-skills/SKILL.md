@@ -81,19 +81,21 @@ Check your PROACTIVE setting:
 
 ## Document Output Convention
 
-User-facing outputs go in `docs/superomni/`, internal state stays in `.superomni/`:
+All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 
 | Output | Location |
 |--------|----------|
 | Specs | `docs/superomni/specs/spec.md` |
 | Plans | `docs/superomni/plans/plan.md` |
-| Code reviews | `docs/superomni/reviews/review-[branch]-[date].md` |
-| Execution results | `docs/superomni/executions/execution-[branch]-[date].md` |
-| Sub-agent sessions | `docs/superomni/subagents/subagent-[branch]-[date].md` |
-| Production readiness | `docs/superomni/production-readiness/production-readiness-[branch]-[date].md` |
-| Improvements (internal) | `.superomni/improvements/improvement-[branch]-[date].md` |
-| Evaluations (internal) | `.superomni/evaluations/evaluation-[branch]-[date].md` |
-| Harness audits (internal) | `.superomni/harness-audits/harness-audit-[branch]-[date].md` |
+| Code reviews | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
+| Execution results | `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
+| Sub-agent sessions | `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
+| Production readiness | `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md` |
+| Improvements | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+| Evaluations | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` |
+| Harness audits | `docs/superomni/harness-audits/harness-audit-[branch]-[session]-[date].md` |
+
+**`[session]` naming rule:** Auto-generate a short, descriptive session identifier from the conversation context (e.g., `vibe-skill`, `auth-refactor`, `fix-login-bug`). Use kebab-case, max 30 chars. This enables agents to search and retrieve relevant prior sessions.
 
 ## Status Protocol
 

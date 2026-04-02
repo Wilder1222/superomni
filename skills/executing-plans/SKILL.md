@@ -313,7 +313,8 @@ After completing execution, save the results as a Markdown document:
 ```bash
 _EXEC_DATE=$(date +%Y%m%d-%H%M%S)
 _EXEC_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_EXEC_FILE="execution-${_EXEC_BRANCH}-${_EXEC_DATE}.md"
+_EXEC_SESSION="<session>"  # Auto-generate from conversation context, e.g. "vibe-skill", "auth-refactor"
+_EXEC_FILE="execution-${_EXEC_BRANCH}-${_EXEC_SESSION}-${_EXEC_DATE}.md"
 mkdir -p docs/superomni/executions
 cat > "docs/superomni/executions/${_EXEC_FILE}" << EOF
 # Execution Results: ${_EXEC_BRANCH}
@@ -334,6 +335,6 @@ EOF
 echo "Execution results saved to docs/superomni/executions/${_EXEC_FILE}"
 ```
 
-Write the full execution log (wave plan, all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `docs/superomni/executions/execution-[branch]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
+Write the full execution log (wave plan, all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `docs/superomni/executions/execution-[branch]-[session]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
 
 Then trigger the `verification` skill.

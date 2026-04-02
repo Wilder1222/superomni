@@ -165,7 +165,7 @@ Concerns (if any):
 After completing verification, save the report as a persistent Markdown document:
 
 ```bash
-EVAL_DIR=".superomni/evaluations"
+EVAL_DIR="docs/superomni/evaluations"
 mkdir -p "$EVAL_DIR"
 BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "main")
 TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)

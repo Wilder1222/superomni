@@ -378,7 +378,7 @@ The `designer` agent adds the missing design review dimension to the framework â
 
 **Decision:** Add `harness-engineering` as a P1 skill with a formal audit protocol covering context efficiency, tool minimalism, evaluation gate coverage, feedback loops, and documentation freshness.
 
-**Implementation:** `skills/harness-engineering/` with 8-phase audit, Harness Health Score (N/25), and prioritized improvement backlog output to `.superomni/harness-audits/`.
+**Implementation:** `skills/harness-engineering/` with 8-phase audit, Harness Health Score (N/25), and prioritized improvement backlog output to `docs/superomni/harness-audits/`.
 
 ### Decision 6: Evaluator as a Dedicated Agent
 

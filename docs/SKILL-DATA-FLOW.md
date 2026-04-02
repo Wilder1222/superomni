@@ -90,7 +90,7 @@ Required structure in `docs/superomni/plans/plan.md`:
 
 ### `executing-plans` → `verification`
 
-**Produces:** `docs/superomni/executions/execution-[branch]-[date].md`
+**Produces:** `docs/superomni/executions/execution-[branch]-[session]-[date].md`
 
 Required sections:
 ```markdown
@@ -117,7 +117,7 @@ Status: DONE | DONE_WITH_CONCERNS
 
 ### `verification` → `self-improvement`
 
-**Produces:** `.superomni/evaluations/evaluation-[branch]-[date].md`
+**Produces:** `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md`
 
 Required sections:
 ```markdown
@@ -157,7 +157,7 @@ Spec/plan used: [docs/superomni/specs/spec.md | docs/superomni/plans/plan.md | u
 
 ### `code-review` → `receiving-code-review`
 
-**Produces:** `docs/superomni/reviews/review-[branch]-[date].md`
+**Produces:** `docs/superomni/reviews/review-[branch]-[session]-[date].md`
 
 Required sections:
 ```markdown
@@ -181,7 +181,7 @@ Required sections:
 
 ### `production-readiness` → `ship`
 
-**Produces:** `docs/superomni/production-readiness/production-readiness-[branch]-[date].md`
+**Produces:** `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md`
 
 Required sections:
 ```markdown
@@ -215,7 +215,7 @@ Required sections:
 
 ### `self-improvement` → next sprint's `workflow`
 
-**Produces:** `.superomni/improvements/improvement-[branch]-[date].md`
+**Produces:** `docs/superomni/improvements/improvement-[branch]-[session]-[date].md`
 
 Required sections:
 ```markdown
@@ -296,14 +296,14 @@ Skills that consume upstream output should use this pattern:
 
 ```bash
 # Read latest improvement report (if exists)
-LATEST_IMPROVE=$(find .superomni/improvements -name "*.md" -type f 2>/dev/null | sort | tail -1)
+LATEST_IMPROVE=$(find docs/superomni/improvements -name "*.md" -type f 2>/dev/null | sort | tail -1)
 if [ -n "$LATEST_IMPROVE" ]; then
   echo "Prior improvement actions:"
   grep "^### ACTION" "$LATEST_IMPROVE" -A 3 | head -30
 fi
 
 # Read latest evaluation report (if exists)
-LATEST_EVAL=$(find .superomni/evaluations -name "*.md" -type f 2>/dev/null | sort | tail -1)
+LATEST_EVAL=$(find docs/superomni/evaluations -name "*.md" -type f 2>/dev/null | sort | tail -1)
 if [ -n "$LATEST_EVAL" ]; then
   echo "Latest task evaluation:"
   cat "$LATEST_EVAL" | head -30

@@ -3,7 +3,7 @@ name: self-improvement
 description: |
   Post-task performance evaluation. Applies first-principles reflection to evaluate
   how well the current session's workflow, agents, and skills performed.
-  Produces a structured improvement report saved to .superomni/improvements/.
+  Produces a structured improvement report saved to docs/superomni/improvements/.
   Triggers: "self-improve", "evaluate performance", "reflect on execution",
   "how did we do", "what could be better", "evaluate this sprint",
   "improve process", "first principles review".
@@ -46,7 +46,7 @@ ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md 2>/dev/null
 ls docs/superomni/ .superomni/ 2>/dev/null
 
 # Read the latest evaluation report (from verification skill)
-LATEST_EVAL=$(find .superomni/evaluations -name "*.md" -type f 2>/dev/null | sort | tail -1)
+LATEST_EVAL=$(find docs/superomni/evaluations -name "*.md" -type f 2>/dev/null | sort | tail -1)
 if [ -n "$LATEST_EVAL" ]; then
   echo "Latest verification evaluation:"
   cat "$LATEST_EVAL" | head -40
@@ -175,7 +175,7 @@ Verify:   Next session starts with `ls docs/superomni/specs/spec.md` — must ex
 ## Phase 7: Save Improvement Report
 
 ```bash
-IMPROVE_DIR=".superomni/improvements"
+IMPROVE_DIR="docs/superomni/improvements"
 mkdir -p "$IMPROVE_DIR"
 BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "main")
 TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)
@@ -273,7 +273,7 @@ Top gap:            [single most important finding]
 Action 1:           [title]
 Action 2:           [title]
 Action 3:           [title]
-Report saved:       [.superomni/improvements/...]
+Report saved:       [docs/superomni/improvements/...]
 Status: DONE | DONE_WITH_CONCERNS
 ════════════════════════════════════════
 ```

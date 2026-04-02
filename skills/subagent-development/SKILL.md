@@ -278,7 +278,8 @@ After the sub-agent session is complete, save the full session record as a Markd
 ```bash
 _SA_DATE=$(date +%Y%m%d-%H%M%S)
 _SA_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_SA_FILE="subagent-${_SA_BRANCH}-${_SA_DATE}.md"
+_SA_SESSION="<session>"  # Auto-generate from conversation context, e.g. "vibe-skill", "auth-refactor"
+_SA_FILE="subagent-${_SA_BRANCH}-${_SA_SESSION}-${_SA_DATE}.md"
 mkdir -p docs/superomni/subagents
 cat > "docs/superomni/subagents/${_SA_FILE}" << EOF
 # Sub-Agent Session: ${_SA_BRANCH}
@@ -306,4 +307,4 @@ EOF
 echo "Sub-agent session saved to docs/superomni/subagents/${_SA_FILE}"
 ```
 
-Write the full session record (agents dispatched, wave breakdown, outputs, integration summary, and final status, formatted as Markdown) to `docs/superomni/subagents/subagent-[branch]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.
+Write the full session record (agents dispatched, wave breakdown, outputs, integration summary, and final status, formatted as Markdown) to `docs/superomni/subagents/subagent-[branch]-[session]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.

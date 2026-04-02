@@ -270,11 +270,12 @@ Concerns (if any):
 After completing verification, save the report as a persistent Markdown document:
 
 ```bash
-EVAL_DIR=".superomni/evaluations"
+EVAL_DIR="docs/superomni/evaluations"
 mkdir -p "$EVAL_DIR"
 BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "main")
+SESSION="<session>"  # Auto-generate from conversation context, e.g. "vibe-skill", "auth-refactor"
 TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)
-EVAL_FILE="$EVAL_DIR/evaluation-${BRANCH}-${TIMESTAMP}.md"
+EVAL_FILE="$EVAL_DIR/evaluation-${BRANCH}-${SESSION}-${TIMESTAMP}.md"
 ```
 
 Write the full VERIFICATION REPORT block (including all checklist results, test output, and goal alignment table) to `$EVAL_FILE` in this format:

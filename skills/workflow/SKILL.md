@@ -140,7 +140,7 @@ Each stage uses specific skills and produces artifacts consumed by the next stag
 **Start-of-sprint context scan:**
 ```bash
 # Always check for prior improvement actions from the last self-improvement run
-LATEST_IMPROVE=$(find .superomni/improvements -name "*.md" -type f 2>/dev/null |   sort -t- -k2,3 | tail -1)
+LATEST_IMPROVE=$(find docs/superomni/improvements -name "*.md" -type f 2>/dev/null |   sort -t- -k2,3 | tail -1)
 if [ -n "$LATEST_IMPROVE" ]; then
   echo "=== Applying improvement actions from last sprint ==="
   grep "^### ACTION" "$LATEST_IMPROVE" -A 4 | head -30
@@ -352,7 +352,7 @@ verified code → finishing-branch → merge to main
 ```
 completed feature → retro → retrospective notes (.context/retros/)
                   ↓
-           self-improvement → improvement report (.superomni/improvements/)
+           self-improvement → improvement report (docs/superomni/improvements/)
                   ↓
           3 action items → [next sprint — feed into THINK stage]
 ```

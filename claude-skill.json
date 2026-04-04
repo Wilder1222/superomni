@@ -17,8 +17,6 @@
     { "name": "execute-plan",     "file": "commands/execute-plan.md" },
     { "name": "review",           "file": "commands/review.md" },
     { "name": "office-hours",     "file": "commands/office-hours.md" },
-    { "name": "autoplan",         "file": "commands/autoplan.md" },
-    { "name": "freeze",           "file": "commands/freeze.md" },
     { "name": "document-release", "file": "commands/document-release.md" },
     { "name": "harness-audit",    "file": "commands/harness-audit.md" },
     { "name": "fd-animate",      "file": "commands/fd-animate.md" },

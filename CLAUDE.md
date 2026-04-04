@@ -20,25 +20,22 @@ Philosophy: **Plan Lean, Execute Complete**
 | test-driven-development | Writing code | P1 |
 | verification | "verify", "done", "complete" | P1 |
 | code-review | "review", "PR ready" | P1 |
-| plan-review | "review plan", "autoplan" | P1 |
+| plan-review | "review plan", "autoplan", "auto review" | P1 |
 | receiving-code-review | "review feedback", "address review" | P1 |
 | security-audit | "security audit", "threat model" | P1 |
 | qa | "qa", "quality assurance" | P1 |
 | careful | "careful", destructive operations | P1 |
 | workflow | "workflow", "sprint", "what's next" | P1 |
-| office-hours | "office hours", "validate idea", "brainstorm this" | P1 |
-| autoplan | "autoplan", "auto review", "review this plan" | P1 |
-| freeze | "freeze", "restrict edits", "lock edits" | P1 |
+| office-hours | "office hours", "validate idea" (product discovery, not sprint pipeline) | P2 |
 | frontend-design | "frontend design", "build UI", "design page", "make it look good" | P1 |
 | git-worktrees | Parallel work | P2 |
 | finishing-branch | "finish branch", "merge" | P2 |
-| dispatching-parallel | Parallel tasks | P2 |
 | investigate | "investigate", "explore" | P2 |
 | retro | "retro", "weekly review" | P2 |
 | ship | "ship", "release" | P2 |
 | writing-skills | "create skill", "install skill", "list skills" | P2 |
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
-| document-release | "update docs", "sync docs", "post-ship docs" | P2 |
+| document-release | "update docs", "sync docs" (optional post-ship) | P3 |
 | production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |
 | self-improvement | "self-improve", "evaluate performance", "reflect on execution", "how did we do", "improve process" | P1 |
 | harness-engineering | "harness", "harness audit", "improve harness", "agent environment", "evaluation gates", "feedback loop" | P1 |

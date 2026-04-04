@@ -3,7 +3,7 @@ name: plan-review
 description: |
   Multi-stage plan review pipeline: Strategy (CEO) → Design (if UI) → Engineering.
   Applies 6 decision principles. Auto-resolves mechanical decisions, surfaces taste decisions.
-  Triggers: "review this plan", "autoplan", "is this plan good", before executing any plan.
+  Triggers: "review this plan", "autoplan", "auto review", "is this plan good", before executing any plan.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -158,6 +158,23 @@ One command. Rough plan in, fully reviewed plan out.
 
 **Mechanical** — one clearly right answer given constraints. Auto-decide silently, don't burden the user.
 **Taste** — reasonable engineers could disagree. Collect and surface at the final gate only.
+
+---
+
+## Auto Mode (/autoplan)
+
+When invoked as `/autoplan` or with "auto review" trigger, run in auto mode:
+- **Mechanical decisions:** Auto-resolve silently using the 6 Decision Principles. Log each decision.
+- **Taste decisions:** Collect and surface at the final gate only.
+- All 3 phases (Strategy, Design, Engineering) run automatically.
+- Final gate still presents taste decisions for user approval.
+
+Auto-decision log format:
+```
+AUTO-DECISION LOG ([Phase])
+  [P1] [topic]: [decision made] — Principle [N]
+  [TASTE] [topic]: [description] — flagging for gate
+```
 
 ---
 

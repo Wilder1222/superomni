@@ -135,10 +135,9 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | About to claim "done" | `verification` |
 | Code review requested | `code-review` |
 | Reviewing a plan | `plan-review` |
-| Complex task needing parallel agents | `subagent-development` |
+| Complex task needing parallel agents (includes wave planning) | `subagent-development` |
 | Working on multiple features at once | `git-worktrees` |
 | Finishing and merging a branch | `finishing-branch` |
-| Multiple parallel tasks | `dispatching-parallel` |
 | Weekly engineering summary | `retro` |
 | Deploying/releasing software | `ship` |
 | Creating a new skill | `writing-skills` |
@@ -150,8 +149,8 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Sprint pipeline orchestration | `workflow` |
 | Managing, installing, searching for online, or creating agents | `agent-management` |
 | Product discovery and idea validation | `office-hours` |
-| Automated full plan review pipeline | `autoplan` |
-| Restrict edits to a directory | `freeze` |
+| Automated full plan review pipeline | `plan-review` (auto mode) |
+| Restrict edits to a directory (built into `systematic-debugging`) | `systematic-debugging` |
 | Update docs after shipping | `document-release` |
 | Verifying production readiness before deploy | `production-readiness` |
 | Post-task performance evaluation and improvement | `self-improvement` |

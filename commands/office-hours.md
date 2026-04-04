@@ -35,4 +35,4 @@ Loads `skills/office-hours/SKILL.md` and guides you through product discovery. S
 
 Saves `design-doc.md` in the project root. This feeds into:
 - `/write-plan` — turns the design doc into an implementation plan
-- `/autoplan` — runs the full CEO+Design+Eng review on the plan
+- `/review` with auto mode — runs the full CEO+Design+Eng review on the plan

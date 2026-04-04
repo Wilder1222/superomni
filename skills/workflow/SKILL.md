@@ -33,17 +33,20 @@ Report status using one of these at the end of every skill session:
 
 ### Auto-Advance Rule
 
-When a skill reports **DONE** (no concerns, no blockers):
+Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+
+**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+
+| Status | At REVIEW stage | At all other stages |
+|--------|----------------|-------------------|
+| **DONE** | STOP — present review summary, wait for user input (Y / N / revision notes) | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
+| **DONE_WITH_CONCERNS** | STOP — present concerns, wait for user decision | STOP — present concerns, wait for user decision |
+| **BLOCKED** / **NEEDS_CONTEXT** | STOP — present blocker, wait for user | STOP — present blocker, wait for user |
+
+When auto-advancing:
 1. Write the session artifact to `docs/superomni/`
-2. Print a single-line transition: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
-3. Immediately invoke the next pipeline skill without waiting for user input
-
-When a skill reports **DONE_WITH_CONCERNS**, **BLOCKED**, or **NEEDS_CONTEXT**:
-1. Write the session artifact
-2. STOP and present the status to the user
-3. Wait for user decision before proceeding
-
-Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → IMPROVE → REFLECT
+2. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
+3. Immediately invoke the next pipeline skill
 
 ### Session Continuity
 
@@ -138,11 +141,13 @@ Nothing is sent to external servers. Data is stored only in `~/.omni-skills/anal
 ## The Pipeline
 
 ```
-THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → IMPROVE → REFLECT
-  │        │       │        │       │       │       │         │
-  ▼        ▼       ▼        ▼       ▼       ▼       ▼         ▼
-spec-*   plan-*  reviewed  code   green  release  actions    retro
+THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+  │        │       │        │       │       │       │
+  ▼        ▼       ▼        ▼       ▼       ▼       ▼
+spec-*   plan-*  approved  code   green  release  retro
 ```
+
+**REVIEW is the only human gate.** All other stages auto-advance on DONE.
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
 
@@ -263,26 +268,24 @@ docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code chang
 
 ## Stage 5: VERIFY — Code Review, QA & Production Readiness
 
-**Skills:** `code-review`, `receiving-code-review`, `qa`, `security-audit`, `verification`, `production-readiness`
+**Required skills:** `code-review`, `qa`, `verification`
+**Optional skills (by context):** `security-audit` (if security-relevant), `receiving-code-review` (if external feedback), `production-readiness` (if deploying to production)
 
 **Input:** Code changes from Stage 4.
 
 **Process:**
-1. Use `code-review` for structured code review (self-review first, then submit PR)
-2. When feedback arrives, use `receiving-code-review` to process comments systematically
-3. Use `qa` for comprehensive quality assurance:
-   - Run existing tests, write missing tests, explore edge cases
-4. Use `security-audit` if changes touch auth, data handling, or external input
-5. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
-6. Use `production-readiness` to run the pre-deploy gate:
-   - Check observability (logging, metrics), reliability (health, timeouts, degradation), operability (rollback, runbook, alerts)
-   - Verdict must be READY or READY_WITH_CONCERNS before proceeding
+1. **Required:** Use `code-review` for structured code review (self-review first, then submit PR)
+2. **Required:** Use `qa` for comprehensive quality assurance — run existing tests, write missing tests, explore edge cases
+3. **Required:** Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
+4. **If security-relevant:** Use `security-audit` for changes touching auth, data handling, or external input
+5. **If deploying:** Use `production-readiness` to run the pre-deploy gate (observability, reliability, operability)
+6. **If external feedback received:** Use `receiving-code-review` to process comments systematically
 
-**Output:** Verified code — reviewed, tested, security audited, goal-aligned, production readiness report saved to `docs/superomni/production-readiness/`.
+**Output:** Verified code — reviewed, tested, goal-aligned. If deploying: production readiness report saved to `docs/superomni/production-readiness/`.
 
 **Data flow:**
 ```
-code → code-review → qa → security-audit → verification → production-readiness
+code → code-review → qa → verification → [security-audit] → [production-readiness]
                                                             │
                                            READY or READY_WITH_CONCERNS?
                                                             │ YES → [next stage]
@@ -312,11 +315,11 @@ verified code → finishing-branch → merge to main → ship → deploy
                                                        [next stage]
 ```
 
-**"What's next" check:** Code merged? Deployed? Version tagged? → Move to IMPROVE.
+**"What's next" check:** Code merged? Deployed? Version tagged? → Move to REFLECT.
 
-## Stage 7: IMPROVE — Self-Evaluation
+## Stage 7: REFLECT — Evaluate & Retrospective
 
-**Skills:** `self-improvement`
+**Skills:** `self-improvement`, `retro` (run sequentially in one stage)
 
 **Input:** Completed feature — the full journey from idea to deployment.
 
@@ -325,44 +328,25 @@ verified code → finishing-branch → merge to main → ship → deploy
    - Process adherence (were phases followed?)
    - Agent behavior (scope management, instruction following, escalation)
    - Skill effectiveness (were the right skills used correctly?)
-2. Generate 3 concrete improvement actions for the next sprint
-3. Save the improvement report
+   - Generate 3 concrete improvement actions
+2. Use `retro` to analyze what was shipped:
+   - Commits, LOC, active days, streak
+   - Capture team/process patterns and lessons learned
+   - Review improvement actions from step 1
 
-**Output:** Improvement report with 3 action items saved to `docs/superomni/improvements/`.
+**Output:** Improvement report + retrospective notes saved to `docs/superomni/improvements/`.
 
 **Data flow:**
 ```
-shipped feature → self-improvement → improvement report (docs/superomni/improvements/)
-                                            │
-                                     3 action items
+shipped feature → self-improvement → improvement report
                                             │
                                             ▼
-                                       [next stage]
+                                     retro → retrospective notes
+                                            │
+                                     feed into next sprint THINK stage
 ```
 
-**"What's next" check:** Improvement report saved with action items? → Move to REFLECT.
-
-## Stage 8: REFLECT — Retrospective
-
-**Skills:** `retro`
-
-**Input:** Improvement report from Stage 7 + full sprint history.
-
-**Process:**
-1. Use `retro` to analyze what was shipped: commits, LOC, active days, streak
-2. Review improvement actions from Stage 7
-3. Capture team/process patterns and lessons learned
-
-**Output:** Retrospective notes.
-
-**Data flow:**
-```
-improvement report → retro → retrospective notes
-                               │
-                        feed into next sprint THINK stage
-```
-
-**"What's next" check:** Retro saved? → Start next sprint at THINK.
+**"What's next" check:** Improvement report + retro saved? → Start next sprint at THINK.
 
 ## Quick Reference: Which Skill When?
 
@@ -404,15 +388,14 @@ git status --short
 - `docs/superomni/specs/spec-*.md` exists but no `docs/superomni/plans/plan-*.md` → You're at PLAN stage
 - `docs/superomni/plans/plan-*.md` exists but no review docs → You're at REVIEW stage (plan review)
 - Plan reviewed, has unchecked items → You're at BUILD stage
-- Code complete but not verified/production-ready → You're at VERIFY stage (code review + QA)
-- `docs/superomni/production-readiness/` files exist but not yet shipped → You're at SHIP stage
-- Shipped but no improvement report → You're at IMPROVE stage
-- `docs/superomni/improvements/` files exist → You're at REFLECT stage
+- Code complete but not verified → You're at VERIFY stage (code review + QA)
+- Verified but not shipped → You're at SHIP stage
+- Shipped but no improvement/retro → You're at REFLECT stage
 
 ## Report
 
 ```
-Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → IMPROVE → REFLECT
+Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
 Stage: [current] | Branch: [branch]
 Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
 Next → [skill-name]: [reason]

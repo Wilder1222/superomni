@@ -53,8 +53,13 @@ Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP �
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null | head -20
    git log --oneline -3 2>/dev/null
+   ```
+   To find the latest spec or plan:
+   ```bash
+   _LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+   _LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
    current stage (see `workflow` skill for stage → skill mapping) and announce:
@@ -88,8 +93,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | Latest `docs/superomni/specs/spec-*.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | Latest `docs/superomni/plans/plan-*.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -156,7 +161,7 @@ Auto-decisions are provisional. The final approval gate is mandatory — all tas
 
 ```bash
 # Look for plan documents
-ls docs/superomni/plans/plan.md plan.md PLAN.md 2>/dev/null || echo "No plan file found"
+ls docs/superomni/plans/plan-*.md 2>/dev/null || echo "No plan file found"
 git diff --name-only HEAD~1 2>/dev/null | grep -i plan || true
 ```
 
@@ -257,7 +262,7 @@ Reply with one option — your choice is immediate confirmation, no second submi
 
 **Confirmation rule:** This is a single-choice question. The moment the user types A, B, C, or D (with custom text for D), treat that as confirmed and act immediately — do NOT ask "Are you sure?" or prompt again.
 
-If approved → write the final reviewed `docs/superomni/plans/plan.md` with all auto-decisions incorporated.
+If approved → write the final reviewed `docs/superomni/plans/plan-[branch]-[session]-[date].md` with all auto-decisions incorporated.
 If reviewing individually → present each taste decision as its own single-choice (pick A or B, or type your own idea); each answer confirms that decision immediately before moving to the next.
 
 ---
@@ -270,7 +275,7 @@ AUTOPLAN COMPLETE
 Phases:      Strategy | Design (if UI) | Engineering
 Auto-decided: [N] mechanical decisions
 Taste decisions: [N] (all resolved at gate)
-Plan:        docs/superomni/plans/plan.md (updated)
+Plan:        docs/superomni/plans/plan-[branch]-[session]-[date].md (updated)
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════

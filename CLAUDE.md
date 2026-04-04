@@ -48,7 +48,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | Command | Description |
 |---------|-------------|
 | `/vibe` | Activate full framework, detect pipeline stage, launch guided workflow. Subcommands: `/vibe status`, `/vibe reset` |
-| `/brainstorm` | Design a feature — produces `docs/superomni/specs/spec.md` |
+| `/brainstorm` | Design a feature — produces `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
@@ -83,8 +83,8 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 
 | Output Type | Directory | File Pattern |
 |-------------|-----------|-------------|
-| Specs | `docs/superomni/specs/` | `spec.md` |
-| Plans | `docs/superomni/plans/` | `plan.md` |
+| Specs | `docs/superomni/specs/` | `spec-[branch]-[session]-[date].md` |
+| Plans | `docs/superomni/plans/` | `plan-[branch]-[session]-[date].md` |
 | Code reviews | `docs/superomni/reviews/` | `review-[branch]-[session]-[date].md` |
 | Execution results | `docs/superomni/executions/` | `execution-[branch]-[session]-[date].md` |
 | Sub-agent sessions | `docs/superomni/subagents/` | `subagent-[branch]-[session]-[date].md` |
@@ -104,5 +104,5 @@ Documents in `docs/superomni/` serve as a permanent, indexable audit trail for a
 - **Project tools first:** Always prefer built-in skills (`skills/`) and agents (`agents/`) over any external tools. Only reach for external tools when no project-local skill or agent is suitable.
 - Respect PROACTIVE mode — if false, only run skills when explicitly asked
 - Use status protocol: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
-- **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/specs/spec.md`, `docs/superomni/plans/plan.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
+- **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/specs/spec-*.md`, `docs/superomni/plans/plan-*.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
 - **CRITICAL — No EnterPlanMode in superomni workflows:** When any superomni skill is active (after `/vibe`, `/brainstorm`, `/write-plan`, or any skill invocation), NEVER use Claude Code's built-in `EnterPlanMode` tool. Always follow the skill's own workflow phases and delegate to the appropriate superomni skill (e.g., `writing-plans` for planning). `EnterPlanMode` bypasses the superomni pipeline and must not be used during superomni sessions.

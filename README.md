@@ -120,8 +120,8 @@ Open your project in your AI CLI. Skills activate automatically.
 |-------|------------|------------|
 | `vibe` | Framework activation / entry point | Auto-detects pipeline stage |
 | `using-skills` | Always active | Loads the framework |
-| `brainstorm` | New feature/design | `docs/superomni/specs/spec.md` |
-| `writing-plans` | Planning implementation | `docs/superomni/plans/plan.md` |
+| `brainstorm` | New feature/design | `docs/superomni/specs/spec-*.md` |
+| `writing-plans` | Planning implementation | `docs/superomni/plans/plan-*.md` |
 | `executing-plans` | Running a plan | Code changes + report |
 | `systematic-debugging` | Any bug/error | Debug report + fix |
 

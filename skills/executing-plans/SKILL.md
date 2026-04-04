@@ -3,7 +3,7 @@ name: executing-plans
 description: |
   Use when executing an implementation plan step by step.
   Triggers: "execute plan", "implement this plan", "start executing", "run the plan".
-  Requires: a docs/superomni/plans/plan.md or similar plan document to exist.
+  Requires: a docs/superomni/plans/plan-*.md or similar plan document to exist.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -50,8 +50,13 @@ Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP �
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null | head -20
    git log --oneline -3 2>/dev/null
+   ```
+   To find the latest spec or plan:
+   ```bash
+   _LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+   _LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
    current stage (see `workflow` skill for stage → skill mapping) and announce:
@@ -85,8 +90,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | Latest `docs/superomni/specs/spec-*.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | Latest `docs/superomni/plans/plan-*.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -148,7 +153,7 @@ update the plan, skill, or constraint — then retry. Never brute-force through 
 
 ```bash
 # Find the plan document
-find . -name "plan.md" -path "*/superomni/*" 2>/dev/null | head -5
+ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1
 ```
 
 Read the plan. Confirm:

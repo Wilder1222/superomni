@@ -80,9 +80,13 @@ If the spec involves UI components, pages, or visual design:
 
 ```bash
 mkdir -p docs/superomni/specs
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_SESSION="<auto-generate-kebab-case-from-context>"  # e.g., auth-refactor, vibe-skill
+_DATE=$(date +%Y%m%d)
+_SPEC_FILE="docs/superomni/specs/spec-${_BRANCH}-${_SESSION}-${_DATE}.md"
 ```
 
-Produce `docs/superomni/specs/spec.md` with this structure:
+Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this structure:
 
 ```markdown
 # [Feature Name] — Spec

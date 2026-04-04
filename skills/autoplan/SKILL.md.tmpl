@@ -39,7 +39,7 @@ Auto-decisions are provisional. The final approval gate is mandatory — all tas
 
 ```bash
 # Look for plan documents
-ls docs/superomni/plans/plan.md plan.md PLAN.md 2>/dev/null || echo "No plan file found"
+ls docs/superomni/plans/plan-*.md 2>/dev/null || echo "No plan file found"
 git diff --name-only HEAD~1 2>/dev/null | grep -i plan || true
 ```
 
@@ -140,7 +140,7 @@ Reply with one option — your choice is immediate confirmation, no second submi
 
 **Confirmation rule:** This is a single-choice question. The moment the user types A, B, C, or D (with custom text for D), treat that as confirmed and act immediately — do NOT ask "Are you sure?" or prompt again.
 
-If approved → write the final reviewed `docs/superomni/plans/plan.md` with all auto-decisions incorporated.
+If approved → write the final reviewed `docs/superomni/plans/plan-[branch]-[session]-[date].md` with all auto-decisions incorporated.
 If reviewing individually → present each taste decision as its own single-choice (pick A or B, or type your own idea); each answer confirms that decision immediately before moving to the next.
 
 ---
@@ -153,7 +153,7 @@ AUTOPLAN COMPLETE
 Phases:      Strategy | Design (if UI) | Engineering
 Auto-decided: [N] mechanical decisions
 Taste decisions: [N] (all resolved at gate)
-Plan:        docs/superomni/plans/plan.md (updated)
+Plan:        docs/superomni/plans/plan-[branch]-[session]-[date].md (updated)
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════

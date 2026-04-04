@@ -29,6 +29,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | office-hours | "office hours", "validate idea", "brainstorm this" | P1 |
 | autoplan | "autoplan", "auto review", "review this plan" | P1 |
 | freeze | "freeze", "restrict edits", "lock edits" | P1 |
+| frontend-design | "frontend design", "build UI", "design page", "make it look good" | P1 |
 | git-worktrees | Parallel work | P2 |
 | finishing-branch | "finish branch", "merge" | P2 |
 | dispatching-parallel | Parallel tasks | P2 |
@@ -52,6 +53,16 @@ Philosophy: **Plan Lean, Execute Complete**
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
 | `/harness-audit` | Audit the agent harness health and produce improvement backlog |
+| `/fd-audit` | Accessibility + performance check |
+| `/fd-critique` | UX review for clarity and hierarchy |
+| `/fd-polish` | Pre-deployment refinement |
+| `/fd-distill` | Reduce complexity |
+| `/fd-clarify` | UX copy improvement |
+| `/fd-animate` | Add purposeful motion |
+| `/fd-colorize` | Strategic color introduction |
+| `/fd-harden` | Error handling + i18n |
+| `/fd-arrange` | Layout and spacing fixes |
+| `/fd-typeset` | Font and hierarchy fixes |
 
 ## Configuration
 

@@ -126,7 +126,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Executing Plans
 
 **Goal:** Execute a written implementation plan precisely, with verification at each stage — running independent steps in parallel to minimize elapsed time.

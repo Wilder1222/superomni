@@ -31,6 +31,10 @@ Rate each dimension and explain what a 10 would look like:
 | Accessibility | / 10 | Keyboard navigable, WCAG AA contrast, screen reader tested |
 | Error recovery | / 10 | Every error tells the user exactly what to do next |
 | AI Slop detection | / 10 | No generic tooltips, placeholder copy, or Lorem ipsum in disguise |
+| Typography | / 10 | Distinctive font choice, modular scale, fluid type, proper line-height |
+| Color system | / 10 | OKLCH-based, tinted neutrals, 60-30-10 ratio, dark mode considered |
+| Spatial rhythm | / 10 | 4pt grid, varied spacing, visual hierarchy passes squint test |
+| Motion quality | / 10 | Purposeful easing, reduced-motion support, exit < entrance duration |
 
 ### Phase 3: AI Slop Detection
 
@@ -41,10 +45,31 @@ Rate each dimension and explain what a 10 would look like:
 - Loading states that don't communicate how long (spinner alone = slop)
 - Empty states that show a blank page instead of a helpful prompt
 - Success states that don't tell the user what to do next
+- Glassmorphism without purpose (frosted glass effect used decoratively, not functionally)
+- Rounded rectangles with drop shadows everywhere (the "SaaS dashboard" look)
+- Gradient text as decoration (gradient on headings that adds no meaning)
+- Neon accents on dark backgrounds (the "developer portfolio" cliché)
+- Hero metric layouts (big number + small label grid — the default dashboard)
+- Default system fonts when a distinctive choice would serve better
+- Cards nested in cards nested in cards (card-ception)
 
 For each AI Slop finding, suggest the specific fix.
 
-### Phase 4: Edit the Plan
+### Phase 4: Impeccable Check
+
+Run through the 7 reference domains as a checklist:
+
+- [ ] **Typography:** modular scale, distinctive fonts, line-height rhythm, max-width: 65ch
+- [ ] **Color:** OKLCH palette, tinted neutrals, 60-30-10 ratio, no pure gray/black
+- [ ] **Spatial:** 4pt grid, varied spacing, squint test passes, no card-in-card nesting
+- [ ] **Motion:** purposeful easing, reduced-motion support, exit animations < entrance
+- [ ] **Interaction:** all 8 states designed, keyboard nav, focus-visible indicators
+- [ ] **Responsive:** mobile-first, container queries, safe area insets
+- [ ] **UX Writing:** specific button labels, 3-part error messages, helpful empty states
+
+For each unchecked item, add to the issues list with a specific recommendation.
+
+### Phase 5: Edit the Plan
 
 For every dimension below 8: edit the plan to add the missing design requirement. Don't just flag — fix.
 
@@ -64,11 +89,16 @@ Dimension Scores:
   Accessibility:          [N]/10
   Error recovery:         [N]/10
   AI Slop detection:      [N]/10
+  Typography:             [N]/10
+  Color system:           [N]/10
+  Spatial rhythm:         [N]/10
+  Motion quality:         [N]/10
   ─────────────────────────────────
   Overall:               [N]/10
 
 Issues found: [N]
 AI Slop found: [N]
+Impeccable check: [N]/7 domains passing
 Plan updated: [yes/no]
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED

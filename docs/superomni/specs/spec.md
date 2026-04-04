@@ -1,313 +1,176 @@
-# Spec: superomni Harness & Pipeline Design Improvements
+# Frontend Design Skill & Agent Upgrade — Spec
 
-**Session:** harness-pipeline-review
-**Date:** 2026-04-02
-**Status:** DRAFT
-
----
-
-## Problem Statement
-
-### A. Output Path Gaps
-
-superomni skills write session artifacts to `docs/superomni/` using hardcoded relative paths. Several design gaps exist:
-
-1. **Generated CLAUDE.md omits the Document Output Convention** — when a user installs superomni locally (`npx`), the generated `CLAUDE.md` (via `lib/templates/claude-instructions.js`) does not include the output directory table.
-
-2. **No `.gitignore` guidance** — session artifacts accumulate in `docs/superomni/` with no `.gitignore` template.
-
-3. **Self-referential pollution** — when developing superomni itself, artifacts land in `superomni/docs/superomni/`, mixing with the project's actual documentation.
-
-4. **Inconsistent mkdir patterns** — brainstorm and writing-plans don't `mkdir -p` before writing; other skills do.
-
-5. **No output convention in preamble** — `lib/preamble.md` doesn't establish the output convention.
-
-### B. Verification Should Auto-Advance
-
-Currently after each pipeline stage completes (e.g., verification passes with DONE), the agent reports status and **waits for user input** before proceeding to the next stage. This creates unnecessary friction when everything passes cleanly.
-
-**Desired behavior:** When a stage completes with **DONE** (no concerns, no blockers), the harness should **automatically advance to the next pipeline stage** without requiring user confirmation. Only stop and ask when the result is DONE_WITH_CONCERNS, BLOCKED, or NEEDS_CONTEXT.
-
-Affected locations:
-- `lib/preamble.md` — Completion Status Protocol (lines 17-23) needs auto-advance rule
-- `skills/vibe/SKILL.md` — Stage detection and routing (Phase 1) should support auto-transition
-- `skills/workflow/SKILL.md` — "What's next" checks at each stage boundary should auto-proceed on clean DONE
-- Every skill's "What's next" hint should become an auto-invocation when status is DONE
-
-### C. Remove Unnecessary Banners
-
-Multiple banner outputs consume context window space and provide little value after the first session start:
-
-1. **`hooks/session-start` lines 37-45** — Full ASCII banner with `━━━` separators, printed every session start. Redundant with vibe banner.
-2. **`skills/vibe/SKILL.md` lines 183-191** — Welcome banner with pipeline visualization. Redundant when auto-advancing.
-3. **`skills/vibe/SKILL.md` lines 234-250** — Status banner for `/vibe status`. Keep but simplify.
-4. **`skills/workflow/SKILL.md` lines 409-423** — Workflow status report with `════` separators.
-
-**Desired behavior:** Replace decorative banners with minimal, single-line status indicators. Keep only the session-start hook banner (simplified) and `/vibe status` output (simplified).
-
-### D. Update Pipeline Steps
-
-The current pipeline has 9 stages with a sub-numbered stage (5.5: PROD-CHECK):
-
-```
-THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT
-```
-
-Issues:
-- **EVALUATE and REFLECT** are separate stages but practically run together (`self-improvement` + `retro`). Merge into one **REFLECT** stage.
-- **Stage 5.5 (PROD-CHECK)** uses non-standard numbering. Renumber as a proper stage.
-- The vibe stage detection matrix (9 priorities) should match the updated pipeline.
-
-**Proposed pipeline (8 stages):**
-
-```
-THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
-```
-
-Where:
-- **VERIFY** = merges TEST + PROD-CHECK (qa → security-audit → verification → production-readiness)
-- **IMPROVE** = post-ship self-evaluation (self-improvement) — evaluates process, generates improvement actions
-- **REFLECT** = engineering retrospective (retro) — analyzes what shipped, streak tracking, team patterns
+**Session:** frontend-design-integration
+**Date:** 2026-04-03
+**Status:** REVIEWED
 
 ---
 
-## Scope
+## Problem
 
-**In scope:**
-- A: Output path fixes (generated CLAUDE.md, .gitignore, mkdir standardization, preamble)
-- B: Auto-advance on clean DONE (preamble protocol, vibe routing, workflow transitions)
-- C: Banner simplification (session-start hook, vibe banners, workflow banners)
-- D: Pipeline consolidation (9 stages → 8 stages, renumber, update all references)
+superomni has a Designer agent focused on UX review (rating dimensions, detecting AI slop) but lacks a **frontend implementation skill** — structured guidance for actually *building* distinctive, production-grade interfaces. Without this, AI-generated frontends fall into generic patterns: Inter font, purple gradients, cards-in-cards, gray-on-color text.
 
-**Out of scope:**
-- Changing the `docs/superomni/` path itself
-- Changing skill artifact formats or naming conventions
-- Individual skill logic changes beyond routing/transition behavior
+Two excellent external references exist:
+- **Anthropic's `frontend-design` skill** — core philosophy of intentional aesthetic direction
+- **pbakaus/impeccable** — 7 domain reference files + 20 steering commands
 
----
+Neither is integrated into superomni's pipeline or conventions.
 
-## Proposed Changes
+## Goals
 
-### A. Output Path Fixes
+- Add a `skills/frontend-design/` skill with 7 domain reference files, following superomni conventions
+- Upgrade `agents/designer.md` with impeccable-level design knowledge
+- Integrate with the brainstorm → plan → execute pipeline (not standalone)
+- Include steering commands adapted as superomni sub-commands
 
-#### A1. Update `lib/templates/claude-instructions.js`
+## Non-Goals (YAGNI)
 
-Add the Document Output Convention table after the Skills Reference table in the generated CLAUDE.md.
+- Not building a separate visual design tool or Figma integration
+- Not adding all 20 impeccable commands — curate to the most valuable 10
+- Not changing the existing pipeline stages
+- Not supporting non-web platforms (native mobile, desktop apps)
+- Not using impeccable as an external dependency — content is adapted and integrated natively
 
-#### A2. Add `.gitignore` template generation
+## Proposed Solution
 
-When `setup.js` runs a project-level install, generate `.gitignore` rules:
+### 1. New Skill: `skills/frontend-design/`
 
-```gitignore
-# superomni session artifacts (transient)
-docs/superomni/executions/
-docs/superomni/reviews/
-docs/superomni/subagents/
-docs/superomni/production-readiness/
-docs/superomni/improvements/
-docs/superomni/evaluations/
-docs/superomni/harness-audits/
-# Keep specs and plans (project deliverables)
-!docs/superomni/specs/
-!docs/superomni/plans/
+**Structure:**
+```
+skills/frontend-design/
+├── SKILL.md              # Main skill (generated from .tmpl)
+├── SKILL.md.tmpl         # Template with {{PREAMBLE}} placeholder
+└── reference/
+    ├── typography.md
+    ├── color-and-contrast.md
+    ├── spatial-design.md
+    ├── motion-design.md
+    ├── interaction-design.md
+    ├── responsive-design.md
+    └── ux-writing.md
 ```
 
-Also create `.gitignore` for superomni's own repo.
-
-#### A3. Standardize mkdir in brainstorm and writing-plans
-
-Add `mkdir -p docs/superomni/specs` and `mkdir -p docs/superomni/plans` respectively.
-
-#### A4. Add output convention to `lib/preamble.md`
-
-Brief reference after Context Window Management section.
-
----
-
-### B. Auto-Advance on Clean DONE
-
-#### B1. Update Completion Status Protocol in `lib/preamble.md`
-
-Add auto-advance rule after the status definitions:
-
-```markdown
-### Auto-Advance Rule
-
-When a skill reports **DONE** (no concerns, no blockers):
-1. Write the session artifact to `docs/superomni/`
-2. Immediately invoke the next pipeline skill without waiting for user input
-3. Print a single-line transition: `[stage] DONE → advancing to [next-stage]`
-
-When a skill reports **DONE_WITH_CONCERNS**, **BLOCKED**, or **NEEDS_CONTEXT**:
-1. Write the session artifact
-2. STOP and present the status to the user
-3. Wait for user decision before proceeding
+**Command registration (required for steering commands):**
+```
+commands/
+├── fd-audit.md
+├── fd-critique.md
+├── fd-polish.md
+├── fd-distill.md
+├── fd-clarify.md
+├── fd-animate.md
+├── fd-colorize.md
+├── fd-harden.md
+├── fd-arrange.md
+└── fd-typeset.md
 ```
 
-#### B2. Update `skills/vibe/SKILL.md` Phase 1
+Each command file registered in `claude-skill.json` under `commands[]`.
 
-After stage detection, if the current stage has a completed artifact with DONE status, auto-route to the next skill instead of showing the menu.
+**SKILL.md phases:**
+1. **Context Gathering** — Audience, brand personality, constraints, aesthetic direction (mandatory before any coding)
+2. **Design Direction** — Commit to a bold aesthetic. Present 3 curated directions + "Other"
+3. **Reference Loading** — Load relevant reference files on-demand based on the task (not all at once — context window management). Loading strategy: skill reads the task description and loads max 2-3 reference files that match. User can request additional references explicitly.
+4. **Implementation** — Build with the reference guidance active. Code must be functional AND visually distinctive
+5. **Quality Gate** — Run the designer agent for review. If any dimension scores < 7: auto-suggest fixes based on reference files, apply, and re-run review. Max 2 auto-retries; escalate to user on 3rd failure.
 
-#### B3. Update `skills/workflow/SKILL.md` stage transitions
+**Steering commands (curated 10 from impeccable's 20):**
 
-Each stage's "What's next" check becomes an auto-invocation rule:
-- Current: `"What's next" check: Does spec.md exist? → Move to PLAN.`
-- New: `Auto-advance: If spec.md exists with acceptance criteria → invoke writing-plans immediately.`
+| Command | Purpose | When to use |
+|---------|---------|-------------|
+| `/fd-audit` | Accessibility + performance check | Before shipping any UI |
+| `/fd-critique` | UX review for clarity and hierarchy | After initial implementation |
+| `/fd-polish` | Pre-deployment refinement | Final pass before ship |
+| `/fd-distill` | Reduce complexity | When UI feels overloaded |
+| `/fd-clarify` | UX copy improvement | When labels/messages are vague |
+| `/fd-animate` | Add purposeful motion | When interactions feel flat |
+| `/fd-colorize` | Strategic color introduction | When palette feels generic |
+| `/fd-harden` | Error handling + i18n | When hardening for production |
+| `/fd-arrange` | Layout and spacing fixes | When spatial rhythm is off |
+| `/fd-typeset` | Font and hierarchy fixes | When text hierarchy is unclear |
 
-#### B4. Update every skill's "What's next" hint
+### 2. Upgraded Agent: `agents/designer.md`
 
-Change from passive suggestion:
-```
-What's next → writing-plans: spec is ready for planning
-```
+Enhance the existing designer agent with:
 
-To active auto-transition (when DONE):
-```
-[THINK] DONE → advancing to PLAN (writing-plans)
-```
+**New dimensions added to the 0-10 rating:**
 
----
+| Dimension | What 10 looks like |
+|-----------|-------------------|
+| Typography | Distinctive font choice, modular scale, fluid type, proper line-height |
+| Color system | OKLCH-based, tinted neutrals, 60-30-10 ratio, dark mode considered |
+| Spatial rhythm | 4pt grid, varied spacing, visual hierarchy passes squint test |
+| Motion quality | Purposeful easing, reduced-motion support, exit < entrance duration |
 
-### C. Banner Simplification
+**Enhanced AI Slop detection** (add to existing list):
+- Glassmorphism without purpose
+- Rounded rectangles with drop shadows everywhere
+- Gradient text as decoration
+- Neon accents on dark backgrounds
+- Hero metric layouts (big number + small label grid)
+- Default system fonts when a distinctive choice would serve better
+- Cards nested in cards nested in cards
 
-#### C1. Simplify `hooks/session-start` (lines 37-45)
+**New Phase: Impeccable Check** — After dimension rating, run through the 7 reference domains as a checklist.
 
-Replace the full ASCII banner:
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  superomni v0.2.0 — Plan Lean, Execute Complete
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Project:   ${_PROJECT}
-  Branch:    ${_BRANCH}
-  Platform:  ${_PLATFORM}
-  Skills:    ${_SKILLS_COUNT} available
-  PROACTIVE: ${_PROACTIVE}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+### 3. Pipeline Integration
 
-With a compact one-liner:
-```
-superomni v0.2.0 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE}
-```
+**THINK stage (brainstorm):**
+- When the brainstorm identifies a UI component/page, auto-suggest frontend-design skill
+- Visual Companion phase (Phase 3) references frontend-design for aesthetic direction
 
-#### C2. Remove vibe welcome banner (lines 183-191)
+**PLAN stage (writing-plans):**
+- Plans for UI work include design direction as a required section
+- Acceptance criteria auto-include: "passes designer agent review at 7+/10 on all dimensions"
 
-The Phase 2 welcome banner duplicates session-start output. Remove entirely. When `/vibe` is invoked, go straight to stage detection + routing.
+**BUILD stage (executing-plans):**
+- Frontend-design skill activates automatically for UI implementation steps
+- Reference files loaded on-demand as relevant to current step
 
-#### C3. Simplify `/vibe status` output (lines 234-250)
+**REVIEW stage (code-review):**
+- Designer agent runs as part of review for any PR with UI changes
+- New dimensions are included in the review output
 
-Replace the `━━━` decorated status block with a compact table:
+## Key Design Decisions
 
-```markdown
-**Pipeline:** THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
-**Stage:** [current] | **Branch:** [branch]
-**Artifacts:** spec.md [Y/N] | plan.md [Y/N] | executions [N] | reviews [N]
-**Next →** [skill-name]: [reason]
-```
+| Decision | Choice | Rationale | Principle Applied |
+|----------|--------|-----------|-------------------|
+| 10 commands vs 20 | 10 curated | Removed overlap, kept highest-value commands | YAGNI + Pragmatic |
+| Upgrade designer vs new agent | Upgrade existing | Avoids duplication, designer already has UX review foundation | DRY |
+| Reference files on-demand | Load per-task, not all at once | 7 files × ~200 lines = 1400 lines of context if loaded together | Explicit over clever |
+| OKLCH over HSL | OKLCH in color reference | Perceptually uniform, modern CSS standard | Choose completeness |
+| Prefix commands with `fd-` | Namespace to avoid collision | Other skills may have `/audit`, `/polish` etc. | Explicit over clever |
+| Auto-retry quality gate | 2 retries max, escalate on 3rd | Bias toward action — auto-fix before bothering user | Bias toward action |
+| Command registration | `commands/*.md` + `claude-skill.json` | Required by superomni architecture for command discovery | Completeness |
 
-#### C4. Remove workflow status banner (lines 409-423)
+## Attribution
 
-Replace `════` decorated output with inline status.
+Reference content adapted from:
+- [pbakaus/impeccable](https://github.com/pbakaus/impeccable) — Apache 2.0 License
+- [anthropics/skills/frontend-design](https://github.com/anthropics/skills) — original frontend-design skill
 
----
-
-### D. Pipeline Consolidation (9 → 8 stages)
-
-#### Current pipeline:
-```
-THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK(5.5) → SHIP → EVALUATE → REFLECT
-```
-
-#### New pipeline:
-```
-THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
-```
-
-#### Stage mapping:
-
-| Old Stage(s) | New Stage | Skills |
-|---|---|---|
-| THINK | **THINK** | brainstorm, investigate |
-| PLAN | **PLAN** | writing-plans, plan-review |
-| BUILD | **BUILD** | executing-plans, test-driven-development, careful, subagent-development |
-| REVIEW | **REVIEW** | code-review, receiving-code-review |
-| TEST + PROD-CHECK | **VERIFY** | qa, security-audit, verification, production-readiness |
-| SHIP | **SHIP** | ship, finishing-branch, careful |
-| EVALUATE | **IMPROVE** | self-improvement |
-| REFLECT | **REFLECT** | retro |
-
-#### D1. Update `skills/workflow/SKILL.md`
-
-Rewrite pipeline definition: merge Stage 5 + 5.5 into VERIFY, merge Stage 7 (REFLECT) to include self-improvement.
-
-#### D2. Update `skills/vibe/SKILL.md` Stage Detection Matrix
-
-New matrix (8 priorities instead of 9):
-
-| Priority | Condition | Stage | Skill |
-|---|---|---|---|
-| 1 | No artifacts | THINK | brainstorm |
-| 2 | spec.md exists, no plan.md | PLAN | writing-plans |
-| 3 | plan.md has open items | BUILD | executing-plans |
-| 4 | plan.md all checked, no review docs | REVIEW | code-review |
-| 5 | Review docs exist, no verification/prod-readiness | VERIFY | qa → verification → production-readiness |
-| 6 | Verified + production-ready | SHIP | ship |
-| 7 | Shipped, no improvement report | IMPROVE | self-improvement |
-| 8 | Improvement report exists | REFLECT | retro |
-
-#### D3. Update `CLAUDE.md` pipeline references
-
-Update the pipeline string and any stage references.
-
-#### D4. Update `skills/vibe/SKILL.md` pipeline string
-
-All instances of `THINK → PLAN → BUILD → REVIEW → TEST → PROD-CHECK → SHIP → EVALUATE → REFLECT` become `THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → REFLECT`.
-
----
-
-## Affected Files
-
-| File | Changes |
-|------|---------|
-| `lib/preamble.md` | Add auto-advance rule, output directory reference |
-| `lib/templates/claude-instructions.js` | Add Document Output Convention table |
-| `lib/setup.js` | Add `.gitignore` generation |
-| `hooks/session-start` | Simplify banner to one-liner |
-| `skills/vibe/SKILL.md` | Remove welcome banner, update stage matrix (9→8), update pipeline string, add auto-advance routing |
-| `skills/workflow/SKILL.md` | Rewrite pipeline (9→8 stages), remove decorated banners, add auto-advance at stage boundaries |
-| `skills/workflow/SKILL.md.tmpl` | Same as above |
-| `skills/brainstorm/SKILL.md` + `.tmpl` | Add `mkdir -p docs/superomni/specs` |
-| `skills/writing-plans/SKILL.md` + `.tmpl` | Add `mkdir -p docs/superomni/plans` |
-| `CLAUDE.md` | Update pipeline string, stage references |
-| `.gitignore` (new) | Exclude transient session artifacts |
-
----
+Attribution noted in each reference file header and in a `LICENSE-NOTICE.md` in the skill directory.
 
 ## Acceptance Criteria
 
-### A. Output Paths
-- [ ] `claude-instructions.js` generates CLAUDE.md with the output convention table
-- [ ] Project-level install creates/appends `.gitignore` rules
-- [ ] All 9 writing skills have `mkdir -p` before output write
-- [ ] `lib/preamble.md` references the output directory convention
-- [ ] superomni's own `.gitignore` excludes transient artifacts
+- [ ] `skills/frontend-design/SKILL.md` exists with 5 phases following superomni conventions
+- [ ] `skills/frontend-design/SKILL.md.tmpl` exists with `{{PREAMBLE}}` placeholder
+- [ ] 7 reference files exist in `skills/frontend-design/reference/`
+- [ ] `agents/designer.md` upgraded with 4 new dimensions + enhanced AI Slop list
+- [ ] 10 steering commands: `commands/fd-*.md` files created
+- [ ] 10 commands registered in `claude-skill.json`
+- [ ] Skill triggers on: "frontend design", "build UI", "design this page", "make it look good"
+- [ ] Pipeline integration: brainstorm auto-suggests for UI work
+- [ ] Pipeline integration: plans for UI include design direction section
+- [ ] Pipeline integration: designer agent runs during review for UI PRs
+- [ ] Reference files loaded on-demand (max 2-3 per task, not all 7)
+- [ ] Quality gate: auto-retry up to 2 times when scores < 7, escalate on 3rd
+- [ ] `CLAUDE.md` updated with frontend-design skill entry in skills table
+- [ ] Attribution: `LICENSE-NOTICE.md` in skill directory credits impeccable + anthropics
+- [ ] `gen-skill-docs.sh` successfully expands preamble
+- [ ] `validate-skills.sh` passes for the new skill
+- [ ] `skill-manager list` discovers the new skill
 
-### B. Auto-Advance
-- [ ] Skills reporting DONE auto-invoke the next pipeline skill
-- [ ] Skills reporting DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT stop and wait
-- [ ] Transition prints a single-line `[stage] DONE → advancing to [next-stage]`
-- [ ] `/vibe` auto-routes to next skill when current stage artifact exists with DONE
+## Open Questions
 
-### C. Banners
-- [ ] Session-start banner is a single line (no `━━━` decorations)
-- [ ] `/vibe` no longer prints a welcome banner (goes straight to routing)
-- [ ] `/vibe status` uses compact format (no `━━━` block)
-- [ ] Workflow skill uses inline status (no `════` decorations)
-
-### D. Pipeline
-- [ ] Pipeline is 8 stages: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
-- [ ] VERIFY stage includes qa + security-audit + verification + production-readiness
-- [ ] IMPROVE stage runs self-improvement after ship
-- [ ] REFLECT stage runs retro after improve
-- [ ] Vibe stage detection matrix has 8 priorities
-- [ ] All pipeline string references updated across all files
+- Should `.impeccable.md` project config file be supported for per-project design preferences (brand colors, font choices)? → Deferred to v2

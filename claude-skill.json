@@ -20,7 +20,17 @@
     { "name": "autoplan",         "file": "commands/autoplan.md" },
     { "name": "freeze",           "file": "commands/freeze.md" },
     { "name": "document-release", "file": "commands/document-release.md" },
-    { "name": "harness-audit",    "file": "commands/harness-audit.md" }
+    { "name": "harness-audit",    "file": "commands/harness-audit.md" },
+    { "name": "fd-animate",      "file": "commands/fd-animate.md" },
+    { "name": "fd-arrange",      "file": "commands/fd-arrange.md" },
+    { "name": "fd-audit",        "file": "commands/fd-audit.md" },
+    { "name": "fd-clarify",      "file": "commands/fd-clarify.md" },
+    { "name": "fd-colorize",     "file": "commands/fd-colorize.md" },
+    { "name": "fd-critique",     "file": "commands/fd-critique.md" },
+    { "name": "fd-distill",      "file": "commands/fd-distill.md" },
+    { "name": "fd-harden",       "file": "commands/fd-harden.md" },
+    { "name": "fd-polish",       "file": "commands/fd-polish.md" },
+    { "name": "fd-typeset",      "file": "commands/fd-typeset.md" }
   ],
   "hooks": {
     "source": "./hooks/hooks.json",

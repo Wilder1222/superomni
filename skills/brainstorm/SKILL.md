@@ -126,7 +126,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Brainstorming & Specification
 
 **Goal:** Transform a fuzzy idea into a concrete, reviewable spec document.
@@ -188,6 +187,11 @@ Surface only TASTE decisions to the user. Decide MECHANICAL ones silently.
 
 For UI or architecture work, produce a text diagram or ASCII wireframe.
 See `visual-companion.md` for diagram formats.
+
+**Frontend Design Integration:**
+If the spec involves UI components, pages, or visual design:
+- Note in the spec: *"This involves UI work — recommend running the `frontend-design` skill during BUILD to ensure design quality."*
+- When generating acceptance criteria, include: "Passes designer agent review at 7+/10 on all dimensions"
 
 ## Phase 4: Spec Document Output
 

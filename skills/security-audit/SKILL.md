@@ -126,7 +126,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Security Audit
 
 **Goal:** Systematically identify security vulnerabilities using OWASP Top 10 and STRIDE threat modeling, then produce an actionable report with severity ratings.

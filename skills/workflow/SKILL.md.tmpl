@@ -16,10 +16,10 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ## The Pipeline
 
 ```
-THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
-  │        │       │        │        │       │       │         │
-  ▼        ▼       ▼        ▼        ▼       ▼       ▼         ▼
-spec-*   plan-*   code   feedback  green  release  actions    retro
+THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → IMPROVE → REFLECT
+  │        │       │        │       │       │       │         │
+  ▼        ▼       ▼        ▼       ▼       ▼       ▼         ▼
+spec-*   plan-*  reviewed  code   green  release  actions    retro
 ```
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
@@ -66,32 +66,55 @@ user request → brainstorm → docs/superomni/specs/spec-[branch]-[session]-[da
 
 ## Stage 2: PLAN — Break It Down
 
-**Skills:** `writing-plans`, `plan-review`
+**Skills:** `writing-plans`
 
 **Input:** Latest `docs/superomni/specs/spec-*.md` from Stage 1.
 
 **Process:**
 1. Use `writing-plans` to decompose the spec into ordered, testable steps
 2. Each step must have: description, files to touch, verification criterion
-3. Use `plan-review` to validate the plan before execution
 
 **Output:** `docs/superomni/plans/plan-[branch]-[session]-[date].md` — ordered steps with verification criteria, dependency graph, risk flags.
 
 **Data flow:**
 ```
-docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*.md → plan-review → plan-*.md (reviewed)
+docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*.md
                                                        │
                                                        ▼
                                                   [next stage]
 ```
 
-**"What's next" check:** Does any `docs/superomni/plans/plan-*.md` exist and pass review? → Move to BUILD.
+**"What's next" check:** Does any `docs/superomni/plans/plan-*.md` exist? → Move to REVIEW.
 
-## Stage 3: BUILD — Execute the Plan
+## Stage 3: REVIEW — Validate the Plan
+
+**Skills:** `plan-review`, `autoplan`
+
+**Input:** `docs/superomni/plans/plan-*.md` from Stage 2.
+
+**Process:**
+1. Use `plan-review` to validate the plan through 3 lenses: Strategy (CEO), Design (if UI), Engineering
+2. Auto-resolve mechanical decisions using the 6 decision principles
+3. Surface taste decisions to the user at the final gate
+4. If issues found → revise the plan and re-review
+
+**Output:** Reviewed plan — review doc saved to `docs/superomni/reviews/`, plan updated with revisions.
+
+**Data flow:**
+```
+docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review doc
+                                                       │
+                                                       ▼
+                                                  [next stage]
+```
+
+**"What's next" check:** Plan reviewed and approved? → Move to BUILD.
+
+## Stage 4: BUILD — Execute the Plan
 
 **Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
 
-**Input:** Latest `docs/superomni/plans/plan-*.md` from Stage 2.
+**Input:** Reviewed `docs/superomni/plans/plan-*.md` from Stage 3.
 
 **Process:**
 1. Use `executing-plans` to work through the plan step by step
@@ -114,64 +137,37 @@ docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code chang
                        [next stage]
 ```
 
-**"What's next" check:** All plan steps complete? Tests passing? → Move to REVIEW.
+**"What's next" check:** All plan steps complete? Tests passing? → Move to VERIFY.
 
-## Stage 4: REVIEW — Get Feedback
+## Stage 5: VERIFY — Code Review, QA & Production Readiness
 
-**Skills:** `code-review`, `receiving-code-review`
+**Skills:** `code-review`, `receiving-code-review`, `qa`, `security-audit`, `verification`, `production-readiness`
 
-**Input:** Code changes on feature branch.
-
-**Process:**
-1. Self-review first using `code-review` (catch obvious issues before asking others)
-2. Submit for review (PR or equivalent)
-3. When feedback arrives, use `receiving-code-review` to process it systematically
-4. Triage comments (P0/P1/P2), fix issues, re-request review
-
-**Output:** Approved code — review comments addressed, PR approved.
-
-**Data flow:**
-```
-code (branch) → code-review (self) → PR
-                                      │
-                              reviewer feedback
-                                      │
-                                      ▼
-                    receiving-code-review → fixes → re-review
-                                                       │
-                                                       ▼
-                                                  [next stage]
-```
-
-**"What's next" check:** PR approved with no open P0/P1 comments? → Move to VERIFY.
-
-## Stage 5: VERIFY — Quality & Production Readiness
-
-**Skills:** `qa`, `security-audit`, `verification`, `production-readiness`
-
-**Input:** Approved code from Stage 4.
+**Input:** Code changes from Stage 4.
 
 **Process:**
-1. Use `qa` for comprehensive quality assurance:
+1. Use `code-review` for structured code review (self-review first, then submit PR)
+2. When feedback arrives, use `receiving-code-review` to process comments systematically
+3. Use `qa` for comprehensive quality assurance:
    - Run existing tests, write missing tests, explore edge cases
-2. Use `security-audit` if changes touch auth, data handling, or external input
-3. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
-4. Use `production-readiness` to run the pre-deploy gate:
+4. Use `security-audit` if changes touch auth, data handling, or external input
+5. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
+6. Use `production-readiness` to run the pre-deploy gate:
    - Check observability (logging, metrics), reliability (health, timeouts, degradation), operability (rollback, runbook, alerts)
    - Verdict must be READY or READY_WITH_CONCERNS before proceeding
 
-**Output:** Verified code — all tests green, security reviewed, goal alignment confirmed, production readiness report saved to `docs/superomni/production-readiness/`.
+**Output:** Verified code — reviewed, tested, security audited, goal-aligned, production readiness report saved to `docs/superomni/production-readiness/`.
 
 **Data flow:**
 ```
-approved code → qa → security-audit → verification → production-readiness
+code → code-review → qa → security-audit → verification → production-readiness
                                                             │
                                            READY or READY_WITH_CONCERNS?
                                                             │ YES → [next stage]
                                                             │ NO  → fix blockers → re-run
 ```
 
-**"What's next" check:** QA passed? Security clean? Verification complete? Production readiness READY? → Move to SHIP.
+**"What's next" check:** Code reviewed? QA passed? Security clean? Verification complete? Production readiness READY? → Move to SHIP.
 
 ## Stage 6: SHIP — Release
 
@@ -284,9 +280,9 @@ git status --short
 
 - Nothing exists → You're at THINK stage
 - `docs/superomni/specs/spec-*.md` exists but no `docs/superomni/plans/plan-*.md` → You're at PLAN stage
-- `docs/superomni/plans/plan-*.md` exists with unchecked items → You're at BUILD stage
-- Feature branch with code but no review → You're at REVIEW stage
-- PR approved but not verified/production-ready → You're at VERIFY stage
+- `docs/superomni/plans/plan-*.md` exists but no review docs → You're at REVIEW stage (plan review)
+- Plan reviewed, has unchecked items → You're at BUILD stage
+- Code complete but not verified/production-ready → You're at VERIFY stage (code review + QA)
 - `docs/superomni/production-readiness/` files exist but not yet shipped → You're at SHIP stage
 - Shipped but no improvement report → You're at IMPROVE stage
 - `docs/superomni/improvements/` files exist → You're at REFLECT stage
@@ -294,7 +290,7 @@ git status --short
 ## Report
 
 ```
-Pipeline: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → IMPROVE → REFLECT
 Stage: [current] | Branch: [branch]
 Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
 Next → [skill-name]: [reason]

@@ -126,7 +126,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Dispatching Parallel Work
 
 **Goal:** Decompose a task into truly independent units and coordinate parallel execution across sub-agents — maximizing concurrency to minimize elapsed time.

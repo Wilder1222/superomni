@@ -127,7 +127,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Agent Management
 
 **Goal:** Find, install, create, and manage AI agents within the superomni framework.

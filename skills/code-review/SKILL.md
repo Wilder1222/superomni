@@ -125,7 +125,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Code Review
 
 **Goal:** Provide structured, actionable code review feedback that improves quality without blocking momentum.
@@ -205,6 +204,14 @@ git diff main...HEAD --stat | tail -1
 # Find all files that import a changed module
 grep -r "from './changedModule'" . --include="*.ts" --include="*.js" -l
 ```
+
+### UI Change Detection
+
+If the diff includes files matching `*.html`, `*.jsx`, `*.tsx`, `*.vue`, `*.svelte`, `*.css`, `*.scss`, or `*.less`:
+- Invoke the **designer agent** for a full design review
+- Include all 10 dimension scores in the review output
+- Flag any dimension scoring < 7 as a P1 issue
+- Apply the AI Slop detection checklist
 
 ### Layer 6: Architecture (P2 — consider)
 

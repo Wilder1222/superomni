@@ -125,7 +125,6 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
-
 # Writing Implementation Plans
 
 **Goal:** Transform a spec or goal into a step-by-step, executable plan that an AI agent can follow.
@@ -157,6 +156,10 @@ Apply the **Completeness is Cheap** principle. Before writing the plan, list:
 
 **What is explicitly out of scope:**
 - [List YAGNI items here]
+
+**For UI work, also include:**
+- [ ] Design direction defined (aesthetic, key visual elements, target references)
+- [ ] Acceptance criterion: "passes designer agent review at 7+/10 on all dimensions"
 
 ## Phase 3: Plan Structure
 
@@ -199,6 +202,11 @@ Write `docs/superomni/plans/plan.md` with this structure:
 
 ## Dependencies
 [External services, APIs, or features this depends on]
+
+## Design Direction (if UI work)
+**Aesthetic:** [minimalist | maximalist | retro-futuristic | organic | other]
+**Key visual elements:** [distinctive fonts, color palette, spatial rhythm]
+**Reference files to load:** [subset of: typography, color, spatial, motion, interaction, responsive, ux-writing]
 
 ## Success Criteria
 - [ ] [Measurable criterion 1]

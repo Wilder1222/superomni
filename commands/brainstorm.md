@@ -25,12 +25,12 @@ Examples:
 2. The agent asks ONE clarifying question at a time
 3. Multiple options are generated and evaluated
 4. A visual diagram is created if helpful
-5. A `docs/superomni/specs/spec.md` document is written
+5. A `docs/superomni/specs/spec-[branch]-[session]-[date].md` document is written
 6. The spec is reviewed for quality
 
 ## Output
 
-A reviewed `docs/superomni/specs/spec.md` file ready to feed into `/write-plan`.
+A reviewed `docs/superomni/specs/spec-[branch]-[session]-[date].md` file ready to feed into `/write-plan`.
 
 ## Skill Reference
 

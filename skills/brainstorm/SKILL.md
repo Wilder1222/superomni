@@ -50,8 +50,13 @@ Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP �
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null | head -20
    git log --oneline -3 2>/dev/null
+   ```
+   To find the latest spec or plan:
+   ```bash
+   _LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+   _LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
    current stage (see `workflow` skill for stage → skill mapping) and announce:
@@ -85,8 +90,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | Latest `docs/superomni/specs/spec-*.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | Latest `docs/superomni/plans/plan-*.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -197,9 +202,13 @@ If the spec involves UI components, pages, or visual design:
 
 ```bash
 mkdir -p docs/superomni/specs
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_SESSION="<auto-generate-kebab-case-from-context>"  # e.g., auth-refactor, vibe-skill
+_DATE=$(date +%Y%m%d)
+_SPEC_FILE="docs/superomni/specs/spec-${_BRANCH}-${_SESSION}-${_DATE}.md"
 ```
 
-Produce `docs/superomni/specs/spec.md` with this structure:
+Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this structure:
 
 ```markdown
 # [Feature Name] — Spec

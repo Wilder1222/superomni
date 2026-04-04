@@ -35,7 +35,7 @@ When ANY superomni skill is active, NEVER use Claude Code's built-in `EnterPlanM
 
 ### Step 1 — Scan for existing context
 ```bash
-ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
+ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null
 git log --oneline -3 2>/dev/null
 git status --short 2>/dev/null
 ```
@@ -46,9 +46,9 @@ Use the scan results to locate the current pipeline stage:
 | Context found | Current stage | Skill to use |
 |---------------|--------------|--------------|
 | No artifacts | THINK | `brainstorm` |
-| `docs/superomni/specs/spec.md` only | PLAN | `writing-plans` |
-| `docs/superomni/specs/spec.md` + `docs/superomni/plans/plan.md` with open items | BUILD | `executing-plans` or `subagent-development` |
-| `docs/superomni/plans/plan.md` all checked, no review | REVIEW | `code-review` |
+| `docs/superomni/specs/spec-*.md` only | PLAN | `writing-plans` |
+| `docs/superomni/specs/spec-*.md` + `docs/superomni/plans/plan-*.md` with open items | BUILD | `executing-plans` or `subagent-development` |
+| `docs/superomni/plans/plan-*.md` all checked, no review | REVIEW | `code-review` |
 | PR approved, no verification/prod-readiness | VERIFY | `qa` → `verification` → `production-readiness` |
 | `docs/superomni/production-readiness/` files exist | SHIP | `ship` |
 | Shipped (tagged release or merged PR), no improvement report | IMPROVE | `self-improvement` |
@@ -91,8 +91,8 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 
 | Output | Location |
 |--------|----------|
-| Specs | `docs/superomni/specs/spec.md` |
-| Plans | `docs/superomni/plans/plan.md` |
+| Specs | `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
+| Plans | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
 | Code reviews | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
 | Execution results | `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
 | Sub-agent sessions | `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |

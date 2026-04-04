@@ -3,7 +3,7 @@ name: executing-plans
 description: |
   Use when executing an implementation plan step by step.
   Triggers: "execute plan", "implement this plan", "start executing", "run the plan".
-  Requires: a docs/superomni/plans/plan.md or similar plan document to exist.
+  Requires: a docs/superomni/plans/plan-*.md or similar plan document to exist.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -31,7 +31,7 @@ update the plan, skill, or constraint — then retry. Never brute-force through 
 
 ```bash
 # Find the plan document
-find . -name "plan.md" -path "*/superomni/*" 2>/dev/null | head -5
+ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1
 ```
 
 Read the plan. Confirm:

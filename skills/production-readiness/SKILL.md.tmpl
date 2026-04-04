@@ -30,12 +30,14 @@ Before checking operational concerns, confirm the output actually achieves what 
 
 ```bash
 # Read acceptance criteria from spec
-cat docs/superomni/specs/spec.md 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
-  cat docs/superomni/plans/plan.md 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
-  echo "No docs/superomni/specs/spec.md or docs/superomni/plans/plan.md found — document what you are verifying against"
+_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+cat "$_SPEC" 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
+  cat "$_PLAN" 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
+  echo "No docs/superomni/specs/spec-*.md or docs/superomni/plans/plan-*.md found — document what you are verifying against"
 ```
 
-For **each acceptance criterion** found in docs/superomni/specs/spec.md:
+For **each acceptance criterion** found in docs/superomni/specs/spec-*.md:
 
 | Criterion | Status | Evidence |
 |-----------|--------|----------|
@@ -44,7 +46,7 @@ For **each acceptance criterion** found in docs/superomni/specs/spec.md:
 
 **Gate:** ALL P0 acceptance criteria must be ✓ before proceeding.
 
-If no docs/superomni/specs/spec.md exists:
+If no docs/superomni/specs/spec-*.md exists:
 - Document what user goal this change fulfills
 - List the observable outcomes that prove the goal is met
 

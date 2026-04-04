@@ -50,8 +50,13 @@ Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP �
 When the user sends a **follow-up message after a completed session**, before doing anything else:
 1. Scan for prior session context:
    ```bash
-   ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md docs/superomni/ .superomni/ 2>/dev/null
+   ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null | head -20
    git log --oneline -3 2>/dev/null
+   ```
+   To find the latest spec or plan:
+   ```bash
+   _LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+   _LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
    ```
 2. If context exists → re-engage the skill framework. Pick the skill that matches the
    current stage (see `workflow` skill for stage → skill mapping) and announce:
@@ -85,8 +90,8 @@ Load context progressively — only what is needed for the current phase:
 
 | Phase | Load these | Defer these |
 |-------|-----------|------------|
-| Planning | `docs/superomni/specs/spec.md`, constraints, prior decisions | Full codebase, test files |
-| Implementation | `docs/superomni/plans/plan.md`, relevant source files | Unrelated modules, docs |
+| Planning | Latest `docs/superomni/specs/spec-*.md`, constraints, prior decisions | Full codebase, test files |
+| Implementation | Latest `docs/superomni/plans/plan-*.md`, relevant source files | Unrelated modules, docs |
 | Review/Debug | diff, failing test output, minimal repro | Full history, specs |
 
 **If context pressure is high:** summarize prior phases into 3-5 bullet points, then discard raw content.
@@ -136,7 +141,7 @@ Nothing is sent to external servers. Data is stored only in `~/.omni-skills/anal
 THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
   │        │       │        │        │       │       │         │
   ▼        ▼       ▼        ▼        ▼       ▼       ▼         ▼
-spec.md  plan.md  code   feedback  green  release  actions    retro
+spec-*   plan-*   code   feedback  green  release  actions    retro
 ```
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
@@ -157,8 +162,10 @@ if [ -n "$LATEST_IMPROVE" ]; then
 fi
 
 # Check what spec/plan artifacts already exist
-test -f docs/superomni/specs/spec.md && echo "spec.md found" || echo "No spec.md"
-test -f docs/superomni/plans/plan.md && echo "plan.md found" || echo "No plan.md"
+_LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+_LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+test -n "$_LATEST_SPEC" && echo "spec found: $_LATEST_SPEC" || echo "No spec"
+test -n "$_LATEST_PLAN" && echo "plan found: $_LATEST_PLAN" || echo "No plan"
 ```
 
 **Process:**
@@ -167,46 +174,46 @@ test -f docs/superomni/plans/plan.md && echo "plan.md found" || echo "No plan.md
 3. Generate 3 candidate approaches, evaluate tradeoffs
 4. Produce a spec document
 
-**Output:** `docs/superomni/specs/spec.md` — problem statement, goals, non-goals, proposed solution, acceptance criteria.
+**Output:** `docs/superomni/specs/spec-[branch]-[session]-[date].md` — problem statement, goals, non-goals, proposed solution, acceptance criteria.
 
 **Data flow:**
 ```
-user request → brainstorm → docs/superomni/specs/spec.md
+user request → brainstorm → docs/superomni/specs/spec-[branch]-[session]-[date].md
                                   │
                                   ▼
                              [next stage]
 ```
 
-**"What's next" check:** Does `docs/superomni/specs/spec.md` exist and have acceptance criteria? → Move to PLAN.
+**"What's next" check:** Does any `docs/superomni/specs/spec-*.md` exist and have acceptance criteria? → Move to PLAN.
 
 ## Stage 2: PLAN — Break It Down
 
 **Skills:** `writing-plans`, `plan-review`
 
-**Input:** `docs/superomni/specs/spec.md` from Stage 1.
+**Input:** Latest `docs/superomni/specs/spec-*.md` from Stage 1.
 
 **Process:**
 1. Use `writing-plans` to decompose the spec into ordered, testable steps
 2. Each step must have: description, files to touch, verification criterion
 3. Use `plan-review` to validate the plan before execution
 
-**Output:** `docs/superomni/plans/plan.md` — ordered steps with verification criteria, dependency graph, risk flags.
+**Output:** `docs/superomni/plans/plan-[branch]-[session]-[date].md` — ordered steps with verification criteria, dependency graph, risk flags.
 
 **Data flow:**
 ```
-docs/superomni/specs/spec.md → writing-plans → docs/superomni/plans/plan.md → plan-review → docs/superomni/plans/plan.md (reviewed)
+docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*.md → plan-review → plan-*.md (reviewed)
                                                        │
                                                        ▼
                                                   [next stage]
 ```
 
-**"What's next" check:** Does `docs/superomni/plans/plan.md` exist and pass review? → Move to BUILD.
+**"What's next" check:** Does any `docs/superomni/plans/plan-*.md` exist and pass review? → Move to BUILD.
 
 ## Stage 3: BUILD — Execute the Plan
 
 **Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
 
-**Input:** `docs/superomni/plans/plan.md` from Stage 2.
+**Input:** Latest `docs/superomni/plans/plan-*.md` from Stage 2.
 
 **Process:**
 1. Use `executing-plans` to work through the plan step by step
@@ -219,7 +226,7 @@ docs/superomni/specs/spec.md → writing-plans → docs/superomni/plans/plan.md 
 
 **Data flow:**
 ```
-docs/superomni/plans/plan.md → executing-plans ──┬──→ code changes (committed)
+docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code changes (committed)
                             │
               test-driven-development → test files
                             │
@@ -270,7 +277,7 @@ code (branch) → code-review (self) → PR
 1. Use `qa` for comprehensive quality assurance:
    - Run existing tests, write missing tests, explore edge cases
 2. Use `security-audit` if changes touch auth, data handling, or external input
-3. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against docs/superomni/specs/spec.md acceptance criteria
+3. Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
 4. Use `production-readiness` to run the pre-deploy gate:
    - Check observability (logging, metrics), reliability (health, timeouts, degradation), operability (rollback, runbook, alerts)
    - Verdict must be READY or READY_WITH_CONCERNS before proceeding
@@ -392,14 +399,14 @@ If you're joining a sprint already in progress:
 
 ```bash
 # Check what exists
-ls docs/superomni/specs/spec.md docs/superomni/plans/plan.md 2>/dev/null
+ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md 2>/dev/null
 git log --oneline -10
 git status --short
 ```
 
 - Nothing exists → You're at THINK stage
-- `docs/superomni/specs/spec.md` exists but no `docs/superomni/plans/plan.md` → You're at PLAN stage
-- `docs/superomni/plans/plan.md` exists with unchecked items → You're at BUILD stage
+- `docs/superomni/specs/spec-*.md` exists but no `docs/superomni/plans/plan-*.md` → You're at PLAN stage
+- `docs/superomni/plans/plan-*.md` exists with unchecked items → You're at BUILD stage
 - Feature branch with code but no review → You're at REVIEW stage
 - PR approved but not verified/production-ready → You're at VERIFY stage
 - `docs/superomni/production-readiness/` files exist but not yet shipped → You're at SHIP stage
@@ -411,7 +418,7 @@ git status --short
 ```
 Pipeline: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
 Stage: [current] | Branch: [branch]
-Artifacts: spec.md [Y/N] | plan.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
 Next → [skill-name]: [reason]
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
 ```

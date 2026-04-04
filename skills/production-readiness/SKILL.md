@@ -44,7 +44,7 @@ When a skill reports **DONE_WITH_CONCERNS**, **BLOCKED**, or **NEEDS_CONTEXT**:
 2. STOP and present the status to the user
 3. Wait for user decision before proceeding
 
-Pipeline stage order: THINK → PLAN → BUILD → REVIEW → VERIFY → SHIP → IMPROVE → REFLECT
+Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → IMPROVE → REFLECT
 
 ### Session Continuity
 

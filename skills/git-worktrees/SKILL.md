@@ -265,4 +265,4 @@ Sub-Agent 2 → worktree: ../project-feat-payments
 Main Agent  → worktree: ../project (main, for integration)
 ```
 
-See `dispatching-parallel` skill for coordinating parallel sub-agents.
+See `subagent-development` skill for coordinating parallel sub-agents (includes wave planning).

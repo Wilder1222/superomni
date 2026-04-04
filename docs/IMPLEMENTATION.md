@@ -14,7 +14,7 @@ superomni/
 │   ├── marketplace.json      ← Marketplace manifest (required by Claude Code)
 │   └── plugin.json           ← Plugin manifest (skills, commands, hooks)
 ├── hooks/                    ← Claude Code session hooks
-├── skills/                   ← Skill definitions (23 skills)
+├── skills/                   ← Skill definitions (28 skills)
 ├── agents/                   ← Agent specifications
 ├── commands/                 ← Slash command docs
 ├── lib/                      ← Build tools and shared assets
@@ -196,7 +196,7 @@ Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
 ### Skill Naming Conventions
 
 - **Format:** `kebab-case`, verb-noun preferred
-- **Examples:** `systematic-debugging`, `writing-plans`, `dispatching-parallel`
+- **Examples:** `systematic-debugging`, `writing-plans`, `subagent-development`
 - **Avoid:** abbreviations, acronyms, ambiguous terms
 
 ---

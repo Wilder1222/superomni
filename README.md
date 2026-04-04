@@ -123,7 +123,7 @@ Open your project in your AI CLI. Skills activate automatically.
 | `brainstorm` | New feature/design | `docs/superomni/specs/spec-*.md` |
 | `writing-plans` | Planning implementation | `docs/superomni/plans/plan-*.md` |
 | `executing-plans` | Running a plan | Code changes + report |
-| `systematic-debugging` | Any bug/error | Debug report + fix |
+| `systematic-debugging` | Any bug/error (includes scope lock via `/freeze`) | Debug report + fix |
 
 ### Quality Assurance (P1)
 
@@ -132,17 +132,14 @@ Open your project in your AI CLI. Skills activate automatically.
 | `test-driven-development` | Writing code | Tests + implementation |
 | `verification` | Before claiming done | Verification report |
 | `code-review` | Reviewing code/PRs | Structured review |
-| `plan-review` | Before executing a plan | Reviewed plan |
-| `subagent-development` | Complex parallel tasks | Multi-agent output |
+| `plan-review` | Before executing a plan (includes auto mode via `/autoplan`) | Reviewed plan |
+| `subagent-development` | Complex parallel tasks (includes wave planning) | Multi-agent output |
 | `receiving-code-review` | Responding to review feedback | Updated code + reply |
 | `security-audit` | Security vulnerability audit | Threat model + fixes |
 | `qa` | Quality assurance pass | QA report |
 | `careful` | High-risk/destructive operations | Safety checklist |
 | `self-improvement` | Post-task performance evaluation | Improvement report + 3 actions |
 | `production-readiness` | Pre-deploy gate | Readiness report |
-| `office-hours` | Product discovery before building | Validated idea + decision |
-| `autoplan` | Automated full plan review pipeline | CEO→Design→Eng reviewed plan |
-| `freeze` | Restrict edits during risky operations | Scope lock |
 | `harness-engineering` | Audit and improve the agent harness | Health score + improvement backlog |
 
 ### Advanced (P2)
@@ -151,13 +148,19 @@ Open your project in your AI CLI. Skills activate automatically.
 |-------|------------|------------|
 | `git-worktrees` | Multiple branches | Worktree setup |
 | `finishing-branch` | Merging a branch | Clean PR |
-| `dispatching-parallel` | Independent parallel tasks | Coordinated output |
 | `investigate` | Exploring unfamiliar code | Investigation report |
 | `retro` | Weekly review | Retrospective report |
 | `ship` | Releasing software | Release + changelog |
 | `writing-skills` | Creating new skills | New skill file |
 | `workflow` | Sprint pipeline orchestration | Workflow plan + status |
+| `office-hours` | Product discovery before building | Validated idea + decision |
 | `agent-management` | Installing or creating agents | Agent installed/created |
+
+### Utility (P3)
+
+| Skill | When to Use | Key Output |
+|-------|------------|------------|
+| `document-release` | Post-ship documentation sync | Updated docs |
 
 ---
 
@@ -287,15 +290,14 @@ superomni/
 │   ├── brainstorm/        ← Design → Spec
 │   ├── writing-plans/        ← Spec → Plan
 │   ├── executing-plans/      ← Plan → Code
-│   ├── systematic-debugging/ ← Debug with Scope Lock + Debug Report
+│   ├── systematic-debugging/ ← Debug with Scope Lock + Debug Report + /freeze
 │   ├── test-driven-development/
 │   ├── verification/
 │   ├── code-review/
-│   ├── plan-review/          ← CEO→Design→Eng 3-stage pipeline
-│   ├── subagent-development/
+│   ├── plan-review/          ← CEO→Design→Eng 3-stage pipeline + auto mode
+│   ├── subagent-development/ ← Includes wave planning
 │   ├── git-worktrees/
 │   ├── finishing-branch/
-│   ├── dispatching-parallel/
 │   ├── investigate/
 │   ├── retro/                ← Weekly engineering retrospective
 │   ├── ship/                 ← Release workflow

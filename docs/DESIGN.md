@@ -276,12 +276,11 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 - brainstorm (+ Search Before Building)
 - writing-plans (+ 6 principles, Completeness Check)
 - executing-plans (+ Status Protocol)
-- subagent-development (full prompt template suite)
+- subagent-development (full prompt template suite + wave planning from dispatching-parallel)
 - test-driven-development
 - verification (+ Status Protocol)
 - git-worktrees
 - finishing-branch
-- dispatching-parallel
 - writing-skills
 
 ### Fused (superpowers + gstack)
@@ -337,10 +336,18 @@ bin/skill-manager search <query>   # Search GitHub for skill files
 
 | Skill | Origin | Purpose |
 |-------|--------|---------|
-| `office-hours` | gstack-inspired | YC-style product discovery before building |
-| `autoplan` | gstack-inspired | Full automated plan review pipeline |
-| `freeze` | Original | Restrict edits to a directory scope |
-| `document-release` | Original | Post-ship documentation synchronization |
+| `office-hours` | gstack-inspired | YC-style product discovery before building (P2) |
+| `document-release` | Original | Post-ship documentation synchronization (P3) |
+
+### Consolidation (v0.3.0 → v0.5.x)
+
+Three skills were merged to reduce overlap and cognitive load (31 → 28 skills):
+
+| Removed Skill | Merged Into | How |
+|---------------|-------------|-----|
+| `autoplan` | `plan-review` | Auto mode — `/autoplan` triggers the full CEO→Design→Eng pipeline automatically |
+| `dispatching-parallel` | `subagent-development` | Wave planning — parallel dispatch is now a built-in capability of subagent-development |
+| `freeze` | `systematic-debugging` | Scope lock — `/freeze` restricts edits to a directory, integrated into the debug workflow |
 
 ### New Agents in v0.3.0
 
@@ -349,7 +356,7 @@ bin/skill-manager search <query>   # Search GitHub for skill files
 | `ceo-advisor` | Product strategy, scope mode, demand validation |
 | `designer` | UX review, missing states, AI slop detection |
 
-The `ceo-advisor` agent formalizes the CEO Lens from the `plan-review` skill into a standalone agent that can be invoked independently or used in the `autoplan` pipeline.
+The `ceo-advisor` agent formalizes the CEO Lens from the `plan-review` skill into a standalone agent that can be invoked independently or used in `plan-review`'s auto mode (`/autoplan`).
 
 The `designer` agent adds the missing design review dimension to the framework — previously design review existed only as a phase inside `plan-review`.
 
@@ -359,7 +366,7 @@ The `designer` agent adds the missing design review dimension to the framework �
 
 | Risk | Mitigation |
 |------|-----------|
-| 22 skills is too many — cognitive overload | PROACTIVE mode focuses agent; `workflow` skill sequences skills; skills reference each other |
+| 28 skills is a lot — cognitive overload | PROACTIVE mode focuses agent; `workflow` skill sequences skills; skills reference each other; consolidation reduced count from 31 to 28 |
 | `.tmpl` build step adds complexity | Pre-built `.md` files committed; build only needed for dev |
 | investigate + systematic-debugging overlap | Clear separation: no error → investigate; has error → debug |
 | retro requires git history | Gracefully handles shallow clones with `git fetch` |

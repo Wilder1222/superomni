@@ -145,6 +145,23 @@ If you haven't completed Phase 1, you cannot propose fixes. "I think it might be
 
 ## Phase 1: Root Cause Investigation
 
+### Scope Lock (built-in freeze)
+
+Before investigating, lock the edit scope to the affected area to prevent accidental changes elsewhere:
+
+```bash
+FREEZE_DIR=$(cd "<affected-directory>" 2>/dev/null && pwd || echo "")
+if [ -n "$FREEZE_DIR" ]; then
+  mkdir -p "${HOME}/.omni-skills"
+  echo "${FREEZE_DIR%/}/" > "${HOME}/.omni-skills/debug-scope.txt"
+  echo "Debug scope locked to: ${FREEZE_DIR%/}/"
+fi
+```
+
+While scope lock is active, do NOT edit files outside the locked directory. Flag out-of-scope fixes as follow-up tasks. Say "unfreeze" or remove `~/.omni-skills/debug-scope.txt` when done debugging.
+
+### Investigation Steps
+
 1. **Read error messages carefully** — read the full stack trace; note exact file names and line numbers
 2. **Reproduce consistently** — can you reproduce the error every time? If not, gather more data first
 3. **Check recent changes** — `git log --oneline -20 -- <affected-files>`

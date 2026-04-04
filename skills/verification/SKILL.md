@@ -33,17 +33,20 @@ Report status using one of these at the end of every skill session:
 
 ### Auto-Advance Rule
 
-When a skill reports **DONE** (no concerns, no blockers):
+Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+
+**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+
+| Status | At REVIEW stage | At all other stages |
+|--------|----------------|-------------------|
+| **DONE** | STOP — present review summary, wait for user input (Y / N / revision notes) | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
+| **DONE_WITH_CONCERNS** | STOP — present concerns, wait for user decision | STOP — present concerns, wait for user decision |
+| **BLOCKED** / **NEEDS_CONTEXT** | STOP — present blocker, wait for user | STOP — present blocker, wait for user |
+
+When auto-advancing:
 1. Write the session artifact to `docs/superomni/`
-2. Print a single-line transition: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
-3. Immediately invoke the next pipeline skill without waiting for user input
-
-When a skill reports **DONE_WITH_CONCERNS**, **BLOCKED**, or **NEEDS_CONTEXT**:
-1. Write the session artifact
-2. STOP and present the status to the user
-3. Wait for user decision before proceeding
-
-Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → IMPROVE → REFLECT
+2. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
+3. Immediately invoke the next pipeline skill
 
 ### Session Continuity
 

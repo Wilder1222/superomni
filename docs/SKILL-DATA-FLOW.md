@@ -235,7 +235,7 @@ Required sections:
 
 | Question | Answer | Evidence |
 |----------|--------|----------|
-| THINK→PLAN→REVIEW→BUILD followed | YES/PARTIAL/NO | |
+| THINK→PLAN→REVIEW→BUILD→VERIFY→SHIP→REFLECT followed | YES/PARTIAL/NO | |
 | Spec/plan created before implementation | YES/PARTIAL/NO | |
 | Skills used for intended triggers | YES/PARTIAL/NO | |
 | Session ended with status report | YES/PARTIAL/NO | |

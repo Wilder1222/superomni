@@ -67,7 +67,7 @@ Use the following priority-ordered rules (first match wins):
 | 1 | No artifacts at all | **THINK** | `brainstorm` |
 | 2 | `spec-*.md` exists, no `plan-*.md` | **PLAN** | `writing-plans` |
 | 3 | `plan-*.md` exists, no review doc matching its session | **REVIEW** | `plan-review` — **human gate: wait for Y/N** |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` |
+| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` (+ `frontend-design` if UI steps detected) |
 | 5 | `plan-*.md` all checked | **VERIFY** | Required: `code-review` → `qa` → `verification`. Optional: `security-audit` (if security-relevant), `production-readiness` (if deploying) |
 | 6 | Verified | **SHIP** | `ship`, `finishing-branch` |
 | 7 | Shipped | **REFLECT** | `self-improvement` → `retro` (run sequentially in one stage) |
@@ -107,6 +107,9 @@ Present the available commands only when auto-advance does not apply:
 | /retro | Engineering retrospective |
 | /workflow | See the full sprint pipeline |
 | /ship | Release workflow |
+| /fd-audit | Accessibility + performance check |
+| /fd-critique | UX review for clarity and hierarchy |
+| /fd-polish | Pre-deployment refinement |
 
 Suggested next step → [skill-name]: [reason based on detected stage]
 ```

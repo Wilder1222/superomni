@@ -219,9 +219,10 @@ Involves code changes? [YES / NO]
 
 1. **Read** — understand what the step requires
 2. **TDD Check** — if this step involves writing or modifying source code: **apply the `test-driven-development` skill** (Red → Green → Refactor) before committing any code
-3. **Do** — make the minimum change needed for this step only
-4. **Verify** — run the step's verification criterion
-5. **Report** — confirm step complete or blocked
+3. **Frontend Check** — if this step involves UI files (`.html`, `.jsx`, `.tsx`, `.vue`, `.svelte`, `.css`, `.scss`): **apply the `frontend-design` skill** Phase 4 (Implementation) with the plan's design direction. After completing all UI steps in a wave, run the designer agent quality gate (Phase 5).
+4. **Do** — make the minimum change needed for this step only
+5. **Verify** — run the step's verification criterion
+6. **Report** — confirm step complete or blocked
 
 ### TDD Integration for Code Steps
 
@@ -242,6 +243,25 @@ Continue to step verification
 ```
 
 **If no test framework exists for this project:** document what the tests would look like and why they cannot be automated. This is a DONE_WITH_CONCERNS, not a skip.
+
+### Frontend-Design Integration for UI Steps
+
+```
+Step involves UI files? ─── NO ──→ Skip
+        │
+        YES
+        ↓
+Load design direction from plan (## Design Direction section)
+        ↓
+Apply frontend-design Phase 4 (Implementation) rules
+        ↓
+After all UI steps in wave complete:
+  Run designer agent quality gate (7+/10 on all dimensions)
+        ↓
+Gate PASS → continue | Gate FAIL → fix and re-run (2 retries)
+```
+
+**If no design direction exists in the plan:** run `frontend-design` Phase 1-2 (Context Gathering + Design Direction) before implementing. This is a one-time cost per session.
 
 ### Step Completion Format
 

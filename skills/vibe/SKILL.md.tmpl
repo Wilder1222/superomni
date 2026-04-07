@@ -25,9 +25,14 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 
 `/vibe` is the single unified entry point. It never executes work itself — it **detects** the current stage and **delegates** to the appropriate skill.
 
-## CRITICAL: Do NOT use EnterPlanMode
+## Planning Route
 
-When `/vibe` is invoked, you MUST follow this skill's phases (Phase 1-4) directly. **NEVER** trigger Claude Code's built-in `EnterPlanMode` tool at any point during the vibe workflow or any subsequent superomni skill session. `EnterPlanMode` bypasses the superomni pipeline entirely. For planning, delegate to the `writing-plans` skill. For implementation, delegate to `executing-plans` or `subagent-development`.
+If you feel the impulse to call `EnterPlanMode`, that impulse IS the trigger for a superomni skill:
+- **Need to design/explore?** → Invoke `brainstorm` skill
+- **Need to plan implementation?** → Invoke `writing-plans` skill
+- **Need to execute?** → Invoke `executing-plans` or `subagent-development`
+
+Always follow this skill's phases (Phase 1-4) directly. Route all planning through superomni skills.
 
 ## Phase 1: Detect Current Pipeline Stage
 
@@ -157,6 +162,6 @@ After displaying the banner and menu:
 2. If no arguments → wait for user input
 3. When the user chooses a command or describes what they want to do → invoke the matching skill
 
-**Important:** `/vibe` never executes implementation work directly. It always delegates to the appropriate skill. Do NOT use Claude Code's built-in `EnterPlanMode` — always delegate to the superomni skill (e.g., `writing-plans` for planning).
+**Important:** `/vibe` never executes implementation work directly. It always delegates to the appropriate skill. Route all planning through superomni skills (`brainstorm`, `writing-plans`).
 
 Report status: **DONE** — framework activated, stage detected, user guided to next skill.

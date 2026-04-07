@@ -7,6 +7,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.3] — 2026-04-07
+
+### Changed
+- **EnterPlanMode: prohibition → redirect** — Replaced "CRITICAL: No EnterPlanMode" prohibitions across all 27 skills, `using-skills`, `vibe`, and `CLAUDE.md` with a superpowers-inspired redirect pattern. Instead of telling the model "never use Plan Mode", the framework now intercepts the planning impulse and routes it to `brainstorm` or `writing-plans` skills via a decision flow graph.
+- **`using-skills/SKILL.md`** — Added `<EXTREMELY-IMPORTANT>` tagged redirect block and dot-language flow graph (inspired by obra/superpowers) that intercepts "About to EnterPlanMode?" decision point.
+- **`vibe/SKILL.md`** — Replaced "CRITICAL: Do NOT use EnterPlanMode" with "Planning Route" section listing skill alternatives per intent.
+- **27 skill preambles** — `### CRITICAL: No EnterPlanMode` (3 lines) → `### Planning Route` (1-line redirect).
+
+### Removed
+- **PreToolUse hook** (`hooks/block-plan-mode`) — Removed the hook-based hard block approach in favor of the redirect pattern.
+- **`.claude/settings.json`** — Removed project-level settings that registered the PreToolUse hook.
+- **`hooks.json` PreToolUse entries** — Restored to SessionStart-only configuration.
+
+---
+
 ## [0.5.1] — 2026-04
 
 ### Added
@@ -26,7 +41,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Installation redesign**: `npx github:Wilder1222/superomni` is now the primary project-level install method for all platforms (Claude, Codex, Copilot, Gemini). Global install via `npm install -g` + `superomni setup`.
 - **Platform-specific instruction templates**: Each CLI gets tailored config files — `CLAUDE.md` (with slash commands), `AGENTS.md` (with trigger phrases + command file mapping for Codex), `.github/copilot-instructions.md` (with skill directory references for Copilot), `GEMINI.md`.
 - **Document output paths**: User-facing outputs (spec, plan, reviews, executions, subagent sessions, production readiness) now write to `docs/superomni/`. Internal state (improvements, evaluations, harness audits) stays in `.superomni/`.
-- Renamed `brainstorming` skill to `brainstorm` for consistency across the project.
+- Renamed `brainstorm` skill to `brainstorm` for consistency across the project.
 - Renamed `scripts.build` to `scripts.gen-skills` to avoid triggering npm git dep preparation.
 - CLI rewritten with explicit `install` (default, project-level) and `setup` (global) commands.
 

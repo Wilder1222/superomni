@@ -25,9 +25,38 @@ Each skill in `skills/` is a behavior specification. When a relevant situation a
 4. **Report** using the status protocol when complete
 5. **Continue** — after DONE, suggest the next skill and re-engage on follow-up messages
 
-## CRITICAL: No EnterPlanMode in superomni
+## Skill Decision Flow
 
-When ANY superomni skill is active, NEVER use Claude Code's built-in `EnterPlanMode` tool. Always follow each skill's own workflow phases. For planning, use the `writing-plans` skill. For implementation, use `executing-plans` or `subagent-development`. `EnterPlanMode` bypasses the superomni pipeline and is forbidden during superomni sessions.
+Before ANY action — including entering Plan Mode — check this flow:
+
+```dot
+digraph skill_flow {
+    "User message received" [shape=doublecircle];
+    "About to EnterPlanMode?" [shape=doublecircle];
+    "Already brainstormed?" [shape=diamond];
+    "Invoke brainstorm skill" [shape=box];
+    "Might any skill apply?" [shape=diamond];
+    "Invoke Skill tool" [shape=box];
+    "Follow skill exactly" [shape=box];
+    "Respond" [shape=doublecircle];
+
+    "About to EnterPlanMode?" -> "Already brainstormed?" [label="STOP"];
+    "Already brainstormed?" -> "Invoke brainstorm skill" [label="no"];
+    "Already brainstormed?" -> "Might any skill apply?" [label="yes → use writing-plans"];
+    "Invoke brainstorm skill" -> "Might any skill apply?";
+
+    "User message received" -> "Might any skill apply?";
+    "Might any skill apply?" -> "Invoke Skill tool" [label="yes, even 1%"];
+    "Might any skill apply?" -> "Respond" [label="definitely not"];
+    "Invoke Skill tool" -> "Follow skill exactly";
+}
+```
+
+<EXTREMELY-IMPORTANT>
+If you feel the urge to call EnterPlanMode, that is the signal to invoke the `brainstorm` or `writing-plans` skill instead. EnterPlanMode bypasses the superomni pipeline — always route planning through superomni skills.
+
+The impulse to plan IS the trigger for the brainstorm skill, not for Plan Mode.
+</EXTREMELY-IMPORTANT>
 
 ## Follow-up Message Protocol
 

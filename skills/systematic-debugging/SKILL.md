@@ -19,9 +19,8 @@ _TEL_START=$(date +%s)
 echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
 ```
 
-### CRITICAL: No EnterPlanMode
-When this skill is active, NEVER use Claude Code's built-in `EnterPlanMode` tool.
-Use the superomni pipeline skills (`brainstorm`, `writing-plans`, `executing-plans`) instead.
+### Planning Route
+If you feel the impulse to call `EnterPlanMode`, invoke `brainstorm` (for design) or `writing-plans` (for plans) instead. All planning flows through superomni skills.
 
 ### PROACTIVE Mode
 If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the

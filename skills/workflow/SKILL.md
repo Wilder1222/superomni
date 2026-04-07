@@ -242,7 +242,7 @@ docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review 
 
 ## Stage 4: BUILD — Execute the Plan
 
-**Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
+**Skills:** `executing-plans`, `test-driven-development`, `frontend-design` (if UI steps), `careful`, `subagent-development`
 
 **Input:** Reviewed `docs/superomni/plans/plan-*.md` from Stage 3.
 
@@ -260,6 +260,8 @@ docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review 
 docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code changes (committed)
                             │
               test-driven-development → test files
+                            │
+              frontend-design (if UI steps) → designer agent quality gate
                             │
                     careful (if triggered) → confirmation
                             │
@@ -361,6 +363,7 @@ shipped feature → self-improvement → improvement report
 | Validate a plan | `plan-review` |
 | Execute a plan | `executing-plans` |
 | Write code with tests | `test-driven-development` |
+| Build UI with design quality | `frontend-design` |
 | Run parallel tasks | `subagent-development` |
 | Review code | `code-review` |
 | Respond to review feedback | `receiving-code-review` |

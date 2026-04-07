@@ -4,7 +4,9 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(rm -f .claude/settings.json)",
-      "Bash(rmdir .claude)"
+      "Bash(rmdir .claude)",
+      "Bash(mkdir -p ~/.omni-skills/sessions)",
+      "Bash(~/.claude/skills/superomni/bin/config get:*)"
     ]
   }
 }

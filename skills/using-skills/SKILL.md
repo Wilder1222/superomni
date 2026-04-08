@@ -231,3 +231,16 @@ When making any technical decision, apply these principles (in context):
 **Decision type:**
 - **Mechanical** (one right answer) → decide silently
 - **Taste** (reasonable disagreement possible) → surface to user at final gate
+
+## Plan Mode Fallback
+
+If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
+
+1. **Skills take precedence over plan mode.** Treat loaded skill instructions as executable steps, not reference material. Follow them exactly — do not summarize, skip, or reorder.
+2. **STOP points in skills must be respected.** Do NOT call `ExitPlanMode` prematurely to bypass a skill's STOP/gate.
+3. **Safe operations in plan mode** — these are always allowed because they inform the plan, not produce code:
+   - Reading files, searching code, running `git log`/`git status`
+   - Writing to `docs/superomni/` (specs, plans, reviews)
+   - Writing to `~/.omni-skills/` (sessions, analytics)
+4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
+5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).

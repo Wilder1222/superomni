@@ -7,6 +7,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.4] — 2026-04-08
+
+### Added
+- **Plan Mode Fallback** — Added a "Plan Mode Fallback" section to the shared preamble (`lib/preamble.md`) and `using-skills/SKILL.md`. If Claude enters Plan Mode despite the routing rule, skills now take precedence: skill instructions are treated as executable steps, STOP points are respected, and planning output routes to `docs/superomni/plans/` instead of Claude's built-in plan file. Inspired by garrytan/gstack's "coexist with plan mode" approach.
+- **Two-layer EnterPlanMode defense** — Layer 1 (CLAUDE.md + EXTREMELY-IMPORTANT): hard routing rule intercepts EnterPlanMode → brainstorm. Layer 2 (Plan Mode Fallback in all 29 skills): if already in plan mode, vibe workflow still governs.
+
+### Changed
+- **CLAUDE.md** — Upgraded "Planning route" soft guidance to "CRITICAL RULE — EnterPlanMode routes to brainstorm skill" with hard conditional language.
+- **`using-skills/SKILL.md`** — `<EXTREMELY-IMPORTANT>` block changed from "feel the urge" soft redirect to "HARD ROUTING RULE: Do NOT call EnterPlanMode" with direct action instruction.
+- **28 skill preambles rebuilt** — All templated skills regenerated to include Plan Mode Fallback section.
+
+---
+
 ## [0.5.3] — 2026-04-07
 
 ### Changed

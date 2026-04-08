@@ -18,9 +18,6 @@ _TEL_START=$(date +%s)
 echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
 ```
 
-### Planning Route
-If you feel the impulse to call `EnterPlanMode`, invoke `brainstorm` (for design) or `writing-plans` (for plans) instead. All planning flows through superomni skills.
-
 ### PROACTIVE Mode
 If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the
 user explicitly invokes. If you would have auto-invoked, say:
@@ -136,6 +133,20 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
+
+### Plan Mode Fallback
+
+If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
+
+1. **Skills take precedence over plan mode.** Treat loaded skill instructions as executable steps, not reference material. Follow them exactly — do not summarize, skip, or reorder.
+2. **STOP points in skills must be respected.** Do NOT call `ExitPlanMode` prematurely to bypass a skill's STOP/gate.
+3. **Safe operations in plan mode** — these are always allowed because they inform the plan, not produce code:
+   - Reading files, searching code, running `git log`/`git status`
+   - Writing to `docs/superomni/` (specs, plans, reviews)
+   - Writing to `~/.omni-skills/` (sessions, analytics)
+4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
+5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
+
 
 # Security Audit
 

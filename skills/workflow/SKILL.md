@@ -18,9 +18,6 @@ _TEL_START=$(date +%s)
 echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
 ```
 
-### Planning Route
-If you feel the impulse to call `EnterPlanMode`, invoke `brainstorm` (for design) or `writing-plans` (for plans) instead. All planning flows through superomni skills.
-
 ### PROACTIVE Mode
 If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the
 user explicitly invokes. If you would have auto-invoked, say:
@@ -137,6 +134,20 @@ _TEL_DUR=$(( _TEL_END - _TEL_START ))
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
+### Plan Mode Fallback
+
+If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
+
+1. **Skills take precedence over plan mode.** Treat loaded skill instructions as executable steps, not reference material. Follow them exactly — do not summarize, skip, or reorder.
+2. **STOP points in skills must be respected.** Do NOT call `ExitPlanMode` prematurely to bypass a skill's STOP/gate.
+3. **Safe operations in plan mode** — these are always allowed because they inform the plan, not produce code:
+   - Reading files, searching code, running `git log`/`git status`
+   - Writing to `docs/superomni/` (specs, plans, reviews)
+   - Writing to `~/.omni-skills/` (sessions, analytics)
+4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
+5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
+
+
 # Workflow — Sprint Pipeline
 
 **Goal:** Guide a complete feature from idea to shipped code by orchestrating the right skills in the right order, with clear data handoffs between each stage.
@@ -242,7 +253,7 @@ docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review 
 
 ## Stage 4: BUILD — Execute the Plan
 
-**Skills:** `executing-plans`, `test-driven-development`, `frontend-design` (if UI steps), `careful`, `subagent-development`
+**Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
 
 **Input:** Reviewed `docs/superomni/plans/plan-*.md` from Stage 3.
 
@@ -260,8 +271,6 @@ docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review 
 docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code changes (committed)
                             │
               test-driven-development → test files
-                            │
-              frontend-design (if UI steps) → designer agent quality gate
                             │
                     careful (if triggered) → confirmation
                             │
@@ -363,7 +372,6 @@ shipped feature → self-improvement → improvement report
 | Validate a plan | `plan-review` |
 | Execute a plan | `executing-plans` |
 | Write code with tests | `test-driven-development` |
-| Build UI with design quality | `frontend-design` |
 | Run parallel tasks | `subagent-development` |
 | Review code | `code-review` |
 | Respond to review feedback | `receiving-code-review` |

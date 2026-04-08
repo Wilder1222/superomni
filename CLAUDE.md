@@ -1,5 +1,14 @@
 # superomni — Project Configuration
 
+## CRITICAL RULE — EnterPlanMode routes to brainstorm skill
+
+**Whenever you are about to call `EnterPlanMode`, STOP and invoke the `brainstorm` skill instead.** This is a hard routing rule, not a suggestion.
+
+- The decision to call `EnterPlanMode` IS the trigger for `brainstorm`
+- Do NOT call `EnterPlanMode` first — call `brainstorm` directly
+- `brainstorm` will produce a structured spec; then `writing-plans` produces the implementation plan
+- This applies in ALL contexts within this project, whether or not a skill is already active
+
 ## Project Identity
 
 This is the **superomni** AI skill framework — a fusion of obra/superpowers and garrytan/gstack.
@@ -102,4 +111,4 @@ Documents in `docs/superomni/` serve as a permanent, indexable audit trail for a
 - Respect PROACTIVE mode — if false, only run skills when explicitly asked
 - Use status protocol: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
 - **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/specs/spec-*.md`, `docs/superomni/plans/plan-*.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
-- **Planning route:** The impulse to call `EnterPlanMode` is the trigger for a superomni skill — invoke `brainstorm` (for design) or `writing-plans` (for plans) instead. All planning flows through the superomni pipeline.
+- **EnterPlanMode → brainstorm:** Whenever about to call `EnterPlanMode`, invoke `brainstorm` skill instead. This is a hard routing rule — the impulse to plan IS the brainstorm trigger.

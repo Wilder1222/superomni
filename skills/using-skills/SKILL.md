@@ -53,9 +53,7 @@ digraph skill_flow {
 ```
 
 <EXTREMELY-IMPORTANT>
-If you feel the urge to call EnterPlanMode, that is the signal to invoke the `brainstorm` or `writing-plans` skill instead. EnterPlanMode bypasses the superomni pipeline — always route planning through superomni skills.
-
-The impulse to plan IS the trigger for the brainstorm skill, not for Plan Mode.
+HARD ROUTING RULE: Whenever you are about to call `EnterPlanMode`, STOP and invoke the `brainstorm` skill instead. The decision to enter plan mode IS the trigger for brainstorm — call it directly, do not call EnterPlanMode first.
 </EXTREMELY-IMPORTANT>
 
 ## Follow-up Message Protocol

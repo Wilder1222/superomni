@@ -22,7 +22,7 @@ THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
 spec-*   plan-*  approved  code   green  release  retro
 ```
 
-**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+**THINK is the only human gate.** After spec generation, the user reviews and approves the spec. All subsequent stages auto-advance on DONE without user interaction.
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
 
@@ -90,15 +90,15 @@ docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*
 
 ## Stage 3: REVIEW — Validate the Plan
 
-**Skills:** `plan-review` (normal mode or auto mode via `/autoplan`)
+**Skills:** `plan-review` (always runs in full auto mode)
 
 **Input:** `docs/superomni/plans/plan-*.md` from Stage 2.
 
 **Process:**
 1. Use `plan-review` to validate the plan through 3 lenses: Strategy (CEO), Design (if UI), Engineering
-2. Auto-resolve mechanical decisions using the 6 decision principles
-3. Surface taste decisions to the user at the final gate
-4. If issues found → revise the plan and re-review
+2. Auto-resolve ALL decisions (both mechanical and taste) using the 6 decision principles
+3. Log all decisions with rationale in the review document
+4. If issues found → auto-revise the plan and re-review
 
 **Output:** Reviewed plan — review doc saved to `docs/superomni/reviews/`, plan updated with revisions.
 
@@ -107,10 +107,10 @@ docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*
 docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review doc
                                                        │
                                                        ▼
-                                                  [next stage]
+                                                  [auto-advance to BUILD]
 ```
 
-**"What's next" check:** Plan reviewed and approved? → Move to BUILD.
+**"What's next" check:** Plan reviewed and auto-approved? → Auto-advance to BUILD.
 
 ## Stage 4: BUILD — Execute the Plan
 

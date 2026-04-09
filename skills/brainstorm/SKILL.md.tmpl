@@ -119,4 +119,32 @@ Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this struc
 
 Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
 
-Report status: **DONE** — spec written and reviewed. Path: [spec file path]
+## Phase 6: Human Gate — Spec Approval
+
+**THINK is the human gate.** After the spec is generated and self-reviewed, STOP and present the spec to the user for approval.
+
+Present:
+```
+SPEC READY FOR REVIEW
+════════════════════════════════════════
+File: [spec file path]
+
+[Summary: 3-5 bullet points of the proposed solution]
+
+Acceptance criteria:
+  - [criterion 1]
+  - [criterion 2]
+  ...
+
+Please review the spec above.
+  Y) Approve — proceed to PLAN (all subsequent stages will auto-execute)
+  N) Reject — describe what needs to change
+  [Or provide revision notes directly]
+════════════════════════════════════════
+```
+
+**Wait for user response.** This is the ONLY human gate in the entire pipeline.
+- If approved → report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) will execute automatically without further user input.
+- If rejected → revise the spec based on feedback and re-present for review.
+
+Report status: **DONE** — spec written, reviewed, and approved by user. Path: [spec file path]

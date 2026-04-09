@@ -2,7 +2,7 @@
 name: plan-review
 description: |
   Multi-stage plan review pipeline: Strategy (CEO) → Design (if UI) → Engineering.
-  Applies 6 decision principles. Auto-resolves mechanical decisions, surfaces taste decisions.
+  Applies 6 decision principles. Auto-resolves ALL decisions (mechanical and taste) without user input.
   Triggers: "review this plan", "autoplan", "auto review", "is this plan good", before executing any plan.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
@@ -32,23 +32,23 @@ One command. Rough plan in, fully reviewed plan out.
 ## Decision Classification
 
 **Mechanical** — one clearly right answer given constraints. Auto-decide silently, don't burden the user.
-**Taste** — reasonable engineers could disagree. Collect and surface at the final gate only.
+**Taste** — reasonable engineers could disagree. Auto-resolve using the 6 Decision Principles and log the rationale. Do NOT ask the user.
 
 ---
 
-## Auto Mode (/autoplan)
+## Auto Mode (Default)
 
-When invoked as `/autoplan` or with "auto review" trigger, run in auto mode:
+Plan review ALWAYS runs in full auto mode when triggered from the pipeline:
 - **Mechanical decisions:** Auto-resolve silently using the 6 Decision Principles. Log each decision.
-- **Taste decisions:** Collect and surface at the final gate only.
+- **Taste decisions:** Auto-resolve using best judgment and the 6 Decision Principles. Log rationale. Do NOT surface to user.
 - All 3 phases (Strategy, Design, Engineering) run automatically.
-- Final gate still presents taste decisions for user approval.
+- No final gate — auto-advance to BUILD immediately on DONE.
 
 Auto-decision log format:
 ```
 AUTO-DECISION LOG ([Phase])
   [P1] [topic]: [decision made] — Principle [N]
-  [TASTE] [topic]: [description] — flagging for gate
+  [TASTE-AUTO] [topic]: [decision made] — Principle [N] — Rationale: [why]
 ```
 
 ---
@@ -72,7 +72,7 @@ STRATEGY REVIEW
   Risks:    [list top 3]
 ```
 
-**GATE:** Present premises to user for confirmation before proceeding.
+**Auto-resolve:** Verify premises against the spec and existing codebase. If premises are valid, proceed silently. If premises are questionable, log the concern and apply Principle 6 (bias toward action) to proceed.
 
 ---
 
@@ -126,32 +126,24 @@ ENGINEERING REVIEW
 
 ---
 
-## Final Gate: Taste Decisions
+## Final Gate: Auto-Resolved Taste Decisions
 
-List all TASTE decisions collected during review. Present to user:
-
-**If there is only ONE taste decision** — ask it as a single-choice question. The user's reply (A, B, or custom text for "Other") confirms immediately, no second submit needed.
-
-**If there are MULTIPLE taste decisions** — present them all at once, ask the user to reply with their choice for each number (e.g. "1:A 2:B 3:Other:my idea"), then after the user replies confirm with: "Got it — proceeding with those choices." before acting.
+All TASTE decisions are auto-resolved using the 6 Decision Principles. Log each decision with rationale:
 
 ```
-TASTE DECISIONS FOR YOUR INPUT
+TASTE DECISIONS — AUTO-RESOLVED
 ═══════════════════════════════════════
-These require your judgment. No objectively right answer.
 
 1. [Decision description]
-   Option A: [description] — Pro: ... Con: ...
-   Option B: [description] — Pro: ... Con: ...
-   Option C (Other): describe your own idea — ___________
-   My suggestion: [A/B] because [reason]
+   Chosen: [option] — Principle [N] — Rationale: [why]
 
 2. [Decision description]
-   ...
+   Chosen: [option] — Principle [N] — Rationale: [why]
 
-[If multiple decisions: Reply with "1:A 2:B ..." or "1:Other:my idea 2:A ..." — your batch reply is the confirmation.]
-[If one decision: Reply A, B, or describe your own idea — your answer is the immediate confirmation.]
 ═══════════════════════════════════════
 ```
+
+Do NOT present taste decisions to the user or wait for input. Apply best judgment and proceed.
 
 ---
 
@@ -162,17 +154,17 @@ PLAN REVIEW COMPLETE
 ════════════════════════════════════════
 Phases completed:     [1, 2 (skipped), 3] or [1, 2, 3]
 Issues found:         [N]
-Decisions made:       [N mechanical, N taste]
+Decisions made:       [N mechanical, N taste — all auto-resolved]
 Plan status:          APPROVED | APPROVED_WITH_NOTES | NEEDS_REVISION
 
-Revisions required:
+Revisions applied:
   - [revision 1]
 
-Taste decisions surfaced:
-  - [decision 1 awaiting user input]
+Taste decisions auto-resolved:
+  - [decision 1: chosen option — rationale]
 
 Status: DONE | NEEDS_CONTEXT
 ════════════════════════════════════════
 ```
 
-**REVIEW is the human gate** — after reporting DONE, present the review summary and wait for user confirmation (Y / N / revision notes) before advancing to BUILD. All other pipeline stages auto-advance on DONE; REVIEW is the only stage that requires explicit user approval.
+**REVIEW auto-advances** — after reporting DONE, immediately advance to BUILD. All decisions (mechanical and taste) have been auto-resolved. No user confirmation is required. The THINK stage (brainstorm + spec approval) is the only human gate in the pipeline.

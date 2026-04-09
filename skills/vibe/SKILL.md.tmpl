@@ -64,22 +64,22 @@ Use the following priority-ordered rules (first match wins):
 
 | Priority | Condition | Stage | Skill |
 |----------|-----------|-------|-------|
-| 1 | No artifacts at all | **THINK** | `brainstorm` |
-| 2 | `spec-*.md` exists, no `plan-*.md` | **PLAN** | `writing-plans` |
-| 3 | `plan-*.md` exists, no review doc matching its session | **REVIEW** | `plan-review` — **human gate: wait for Y/N** |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` (+ `frontend-design` if UI steps detected) |
-| 5 | `plan-*.md` all checked | **VERIFY** | Required: `code-review` → `qa` → `verification`. Optional: `security-audit` (if security-relevant), `production-readiness` (if deploying) |
-| 6 | Verified | **SHIP** | `ship`, `finishing-branch` |
+| 1 | No artifacts at all | **THINK** | `brainstorm` — **human gate: interactive brainstorm + spec approval** |
+| 2 | `spec-*.md` exists, no `plan-*.md` | **PLAN** | `writing-plans` — auto-advance |
+| 3 | `plan-*.md` exists, no review doc matching its session | **REVIEW** | `plan-review` — auto-advance (all decisions auto-resolved) |
+| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` (+ `frontend-design` if UI steps detected) — auto-advance |
+| 5 | `plan-*.md` all checked | **VERIFY** | Required: `code-review` → `qa` → `verification`. Optional: `security-audit` (if security-relevant), `production-readiness` (if deploying) — auto-advance |
+| 6 | Verified | **SHIP** | `ship`, `finishing-branch` — auto-advance |
 | 7 | Shipped | **REFLECT** | `self-improvement` → `retro` (run sequentially in one stage) |
 
 **Session matching for REVIEW detection:** Extract the `[session]` segment from the plan filename (e.g., `plan-main-auth-refactor-20260404.md` → session = `auth-refactor`). A matching review doc must contain the same session identifier (e.g., `review-main-auth-refactor-*.md`). If no matching review exists → stage is REVIEW.
 
 ### Auto-Advance Rule
 
-**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+**THINK is the only human gate.** The brainstorm skill requires interactive dialogue and spec approval from the user. Once the spec is approved, all subsequent stages auto-advance on DONE without user interaction.
 
-- **Non-REVIEW stages with DONE:** Auto-invoke the next skill immediately. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
-- **REVIEW stage with DONE:** STOP. Present the review summary and ask: `Plan review complete. Proceed to BUILD? (Y / N / describe revisions)`
+- **THINK stage with DONE (spec approved):** Auto-invoke `writing-plans`. All subsequent stages chain automatically.
+- **All non-THINK stages with DONE:** Auto-invoke the next skill immediately. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
 - **Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT:** STOP and wait for user.
 
 Only show the guided menu when:

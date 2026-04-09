@@ -16,7 +16,387 @@ mkdir -p ~/.omni-skills/sessions
 _PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _TEL_START=$(date +%s)
-echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
+echo "Branch: ---
+name: agent-management
+description: |
+  Use when you need to find, install, create, or manage AI agents.
+  Supports installing agents from local paths or GitHub URLs, scaffolding custom agents,
+  and assigning skills to agents.
+  Triggers: "install agent", "create agent", "manage agents", "list agents", "new agent", "add agent".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Agent Management
+
+**Goal:** Find, install, create, and manage AI agents within the superomni framework.
+
+## What Is an Agent?
+
+An agent is a specialized AI persona defined in `agents/<name>.md`. Each agent:
+- Has a **specific expertise** (e.g., planning, debugging, testing, security)
+- Follows a **structured process** tailored to its domain
+- Produces a **defined output format** with status reporting
+- Can be **assigned to tasks** by the main agent or invoked directly
+
+## Selection Flow
+
+**Always follow this order before creating anything from scratch:**
+
+```
+1. Check project built-ins  →  bin/agent-manager list
+2. Search the network       →  bin/agent-manager search <query>
+3. Install from URL         →  bin/agent-manager install <url>
+4. Create from scratch      →  bin/agent-manager create <name>
+```
+
+Never jump to Phase 4 (create) without first completing Phases 1–3.
+
+## Phase 1: Check Project Built-ins
+
+Before anything else, check if a built-in or previously-installed agent already covers your need:
+
+```bash
+# List all agents (built-in + user-installed)
+bin/agent-manager list
+
+# Get details about a specific agent
+bin/agent-manager info <name>
+```
+
+| Agent | Specialty |
+|-------|-----------|
+| `code-reviewer` | Structured code review (P0/P1/P2 framework) |
+| `planner` | Strategic task decomposition and plan writing |
+| `debugger` | Root-cause analysis and bug resolution |
+| `test-writer` | Behavior-verifying test suites |
+| `security-auditor` | OWASP-aware vulnerability identification |
+| `architect` | System design and architecture review |
+| `ceo-advisor` | Product strategy, scope decisions, demand validation |
+| `designer` | UX design, missing states, AI slop detection |
+
+**Gate:** If a built-in agent fits your need → use it directly. Stop here.
+If none fits → proceed to Phase 2.
+
+## Phase 2: Search the Network
+
+If no built-in agent covers your need, search GitHub and known registries before creating from scratch:
+
+```bash
+# Search GitHub for matching agents
+bin/agent-manager search <your-query>
+```
+
+This searches GitHub for agent markdown files matching your query and shows raw URLs you can install directly.
+
+**Search strategy:**
+1. Search with your domain term: `bin/agent-manager search "data-analyst"`
+2. Check known registries:
+   - obra/superpowers: `https://github.com/obra/superpowers/tree/main/agents`
+   - garrytan/gstack: `https://github.com/garrytan/gstack/tree/main/agents`
+3. If found → install via URL (Phase 3)
+4. If nothing suitable → create from scratch (Phase 4)
+
+**Gate:** If a suitable agent is found online → install it (Phase 3). Stop here.
+If nothing suitable → proceed to Phase 4.
+
+## Phase 3: Install an Agent
+
+### From GitHub (or any URL)
+
+```bash
+# Install from a raw GitHub URL
+bin/agent-manager install https://raw.githubusercontent.com/user/repo/main/agents/my-agent.md
+
+# Install from obra/superpowers
+bin/agent-manager install https://raw.githubusercontent.com/obra/superpowers/main/agents/<agent-name>.md
+```
+
+### From a Local File
+
+```bash
+bin/agent-manager install ./path/to/my-agent.md
+```
+
+The agent is copied to `~/.omni-skills/agents/` and available immediately.
+
+### Verify Installation
+
+```bash
+bin/agent-manager list
+bin/agent-manager info <agent-name>
+```
+
+## Phase 4: Create a Custom Agent
+
+### Step 1: Scaffold
+
+```bash
+bin/agent-manager create <agent-name>
+```
+
+This creates a template at either:
+- `agents/<name>.md` — project agents (tracked in git, shared with team)
+- `~/.omni-skills/agents/<name>.md` — user agents (personal, not in git)
+
+### Step 2: Define the Agent
+
+Edit the scaffolded file and fill in:
+
+1. **Identity** — who is this agent and what is their specialty?
+2. **Iron Law** — the one rule this agent must never violate
+3. **Process** — phase-by-phase protocol (3–5 phases)
+4. **Output format** — structured report with status
+
+### Step 3: Assign Skills (Optional)
+
+To give an agent access to specific skills, reference them in its process:
+
+```markdown
+## Available Skills
+- Follow `skills/systematic-debugging/SKILL.md` for debugging protocol
+- Follow `skills/test-driven-development/SKILL.md` when writing tests
+```
+
+### Step 4: Test the Agent
+
+Invoke the agent with a sample task:
+1. Provide a clear task description
+2. Verify the agent follows its defined process
+3. Check the output matches the defined format
+
+## Phase 5: Remove an Agent
+
+Only user-installed agents can be removed (built-ins are part of the framework):
+
+```bash
+bin/agent-manager remove <agent-name>
+```
+
+## Agent Design Principles
+
+### Do
+- Give agents a single, focused specialty
+- Define explicit output formats with status reporting
+- Include at least one "Iron Law" — a non-negotiable rule
+- Use phase-based protocols that are easy to follow
+- Reference relevant skills rather than duplicating them
+
+### Don't
+- Create an agent whose purpose overlaps significantly with an existing one
+- Make agents that do everything (use `subagent-development` skill instead)
+- Skip the output format — it enables verification
+- Forget to test before deploying to the team
+
+## Agent Management Report
+
+```
+AGENT MANAGEMENT REPORT
+════════════════════════════════════════
+Operation:   [list/install/create/remove]
+Agent:       [name]
+Location:    [path]
+Source:      [local/url — if installed]
+Flow used:   [built-in | network search | created from scratch]
+
+Built-in agents:   [N]
+User agents:       [N]
+
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+════════════════════════════════════════
+```
+BRANCH | PROACTIVE: ---
+name: agent-management
+description: |
+  Use when you need to find, install, create, or manage AI agents.
+  Supports installing agents from local paths or GitHub URLs, scaffolding custom agents,
+  and assigning skills to agents.
+  Triggers: "install agent", "create agent", "manage agents", "list agents", "new agent", "add agent".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Agent Management
+
+**Goal:** Find, install, create, and manage AI agents within the superomni framework.
+
+## What Is an Agent?
+
+An agent is a specialized AI persona defined in `agents/<name>.md`. Each agent:
+- Has a **specific expertise** (e.g., planning, debugging, testing, security)
+- Follows a **structured process** tailored to its domain
+- Produces a **defined output format** with status reporting
+- Can be **assigned to tasks** by the main agent or invoked directly
+
+## Selection Flow
+
+**Always follow this order before creating anything from scratch:**
+
+```
+1. Check project built-ins  →  bin/agent-manager list
+2. Search the network       →  bin/agent-manager search <query>
+3. Install from URL         →  bin/agent-manager install <url>
+4. Create from scratch      →  bin/agent-manager create <name>
+```
+
+Never jump to Phase 4 (create) without first completing Phases 1–3.
+
+## Phase 1: Check Project Built-ins
+
+Before anything else, check if a built-in or previously-installed agent already covers your need:
+
+```bash
+# List all agents (built-in + user-installed)
+bin/agent-manager list
+
+# Get details about a specific agent
+bin/agent-manager info <name>
+```
+
+| Agent | Specialty |
+|-------|-----------|
+| `code-reviewer` | Structured code review (P0/P1/P2 framework) |
+| `planner` | Strategic task decomposition and plan writing |
+| `debugger` | Root-cause analysis and bug resolution |
+| `test-writer` | Behavior-verifying test suites |
+| `security-auditor` | OWASP-aware vulnerability identification |
+| `architect` | System design and architecture review |
+| `ceo-advisor` | Product strategy, scope decisions, demand validation |
+| `designer` | UX design, missing states, AI slop detection |
+
+**Gate:** If a built-in agent fits your need → use it directly. Stop here.
+If none fits → proceed to Phase 2.
+
+## Phase 2: Search the Network
+
+If no built-in agent covers your need, search GitHub and known registries before creating from scratch:
+
+```bash
+# Search GitHub for matching agents
+bin/agent-manager search <your-query>
+```
+
+This searches GitHub for agent markdown files matching your query and shows raw URLs you can install directly.
+
+**Search strategy:**
+1. Search with your domain term: `bin/agent-manager search "data-analyst"`
+2. Check known registries:
+   - obra/superpowers: `https://github.com/obra/superpowers/tree/main/agents`
+   - garrytan/gstack: `https://github.com/garrytan/gstack/tree/main/agents`
+3. If found → install via URL (Phase 3)
+4. If nothing suitable → create from scratch (Phase 4)
+
+**Gate:** If a suitable agent is found online → install it (Phase 3). Stop here.
+If nothing suitable → proceed to Phase 4.
+
+## Phase 3: Install an Agent
+
+### From GitHub (or any URL)
+
+```bash
+# Install from a raw GitHub URL
+bin/agent-manager install https://raw.githubusercontent.com/user/repo/main/agents/my-agent.md
+
+# Install from obra/superpowers
+bin/agent-manager install https://raw.githubusercontent.com/obra/superpowers/main/agents/<agent-name>.md
+```
+
+### From a Local File
+
+```bash
+bin/agent-manager install ./path/to/my-agent.md
+```
+
+The agent is copied to `~/.omni-skills/agents/` and available immediately.
+
+### Verify Installation
+
+```bash
+bin/agent-manager list
+bin/agent-manager info <agent-name>
+```
+
+## Phase 4: Create a Custom Agent
+
+### Step 1: Scaffold
+
+```bash
+bin/agent-manager create <agent-name>
+```
+
+This creates a template at either:
+- `agents/<name>.md` — project agents (tracked in git, shared with team)
+- `~/.omni-skills/agents/<name>.md` — user agents (personal, not in git)
+
+### Step 2: Define the Agent
+
+Edit the scaffolded file and fill in:
+
+1. **Identity** — who is this agent and what is their specialty?
+2. **Iron Law** — the one rule this agent must never violate
+3. **Process** — phase-by-phase protocol (3–5 phases)
+4. **Output format** — structured report with status
+
+### Step 3: Assign Skills (Optional)
+
+To give an agent access to specific skills, reference them in its process:
+
+```markdown
+## Available Skills
+- Follow `skills/systematic-debugging/SKILL.md` for debugging protocol
+- Follow `skills/test-driven-development/SKILL.md` when writing tests
+```
+
+### Step 4: Test the Agent
+
+Invoke the agent with a sample task:
+1. Provide a clear task description
+2. Verify the agent follows its defined process
+3. Check the output matches the defined format
+
+## Phase 5: Remove an Agent
+
+Only user-installed agents can be removed (built-ins are part of the framework):
+
+```bash
+bin/agent-manager remove <agent-name>
+```
+
+## Agent Design Principles
+
+### Do
+- Give agents a single, focused specialty
+- Define explicit output formats with status reporting
+- Include at least one "Iron Law" — a non-negotiable rule
+- Use phase-based protocols that are easy to follow
+- Reference relevant skills rather than duplicating them
+
+### Don't
+- Create an agent whose purpose overlaps significantly with an existing one
+- Make agents that do everything (use `subagent-development` skill instead)
+- Skip the output format — it enables verification
+- Forget to test before deploying to the team
+
+## Agent Management Report
+
+```
+AGENT MANAGEMENT REPORT
+════════════════════════════════════════
+Operation:   [list/install/create/remove]
+Agent:       [name]
+Location:    [path]
+Source:      [local/url — if installed]
+Flow used:   [built-in | network search | created from scratch]
+
+Built-in agents:   [N]
+User agents:       [N]
+
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+════════════════════════════════════════
+```
+PROACTIVE"
 ```
 
 ### PROACTIVE Mode
@@ -36,11 +416,11 @@ Report status using one of these at the end of every skill session:
 
 Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
 
-**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+**THINK is the only human gate.** After the brainstorm skill generates a spec document, STOP and present the spec for user review. Once the user approves, all subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) auto-advance on DONE without asking the user.
 
-| Status | At REVIEW stage | At all other stages |
-|--------|----------------|-------------------|
-| **DONE** | STOP — present review summary, wait for user input (Y / N / revision notes) | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
+| Status | At THINK stage (after spec generation) | At all other stages |
+|--------|----------------------------------------|-------------------|
+| **DONE** | STOP — present spec document for user review. Wait for user approval before advancing to PLAN. | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
 | **DONE_WITH_CONCERNS** | STOP — present concerns, wait for user decision | STOP — present concerns, wait for user decision |
 | **BLOCKED** / **NEEDS_CONTEXT** | STOP — present blocker, wait for user | STOP — present blocker, wait for user |
 
@@ -48,6 +428,8 @@ When auto-advancing:
 1. Write the session artifact to `docs/superomni/`
 2. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
 3. Immediately invoke the next pipeline skill
+
+**Note:** The REVIEW stage (plan-review) runs fully automatically — all decisions (mechanical and taste) are auto-resolved using the 6 Decision Principles. No user input is requested during REVIEW.
 
 ### Session Continuity
 
@@ -131,7 +513,197 @@ For a full performance evaluation spanning the entire sprint, use the `self-impr
 ```bash
 _TEL_END=$(date +%s)
 _TEL_DUR=$(( _TEL_END - _TEL_START ))
-~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
+~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "---
+name: agent-management
+description: |
+  Use when you need to find, install, create, or manage AI agents.
+  Supports installing agents from local paths or GitHub URLs, scaffolding custom agents,
+  and assigning skills to agents.
+  Triggers: "install agent", "create agent", "manage agents", "list agents", "new agent", "add agent".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Agent Management
+
+**Goal:** Find, install, create, and manage AI agents within the superomni framework.
+
+## What Is an Agent?
+
+An agent is a specialized AI persona defined in `agents/<name>.md`. Each agent:
+- Has a **specific expertise** (e.g., planning, debugging, testing, security)
+- Follows a **structured process** tailored to its domain
+- Produces a **defined output format** with status reporting
+- Can be **assigned to tasks** by the main agent or invoked directly
+
+## Selection Flow
+
+**Always follow this order before creating anything from scratch:**
+
+```
+1. Check project built-ins  →  bin/agent-manager list
+2. Search the network       →  bin/agent-manager search <query>
+3. Install from URL         →  bin/agent-manager install <url>
+4. Create from scratch      →  bin/agent-manager create <name>
+```
+
+Never jump to Phase 4 (create) without first completing Phases 1–3.
+
+## Phase 1: Check Project Built-ins
+
+Before anything else, check if a built-in or previously-installed agent already covers your need:
+
+```bash
+# List all agents (built-in + user-installed)
+bin/agent-manager list
+
+# Get details about a specific agent
+bin/agent-manager info <name>
+```
+
+| Agent | Specialty |
+|-------|-----------|
+| `code-reviewer` | Structured code review (P0/P1/P2 framework) |
+| `planner` | Strategic task decomposition and plan writing |
+| `debugger` | Root-cause analysis and bug resolution |
+| `test-writer` | Behavior-verifying test suites |
+| `security-auditor` | OWASP-aware vulnerability identification |
+| `architect` | System design and architecture review |
+| `ceo-advisor` | Product strategy, scope decisions, demand validation |
+| `designer` | UX design, missing states, AI slop detection |
+
+**Gate:** If a built-in agent fits your need → use it directly. Stop here.
+If none fits → proceed to Phase 2.
+
+## Phase 2: Search the Network
+
+If no built-in agent covers your need, search GitHub and known registries before creating from scratch:
+
+```bash
+# Search GitHub for matching agents
+bin/agent-manager search <your-query>
+```
+
+This searches GitHub for agent markdown files matching your query and shows raw URLs you can install directly.
+
+**Search strategy:**
+1. Search with your domain term: `bin/agent-manager search "data-analyst"`
+2. Check known registries:
+   - obra/superpowers: `https://github.com/obra/superpowers/tree/main/agents`
+   - garrytan/gstack: `https://github.com/garrytan/gstack/tree/main/agents`
+3. If found → install via URL (Phase 3)
+4. If nothing suitable → create from scratch (Phase 4)
+
+**Gate:** If a suitable agent is found online → install it (Phase 3). Stop here.
+If nothing suitable → proceed to Phase 4.
+
+## Phase 3: Install an Agent
+
+### From GitHub (or any URL)
+
+```bash
+# Install from a raw GitHub URL
+bin/agent-manager install https://raw.githubusercontent.com/user/repo/main/agents/my-agent.md
+
+# Install from obra/superpowers
+bin/agent-manager install https://raw.githubusercontent.com/obra/superpowers/main/agents/<agent-name>.md
+```
+
+### From a Local File
+
+```bash
+bin/agent-manager install ./path/to/my-agent.md
+```
+
+The agent is copied to `~/.omni-skills/agents/` and available immediately.
+
+### Verify Installation
+
+```bash
+bin/agent-manager list
+bin/agent-manager info <agent-name>
+```
+
+## Phase 4: Create a Custom Agent
+
+### Step 1: Scaffold
+
+```bash
+bin/agent-manager create <agent-name>
+```
+
+This creates a template at either:
+- `agents/<name>.md` — project agents (tracked in git, shared with team)
+- `~/.omni-skills/agents/<name>.md` — user agents (personal, not in git)
+
+### Step 2: Define the Agent
+
+Edit the scaffolded file and fill in:
+
+1. **Identity** — who is this agent and what is their specialty?
+2. **Iron Law** — the one rule this agent must never violate
+3. **Process** — phase-by-phase protocol (3–5 phases)
+4. **Output format** — structured report with status
+
+### Step 3: Assign Skills (Optional)
+
+To give an agent access to specific skills, reference them in its process:
+
+```markdown
+## Available Skills
+- Follow `skills/systematic-debugging/SKILL.md` for debugging protocol
+- Follow `skills/test-driven-development/SKILL.md` when writing tests
+```
+
+### Step 4: Test the Agent
+
+Invoke the agent with a sample task:
+1. Provide a clear task description
+2. Verify the agent follows its defined process
+3. Check the output matches the defined format
+
+## Phase 5: Remove an Agent
+
+Only user-installed agents can be removed (built-ins are part of the framework):
+
+```bash
+bin/agent-manager remove <agent-name>
+```
+
+## Agent Design Principles
+
+### Do
+- Give agents a single, focused specialty
+- Define explicit output formats with status reporting
+- Include at least one "Iron Law" — a non-negotiable rule
+- Use phase-based protocols that are easy to follow
+- Reference relevant skills rather than duplicating them
+
+### Don't
+- Create an agent whose purpose overlaps significantly with an existing one
+- Make agents that do everything (use `subagent-development` skill instead)
+- Skip the output format — it enables verification
+- Forget to test before deploying to the team
+
+## Agent Management Report
+
+```
+AGENT MANAGEMENT REPORT
+════════════════════════════════════════
+Operation:   [list/install/create/remove]
+Agent:       [name]
+Location:    [path]
+Source:      [local/url — if installed]
+Flow used:   [built-in | network search | created from scratch]
+
+Built-in agents:   [N]
+User agents:       [N]
+
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+════════════════════════════════════════
+```
+TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 

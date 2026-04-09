@@ -15,7 +15,307 @@ mkdir -p ~/.omni-skills/sessions
 _PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _TEL_START=$(date +%s)
-echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
+echo "Branch: ---
+name: brainstorm
+description: |
+  Use when starting a new feature, project, or design decision.
+  Guides from fuzzy idea to concrete spec through structured dialogue.
+  Triggers: "brainstorm", "design", "spec this out", "let's think through".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebSearch]
+---
+
+{{PREAMBLE}}
+
+# Brainstorming & Specification
+
+**Goal:** Transform a fuzzy idea into a concrete, reviewable spec document.
+
+## Iron Law: Search Before Building
+
+Before designing anything:
+1. **Layer 1 — Tried and true:** Does a well-established solution already exist?
+2. **Layer 2 — New and popular:** Is there a recently popular approach? Evaluate carefully.
+3. **Layer 3 — First principles:** Only design from scratch if nothing fits.
+
+Run: `grep -r "similar functionality" . --include="*.md" -l` to check existing docs.
+
+## Phase 1: Problem Crystallization
+
+Ask ONE clarifying question at a time. Do not ask multiple questions at once.
+
+Required understanding before proceeding:
+- [ ] What is the problem being solved? (not the solution)
+- [ ] Who experiences this problem?
+- [ ] What does success look like? (measurable outcome)
+- [ ] What constraints exist? (time, technology, team size)
+- [ ] What already exists that's related?
+
+Rule: **Ask one question. Wait for answer. Then ask the next.**
+Confirmation rule: each answer (text input or single-choice) is an immediate confirmation — do NOT re-ask or add a "confirm?" prompt after the user replies.
+
+## Phase 2: Solution Space Exploration
+
+Generate 3 candidate approaches, then always offer an "Other" option for the user's own idea:
+
+```
+Option A: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option B: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option C: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option D (Other): describe your own approach — ___________
+```
+
+Apply the 6 Decision Principles when evaluating:
+- Prefer completeness (covers more cases)
+- Prefer DRY (reuses existing)
+- Prefer explicit over clever
+
+Surface only TASTE decisions to the user. Decide MECHANICAL ones silently.
+
+## Phase 3: Visual Companion (if applicable)
+
+For UI or architecture work, produce a text diagram or ASCII wireframe.
+See `visual-companion.md` for diagram formats.
+
+**Frontend Design Integration:**
+If the spec involves UI components, pages, or visual design:
+- Note in the spec: *"This involves UI work — recommend running the `frontend-design` skill during BUILD to ensure design quality."*
+- When generating acceptance criteria, include: "Passes designer agent review at 7+/10 on all dimensions"
+
+## Phase 4: Spec Document Output
+
+```bash
+mkdir -p docs/superomni/specs
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_SESSION="<auto-generate-kebab-case-from-context>"  # e.g., auth-refactor, vibe-skill
+_DATE=$(date +%Y%m%d)
+_SPEC_FILE="docs/superomni/specs/spec-${_BRANCH}-${_SESSION}-${_DATE}.md"
+```
+
+Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this structure:
+
+```markdown
+# [Feature Name] — Spec
+
+## Problem
+[1 paragraph: what is broken or missing and for whom]
+
+## Goals
+- [Measurable outcome 1]
+- [Measurable outcome 2]
+
+## Non-Goals (YAGNI)
+- [What we are explicitly NOT building]
+
+## Proposed Solution
+[Selected approach + rationale]
+
+## Key Design Decisions
+| Decision | Choice | Rationale | Principle Applied |
+
+## Acceptance Criteria
+- [ ] [Testable criterion 1]
+- [ ] [Testable criterion 2]
+
+## Open Questions
+- [Any unresolved taste decisions requiring user input]
+```
+
+## Phase 5: Spec Review
+
+Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
+
+## Phase 6: Human Gate — Spec Approval
+
+**THINK is the human gate.** After the spec is generated and self-reviewed, STOP and present the spec to the user for approval.
+
+Present:
+```
+SPEC READY FOR REVIEW
+════════════════════════════════════════
+File: [spec file path]
+
+[Summary: 3-5 bullet points of the proposed solution]
+
+Acceptance criteria:
+  - [criterion 1]
+  - [criterion 2]
+  ...
+
+Please review the spec above.
+  Y) Approve — proceed to PLAN (all subsequent stages will auto-execute)
+  N) Reject — describe what needs to change
+  [Or provide revision notes directly]
+════════════════════════════════════════
+```
+
+**Wait for user response.** This is the ONLY human gate in the entire pipeline.
+- If approved → report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) will execute automatically without further user input.
+- If rejected → revise the spec based on feedback and re-present for review.
+
+Report status: **DONE** — spec written, reviewed, and approved by user. Path: [spec file path]
+BRANCH | PROACTIVE: ---
+name: brainstorm
+description: |
+  Use when starting a new feature, project, or design decision.
+  Guides from fuzzy idea to concrete spec through structured dialogue.
+  Triggers: "brainstorm", "design", "spec this out", "let's think through".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebSearch]
+---
+
+{{PREAMBLE}}
+
+# Brainstorming & Specification
+
+**Goal:** Transform a fuzzy idea into a concrete, reviewable spec document.
+
+## Iron Law: Search Before Building
+
+Before designing anything:
+1. **Layer 1 — Tried and true:** Does a well-established solution already exist?
+2. **Layer 2 — New and popular:** Is there a recently popular approach? Evaluate carefully.
+3. **Layer 3 — First principles:** Only design from scratch if nothing fits.
+
+Run: `grep -r "similar functionality" . --include="*.md" -l` to check existing docs.
+
+## Phase 1: Problem Crystallization
+
+Ask ONE clarifying question at a time. Do not ask multiple questions at once.
+
+Required understanding before proceeding:
+- [ ] What is the problem being solved? (not the solution)
+- [ ] Who experiences this problem?
+- [ ] What does success look like? (measurable outcome)
+- [ ] What constraints exist? (time, technology, team size)
+- [ ] What already exists that's related?
+
+Rule: **Ask one question. Wait for answer. Then ask the next.**
+Confirmation rule: each answer (text input or single-choice) is an immediate confirmation — do NOT re-ask or add a "confirm?" prompt after the user replies.
+
+## Phase 2: Solution Space Exploration
+
+Generate 3 candidate approaches, then always offer an "Other" option for the user's own idea:
+
+```
+Option A: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option B: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option C: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option D (Other): describe your own approach — ___________
+```
+
+Apply the 6 Decision Principles when evaluating:
+- Prefer completeness (covers more cases)
+- Prefer DRY (reuses existing)
+- Prefer explicit over clever
+
+Surface only TASTE decisions to the user. Decide MECHANICAL ones silently.
+
+## Phase 3: Visual Companion (if applicable)
+
+For UI or architecture work, produce a text diagram or ASCII wireframe.
+See `visual-companion.md` for diagram formats.
+
+**Frontend Design Integration:**
+If the spec involves UI components, pages, or visual design:
+- Note in the spec: *"This involves UI work — recommend running the `frontend-design` skill during BUILD to ensure design quality."*
+- When generating acceptance criteria, include: "Passes designer agent review at 7+/10 on all dimensions"
+
+## Phase 4: Spec Document Output
+
+```bash
+mkdir -p docs/superomni/specs
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_SESSION="<auto-generate-kebab-case-from-context>"  # e.g., auth-refactor, vibe-skill
+_DATE=$(date +%Y%m%d)
+_SPEC_FILE="docs/superomni/specs/spec-${_BRANCH}-${_SESSION}-${_DATE}.md"
+```
+
+Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this structure:
+
+```markdown
+# [Feature Name] — Spec
+
+## Problem
+[1 paragraph: what is broken or missing and for whom]
+
+## Goals
+- [Measurable outcome 1]
+- [Measurable outcome 2]
+
+## Non-Goals (YAGNI)
+- [What we are explicitly NOT building]
+
+## Proposed Solution
+[Selected approach + rationale]
+
+## Key Design Decisions
+| Decision | Choice | Rationale | Principle Applied |
+
+## Acceptance Criteria
+- [ ] [Testable criterion 1]
+- [ ] [Testable criterion 2]
+
+## Open Questions
+- [Any unresolved taste decisions requiring user input]
+```
+
+## Phase 5: Spec Review
+
+Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
+
+## Phase 6: Human Gate — Spec Approval
+
+**THINK is the human gate.** After the spec is generated and self-reviewed, STOP and present the spec to the user for approval.
+
+Present:
+```
+SPEC READY FOR REVIEW
+════════════════════════════════════════
+File: [spec file path]
+
+[Summary: 3-5 bullet points of the proposed solution]
+
+Acceptance criteria:
+  - [criterion 1]
+  - [criterion 2]
+  ...
+
+Please review the spec above.
+  Y) Approve — proceed to PLAN (all subsequent stages will auto-execute)
+  N) Reject — describe what needs to change
+  [Or provide revision notes directly]
+════════════════════════════════════════
+```
+
+**Wait for user response.** This is the ONLY human gate in the entire pipeline.
+- If approved → report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) will execute automatically without further user input.
+- If rejected → revise the spec based on feedback and re-present for review.
+
+Report status: **DONE** — spec written, reviewed, and approved by user. Path: [spec file path]
+PROACTIVE"
 ```
 
 ### PROACTIVE Mode
@@ -35,11 +335,11 @@ Report status using one of these at the end of every skill session:
 
 Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
 
-**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+**THINK is the only human gate.** After the brainstorm skill generates a spec document, STOP and present the spec for user review. Once the user approves, all subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) auto-advance on DONE without asking the user.
 
-| Status | At REVIEW stage | At all other stages |
-|--------|----------------|-------------------|
-| **DONE** | STOP — present review summary, wait for user input (Y / N / revision notes) | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
+| Status | At THINK stage (after spec generation) | At all other stages |
+|--------|----------------------------------------|-------------------|
+| **DONE** | STOP — present spec document for user review. Wait for user approval before advancing to PLAN. | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
 | **DONE_WITH_CONCERNS** | STOP — present concerns, wait for user decision | STOP — present concerns, wait for user decision |
 | **BLOCKED** / **NEEDS_CONTEXT** | STOP — present blocker, wait for user | STOP — present blocker, wait for user |
 
@@ -47,6 +347,8 @@ When auto-advancing:
 1. Write the session artifact to `docs/superomni/`
 2. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
 3. Immediately invoke the next pipeline skill
+
+**Note:** The REVIEW stage (plan-review) runs fully automatically — all decisions (mechanical and taste) are auto-resolved using the 6 Decision Principles. No user input is requested during REVIEW.
 
 ### Session Continuity
 
@@ -130,7 +432,157 @@ For a full performance evaluation spanning the entire sprint, use the `self-impr
 ```bash
 _TEL_END=$(date +%s)
 _TEL_DUR=$(( _TEL_END - _TEL_START ))
-~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
+~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "---
+name: brainstorm
+description: |
+  Use when starting a new feature, project, or design decision.
+  Guides from fuzzy idea to concrete spec through structured dialogue.
+  Triggers: "brainstorm", "design", "spec this out", "let's think through".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebSearch]
+---
+
+{{PREAMBLE}}
+
+# Brainstorming & Specification
+
+**Goal:** Transform a fuzzy idea into a concrete, reviewable spec document.
+
+## Iron Law: Search Before Building
+
+Before designing anything:
+1. **Layer 1 — Tried and true:** Does a well-established solution already exist?
+2. **Layer 2 — New and popular:** Is there a recently popular approach? Evaluate carefully.
+3. **Layer 3 — First principles:** Only design from scratch if nothing fits.
+
+Run: `grep -r "similar functionality" . --include="*.md" -l` to check existing docs.
+
+## Phase 1: Problem Crystallization
+
+Ask ONE clarifying question at a time. Do not ask multiple questions at once.
+
+Required understanding before proceeding:
+- [ ] What is the problem being solved? (not the solution)
+- [ ] Who experiences this problem?
+- [ ] What does success look like? (measurable outcome)
+- [ ] What constraints exist? (time, technology, team size)
+- [ ] What already exists that's related?
+
+Rule: **Ask one question. Wait for answer. Then ask the next.**
+Confirmation rule: each answer (text input or single-choice) is an immediate confirmation — do NOT re-ask or add a "confirm?" prompt after the user replies.
+
+## Phase 2: Solution Space Exploration
+
+Generate 3 candidate approaches, then always offer an "Other" option for the user's own idea:
+
+```
+Option A: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option B: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option C: [name] — [1-sentence description]
+  Pro: ...
+  Con: ...
+  Effort: [S/M/L]
+
+Option D (Other): describe your own approach — ___________
+```
+
+Apply the 6 Decision Principles when evaluating:
+- Prefer completeness (covers more cases)
+- Prefer DRY (reuses existing)
+- Prefer explicit over clever
+
+Surface only TASTE decisions to the user. Decide MECHANICAL ones silently.
+
+## Phase 3: Visual Companion (if applicable)
+
+For UI or architecture work, produce a text diagram or ASCII wireframe.
+See `visual-companion.md` for diagram formats.
+
+**Frontend Design Integration:**
+If the spec involves UI components, pages, or visual design:
+- Note in the spec: *"This involves UI work — recommend running the `frontend-design` skill during BUILD to ensure design quality."*
+- When generating acceptance criteria, include: "Passes designer agent review at 7+/10 on all dimensions"
+
+## Phase 4: Spec Document Output
+
+```bash
+mkdir -p docs/superomni/specs
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_SESSION="<auto-generate-kebab-case-from-context>"  # e.g., auth-refactor, vibe-skill
+_DATE=$(date +%Y%m%d)
+_SPEC_FILE="docs/superomni/specs/spec-${_BRANCH}-${_SESSION}-${_DATE}.md"
+```
+
+Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this structure:
+
+```markdown
+# [Feature Name] — Spec
+
+## Problem
+[1 paragraph: what is broken or missing and for whom]
+
+## Goals
+- [Measurable outcome 1]
+- [Measurable outcome 2]
+
+## Non-Goals (YAGNI)
+- [What we are explicitly NOT building]
+
+## Proposed Solution
+[Selected approach + rationale]
+
+## Key Design Decisions
+| Decision | Choice | Rationale | Principle Applied |
+
+## Acceptance Criteria
+- [ ] [Testable criterion 1]
+- [ ] [Testable criterion 2]
+
+## Open Questions
+- [Any unresolved taste decisions requiring user input]
+```
+
+## Phase 5: Spec Review
+
+Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
+
+## Phase 6: Human Gate — Spec Approval
+
+**THINK is the human gate.** After the spec is generated and self-reviewed, STOP and present the spec to the user for approval.
+
+Present:
+```
+SPEC READY FOR REVIEW
+════════════════════════════════════════
+File: [spec file path]
+
+[Summary: 3-5 bullet points of the proposed solution]
+
+Acceptance criteria:
+  - [criterion 1]
+  - [criterion 2]
+  ...
+
+Please review the spec above.
+  Y) Approve — proceed to PLAN (all subsequent stages will auto-execute)
+  N) Reject — describe what needs to change
+  [Or provide revision notes directly]
+════════════════════════════════════════
+```
+
+**Wait for user response.** This is the ONLY human gate in the entire pipeline.
+- If approved → report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) will execute automatically without further user input.
+- If rejected → revise the spec based on feedback and re-present for review.
+
+Report status: **DONE** — spec written, reviewed, and approved by user. Path: [spec file path]
+TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
@@ -258,4 +710,32 @@ Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this struc
 
 Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
 
-Report status: **DONE** — spec written and reviewed. Path: [spec file path]
+## Phase 6: Human Gate — Spec Approval
+
+**THINK is the human gate.** After the spec is generated and self-reviewed, STOP and present the spec to the user for approval.
+
+Present:
+```
+SPEC READY FOR REVIEW
+════════════════════════════════════════
+File: [spec file path]
+
+[Summary: 3-5 bullet points of the proposed solution]
+
+Acceptance criteria:
+  - [criterion 1]
+  - [criterion 2]
+  ...
+
+Please review the spec above.
+  Y) Approve — proceed to PLAN (all subsequent stages will auto-execute)
+  N) Reject — describe what needs to change
+  [Or provide revision notes directly]
+════════════════════════════════════════
+```
+
+**Wait for user response.** This is the ONLY human gate in the entire pipeline.
+- If approved → report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) will execute automatically without further user input.
+- If rejected → revise the spec based on feedback and re-present for review.
+
+Report status: **DONE** — spec written, reviewed, and approved by user. Path: [spec file path]

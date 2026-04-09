@@ -15,7 +15,563 @@ mkdir -p ~/.omni-skills/sessions
 _PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _TEL_START=$(date +%s)
-echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
+echo "Branch: ---
+name: workflow
+description: |
+  Documents the end-to-end sprint workflow and inter-skill data flow.
+  Use to understand which skills to use, in what order, and how data flows between them.
+  Triggers: "workflow", "sprint", "pipeline", "what's next", "how do skills connect".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Workflow — Sprint Pipeline
+
+**Goal:** Guide a complete feature from idea to shipped code by orchestrating the right skills in the right order, with clear data handoffs between each stage.
+
+## The Pipeline
+
+```
+THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+  │        │       │        │       │       │       │
+  ▼        ▼       ▼        ▼       ▼       ▼       ▼
+spec-*   plan-*  approved  code   green  release  retro
+```
+
+**THINK is the only human gate.** After spec generation, the user reviews and approves the spec. All subsequent stages auto-advance on DONE without user interaction.
+
+Each stage uses specific skills and produces artifacts consumed by the next stage.
+
+## Stage 1: THINK — Define the Problem
+
+**Skills:** `brainstorm`, `investigate`
+
+**Input:** Fuzzy idea, user request, bug report, or feature ask.
+
+**Start-of-sprint context scan:**
+```bash
+# Always check for prior improvement actions from the last self-improvement run
+LATEST_IMPROVE=$(find docs/superomni/improvements -name "*.md" -type f 2>/dev/null |   sort -t- -k2,3 | tail -1)
+if [ -n "$LATEST_IMPROVE" ]; then
+  echo "=== Applying improvement actions from last sprint ==="
+  grep "^### ACTION" "$LATEST_IMPROVE" -A 4 | head -30
+fi
+
+# Check what spec/plan artifacts already exist
+_LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+_LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+test -n "$_LATEST_SPEC" && echo "spec found: $_LATEST_SPEC" || echo "No spec"
+test -n "$_LATEST_PLAN" && echo "plan found: $_LATEST_PLAN" || echo "No plan"
+```
+
+**Process:**
+1. If the problem space is unclear → use `investigate` to map the system
+2. Use `brainstorm` to crystallize the problem and explore solutions
+3. Generate 3 candidate approaches, evaluate tradeoffs
+4. Produce a spec document
+
+**Output:** `docs/superomni/specs/spec-[branch]-[session]-[date].md` — problem statement, goals, non-goals, proposed solution, acceptance criteria.
+
+**Data flow:**
+```
+user request → brainstorm → docs/superomni/specs/spec-[branch]-[session]-[date].md
+                                  │
+                                  ▼
+                             [next stage]
+```
+
+**"What's next" check:** Does any `docs/superomni/specs/spec-*.md` exist and have acceptance criteria? → Move to PLAN.
+
+## Stage 2: PLAN — Break It Down
+
+**Skills:** `writing-plans`
+
+**Input:** Latest `docs/superomni/specs/spec-*.md` from Stage 1.
+
+**Process:**
+1. Use `writing-plans` to decompose the spec into ordered, testable steps
+2. Each step must have: description, files to touch, verification criterion
+
+**Output:** `docs/superomni/plans/plan-[branch]-[session]-[date].md` — ordered steps with verification criteria, dependency graph, risk flags.
+
+**Data flow:**
+```
+docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*.md
+                                                       │
+                                                       ▼
+                                                  [next stage]
+```
+
+**"What's next" check:** Does any `docs/superomni/plans/plan-*.md` exist? → Move to REVIEW.
+
+## Stage 3: REVIEW — Validate the Plan
+
+**Skills:** `plan-review` (always runs in full auto mode)
+
+**Input:** `docs/superomni/plans/plan-*.md` from Stage 2.
+
+**Process:**
+1. Use `plan-review` to validate the plan through 3 lenses: Strategy (CEO), Design (if UI), Engineering
+2. Auto-resolve ALL decisions (both mechanical and taste) using the 6 decision principles
+3. Log all decisions with rationale in the review document
+4. If issues found → auto-revise the plan and re-review
+
+**Output:** Reviewed plan — review doc saved to `docs/superomni/reviews/`, plan updated with revisions.
+
+**Data flow:**
+```
+docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review doc
+                                                       │
+                                                       ▼
+                                                  [auto-advance to BUILD]
+```
+
+**"What's next" check:** Plan reviewed and auto-approved? → Auto-advance to BUILD.
+
+## Stage 4: BUILD — Execute the Plan
+
+**Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
+
+**Input:** Reviewed `docs/superomni/plans/plan-*.md` from Stage 3.
+
+**Process:**
+1. Use `executing-plans` to work through the plan step by step
+2. For each step, use `test-driven-development` (Red → Green → Refactor)
+3. If high-risk operations are detected, `careful` activates automatically
+4. For independent steps, consider `subagent-development` for parallel execution
+5. Verify each step before moving to the next
+
+**Output:** Working code with tests — committed to a feature branch.
+
+**Data flow:**
+```
+docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code changes (committed)
+                            │
+              test-driven-development → test files
+                            │
+                    careful (if triggered) → confirmation
+                            │
+                            ▼
+                       [next stage]
+```
+
+**"What's next" check:** All plan steps complete? Tests passing? → Move to VERIFY.
+
+## Stage 5: VERIFY — Code Review, QA & Production Readiness
+
+**Required skills:** `code-review`, `qa`, `verification`
+**Optional skills (by context):** `security-audit` (if security-relevant), `receiving-code-review` (if external feedback), `production-readiness` (if deploying to production)
+
+**Input:** Code changes from Stage 4.
+
+**Process:**
+1. **Required:** Use `code-review` for structured code review (self-review first, then submit PR)
+2. **Required:** Use `qa` for comprehensive quality assurance — run existing tests, write missing tests, explore edge cases
+3. **Required:** Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
+4. **If security-relevant:** Use `security-audit` for changes touching auth, data handling, or external input
+5. **If deploying:** Use `production-readiness` to run the pre-deploy gate (observability, reliability, operability)
+6. **If external feedback received:** Use `receiving-code-review` to process comments systematically
+
+**Output:** Verified code — reviewed, tested, goal-aligned. If deploying: production readiness report saved to `docs/superomni/production-readiness/`.
+
+**Data flow:**
+```
+code → code-review → qa → verification → [security-audit] → [production-readiness]
+                                                            │
+                                           READY or READY_WITH_CONCERNS?
+                                                            │ YES → [next stage]
+                                                            │ NO  → fix blockers → re-run
+```
+
+**"What's next" check:** Code reviewed? QA passed? Security clean? Verification complete? Production readiness READY? → Move to SHIP.
+
+## Stage 6: SHIP — Release
+
+**Skills:** `ship`, `finishing-branch`, `careful`
+
+**Input:** Verified and production-ready code from Stage 5.
+
+**Process:**
+1. Use `finishing-branch` to prepare the branch for merge
+2. Use `ship` for the release workflow (version bump, changelog, deploy)
+3. `careful` activates automatically for production deployments
+
+**Output:** Released software — merged to main, deployed, tagged.
+
+**Data flow:**
+```
+verified code → finishing-branch → merge to main → ship → deploy
+                                                            │
+                                                            ▼
+                                                       [next stage]
+```
+
+**"What's next" check:** Code merged? Deployed? Version tagged? → Move to REFLECT.
+
+## Stage 7: REFLECT — Evaluate & Retrospective
+
+**Skills:** `self-improvement`, `retro` (run sequentially in one stage)
+
+**Input:** Completed feature — the full journey from idea to deployment.
+
+**Process:**
+1. Use `self-improvement` to evaluate *how* you worked:
+   - Process adherence (were phases followed?)
+   - Agent behavior (scope management, instruction following, escalation)
+   - Skill effectiveness (were the right skills used correctly?)
+   - Generate 3 concrete improvement actions
+2. Use `retro` to analyze what was shipped:
+   - Commits, LOC, active days, streak
+   - Capture team/process patterns and lessons learned
+   - Review improvement actions from step 1
+
+**Output:** Improvement report + retrospective notes saved to `docs/superomni/improvements/`.
+
+**Data flow:**
+```
+shipped feature → self-improvement → improvement report
+                                            │
+                                            ▼
+                                     retro → retrospective notes
+                                            │
+                                     feed into next sprint THINK stage
+```
+
+**"What's next" check:** Improvement report + retro saved? → Start next sprint at THINK.
+
+## Quick Reference: Which Skill When?
+
+| I need to... | Use this skill |
+|--------------|---------------|
+| Understand a fuzzy idea | `brainstorm` |
+| Explore an unfamiliar system | `investigate` |
+| Break work into steps | `writing-plans` |
+| Validate a plan | `plan-review` |
+| Execute a plan | `executing-plans` |
+| Write code with tests | `test-driven-development` |
+| Run parallel tasks | `subagent-development` |
+| Review code | `code-review` |
+| Respond to review feedback | `receiving-code-review` |
+| Run QA checks | `qa` |
+| Audit for security | `security-audit` |
+| Handle risky operations | `careful` |
+| Verify work is complete | `verification` |
+| Check production readiness | `production-readiness` |
+| Debug an error | `systematic-debugging` |
+| Prepare branch for merge | `finishing-branch` |
+| Release software | `ship` |
+| Run a retrospective | `retro` |
+| Evaluate sprint performance | `self-improvement` |
+| Create a new skill | `writing-skills` |
+
+## Picking Up Mid-Sprint
+
+If you're joining a sprint already in progress:
+
+```bash
+# Check what exists
+ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md 2>/dev/null
+git log --oneline -10
+git status --short
+```
+
+- Nothing exists → You're at THINK stage
+- `docs/superomni/specs/spec-*.md` exists but no `docs/superomni/plans/plan-*.md` → You're at PLAN stage
+- `docs/superomni/plans/plan-*.md` exists but no review docs → You're at REVIEW stage (plan review)
+- Plan reviewed, has unchecked items → You're at BUILD stage
+- Code complete but not verified → You're at VERIFY stage (code review + QA)
+- Verified but not shipped → You're at SHIP stage
+- Shipped but no improvement/retro → You're at REFLECT stage
+
+## Report
+
+```
+Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+Stage: [current] | Branch: [branch]
+Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Next → [skill-name]: [reason]
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+```
+BRANCH | PROACTIVE: ---
+name: workflow
+description: |
+  Documents the end-to-end sprint workflow and inter-skill data flow.
+  Use to understand which skills to use, in what order, and how data flows between them.
+  Triggers: "workflow", "sprint", "pipeline", "what's next", "how do skills connect".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Workflow — Sprint Pipeline
+
+**Goal:** Guide a complete feature from idea to shipped code by orchestrating the right skills in the right order, with clear data handoffs between each stage.
+
+## The Pipeline
+
+```
+THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+  │        │       │        │       │       │       │
+  ▼        ▼       ▼        ▼       ▼       ▼       ▼
+spec-*   plan-*  approved  code   green  release  retro
+```
+
+**THINK is the only human gate.** After spec generation, the user reviews and approves the spec. All subsequent stages auto-advance on DONE without user interaction.
+
+Each stage uses specific skills and produces artifacts consumed by the next stage.
+
+## Stage 1: THINK — Define the Problem
+
+**Skills:** `brainstorm`, `investigate`
+
+**Input:** Fuzzy idea, user request, bug report, or feature ask.
+
+**Start-of-sprint context scan:**
+```bash
+# Always check for prior improvement actions from the last self-improvement run
+LATEST_IMPROVE=$(find docs/superomni/improvements -name "*.md" -type f 2>/dev/null |   sort -t- -k2,3 | tail -1)
+if [ -n "$LATEST_IMPROVE" ]; then
+  echo "=== Applying improvement actions from last sprint ==="
+  grep "^### ACTION" "$LATEST_IMPROVE" -A 4 | head -30
+fi
+
+# Check what spec/plan artifacts already exist
+_LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+_LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+test -n "$_LATEST_SPEC" && echo "spec found: $_LATEST_SPEC" || echo "No spec"
+test -n "$_LATEST_PLAN" && echo "plan found: $_LATEST_PLAN" || echo "No plan"
+```
+
+**Process:**
+1. If the problem space is unclear → use `investigate` to map the system
+2. Use `brainstorm` to crystallize the problem and explore solutions
+3. Generate 3 candidate approaches, evaluate tradeoffs
+4. Produce a spec document
+
+**Output:** `docs/superomni/specs/spec-[branch]-[session]-[date].md` — problem statement, goals, non-goals, proposed solution, acceptance criteria.
+
+**Data flow:**
+```
+user request → brainstorm → docs/superomni/specs/spec-[branch]-[session]-[date].md
+                                  │
+                                  ▼
+                             [next stage]
+```
+
+**"What's next" check:** Does any `docs/superomni/specs/spec-*.md` exist and have acceptance criteria? → Move to PLAN.
+
+## Stage 2: PLAN — Break It Down
+
+**Skills:** `writing-plans`
+
+**Input:** Latest `docs/superomni/specs/spec-*.md` from Stage 1.
+
+**Process:**
+1. Use `writing-plans` to decompose the spec into ordered, testable steps
+2. Each step must have: description, files to touch, verification criterion
+
+**Output:** `docs/superomni/plans/plan-[branch]-[session]-[date].md` — ordered steps with verification criteria, dependency graph, risk flags.
+
+**Data flow:**
+```
+docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*.md
+                                                       │
+                                                       ▼
+                                                  [next stage]
+```
+
+**"What's next" check:** Does any `docs/superomni/plans/plan-*.md` exist? → Move to REVIEW.
+
+## Stage 3: REVIEW — Validate the Plan
+
+**Skills:** `plan-review` (always runs in full auto mode)
+
+**Input:** `docs/superomni/plans/plan-*.md` from Stage 2.
+
+**Process:**
+1. Use `plan-review` to validate the plan through 3 lenses: Strategy (CEO), Design (if UI), Engineering
+2. Auto-resolve ALL decisions (both mechanical and taste) using the 6 decision principles
+3. Log all decisions with rationale in the review document
+4. If issues found → auto-revise the plan and re-review
+
+**Output:** Reviewed plan — review doc saved to `docs/superomni/reviews/`, plan updated with revisions.
+
+**Data flow:**
+```
+docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review doc
+                                                       │
+                                                       ▼
+                                                  [auto-advance to BUILD]
+```
+
+**"What's next" check:** Plan reviewed and auto-approved? → Auto-advance to BUILD.
+
+## Stage 4: BUILD — Execute the Plan
+
+**Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
+
+**Input:** Reviewed `docs/superomni/plans/plan-*.md` from Stage 3.
+
+**Process:**
+1. Use `executing-plans` to work through the plan step by step
+2. For each step, use `test-driven-development` (Red → Green → Refactor)
+3. If high-risk operations are detected, `careful` activates automatically
+4. For independent steps, consider `subagent-development` for parallel execution
+5. Verify each step before moving to the next
+
+**Output:** Working code with tests — committed to a feature branch.
+
+**Data flow:**
+```
+docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code changes (committed)
+                            │
+              test-driven-development → test files
+                            │
+                    careful (if triggered) → confirmation
+                            │
+                            ▼
+                       [next stage]
+```
+
+**"What's next" check:** All plan steps complete? Tests passing? → Move to VERIFY.
+
+## Stage 5: VERIFY — Code Review, QA & Production Readiness
+
+**Required skills:** `code-review`, `qa`, `verification`
+**Optional skills (by context):** `security-audit` (if security-relevant), `receiving-code-review` (if external feedback), `production-readiness` (if deploying to production)
+
+**Input:** Code changes from Stage 4.
+
+**Process:**
+1. **Required:** Use `code-review` for structured code review (self-review first, then submit PR)
+2. **Required:** Use `qa` for comprehensive quality assurance — run existing tests, write missing tests, explore edge cases
+3. **Required:** Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
+4. **If security-relevant:** Use `security-audit` for changes touching auth, data handling, or external input
+5. **If deploying:** Use `production-readiness` to run the pre-deploy gate (observability, reliability, operability)
+6. **If external feedback received:** Use `receiving-code-review` to process comments systematically
+
+**Output:** Verified code — reviewed, tested, goal-aligned. If deploying: production readiness report saved to `docs/superomni/production-readiness/`.
+
+**Data flow:**
+```
+code → code-review → qa → verification → [security-audit] → [production-readiness]
+                                                            │
+                                           READY or READY_WITH_CONCERNS?
+                                                            │ YES → [next stage]
+                                                            │ NO  → fix blockers → re-run
+```
+
+**"What's next" check:** Code reviewed? QA passed? Security clean? Verification complete? Production readiness READY? → Move to SHIP.
+
+## Stage 6: SHIP — Release
+
+**Skills:** `ship`, `finishing-branch`, `careful`
+
+**Input:** Verified and production-ready code from Stage 5.
+
+**Process:**
+1. Use `finishing-branch` to prepare the branch for merge
+2. Use `ship` for the release workflow (version bump, changelog, deploy)
+3. `careful` activates automatically for production deployments
+
+**Output:** Released software — merged to main, deployed, tagged.
+
+**Data flow:**
+```
+verified code → finishing-branch → merge to main → ship → deploy
+                                                            │
+                                                            ▼
+                                                       [next stage]
+```
+
+**"What's next" check:** Code merged? Deployed? Version tagged? → Move to REFLECT.
+
+## Stage 7: REFLECT — Evaluate & Retrospective
+
+**Skills:** `self-improvement`, `retro` (run sequentially in one stage)
+
+**Input:** Completed feature — the full journey from idea to deployment.
+
+**Process:**
+1. Use `self-improvement` to evaluate *how* you worked:
+   - Process adherence (were phases followed?)
+   - Agent behavior (scope management, instruction following, escalation)
+   - Skill effectiveness (were the right skills used correctly?)
+   - Generate 3 concrete improvement actions
+2. Use `retro` to analyze what was shipped:
+   - Commits, LOC, active days, streak
+   - Capture team/process patterns and lessons learned
+   - Review improvement actions from step 1
+
+**Output:** Improvement report + retrospective notes saved to `docs/superomni/improvements/`.
+
+**Data flow:**
+```
+shipped feature → self-improvement → improvement report
+                                            │
+                                            ▼
+                                     retro → retrospective notes
+                                            │
+                                     feed into next sprint THINK stage
+```
+
+**"What's next" check:** Improvement report + retro saved? → Start next sprint at THINK.
+
+## Quick Reference: Which Skill When?
+
+| I need to... | Use this skill |
+|--------------|---------------|
+| Understand a fuzzy idea | `brainstorm` |
+| Explore an unfamiliar system | `investigate` |
+| Break work into steps | `writing-plans` |
+| Validate a plan | `plan-review` |
+| Execute a plan | `executing-plans` |
+| Write code with tests | `test-driven-development` |
+| Run parallel tasks | `subagent-development` |
+| Review code | `code-review` |
+| Respond to review feedback | `receiving-code-review` |
+| Run QA checks | `qa` |
+| Audit for security | `security-audit` |
+| Handle risky operations | `careful` |
+| Verify work is complete | `verification` |
+| Check production readiness | `production-readiness` |
+| Debug an error | `systematic-debugging` |
+| Prepare branch for merge | `finishing-branch` |
+| Release software | `ship` |
+| Run a retrospective | `retro` |
+| Evaluate sprint performance | `self-improvement` |
+| Create a new skill | `writing-skills` |
+
+## Picking Up Mid-Sprint
+
+If you're joining a sprint already in progress:
+
+```bash
+# Check what exists
+ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md 2>/dev/null
+git log --oneline -10
+git status --short
+```
+
+- Nothing exists → You're at THINK stage
+- `docs/superomni/specs/spec-*.md` exists but no `docs/superomni/plans/plan-*.md` → You're at PLAN stage
+- `docs/superomni/plans/plan-*.md` exists but no review docs → You're at REVIEW stage (plan review)
+- Plan reviewed, has unchecked items → You're at BUILD stage
+- Code complete but not verified → You're at VERIFY stage (code review + QA)
+- Verified but not shipped → You're at SHIP stage
+- Shipped but no improvement/retro → You're at REFLECT stage
+
+## Report
+
+```
+Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+Stage: [current] | Branch: [branch]
+Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Next → [skill-name]: [reason]
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+```
+PROACTIVE"
 ```
 
 ### PROACTIVE Mode
@@ -35,11 +591,11 @@ Report status using one of these at the end of every skill session:
 
 Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
 
-**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+**THINK is the only human gate.** After the brainstorm skill generates a spec document, STOP and present the spec for user review. Once the user approves, all subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) auto-advance on DONE without asking the user.
 
-| Status | At REVIEW stage | At all other stages |
-|--------|----------------|-------------------|
-| **DONE** | STOP — present review summary, wait for user input (Y / N / revision notes) | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
+| Status | At THINK stage (after spec generation) | At all other stages |
+|--------|----------------------------------------|-------------------|
+| **DONE** | STOP — present spec document for user review. Wait for user approval before advancing to PLAN. | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
 | **DONE_WITH_CONCERNS** | STOP — present concerns, wait for user decision | STOP — present concerns, wait for user decision |
 | **BLOCKED** / **NEEDS_CONTEXT** | STOP — present blocker, wait for user | STOP — present blocker, wait for user |
 
@@ -47,6 +603,8 @@ When auto-advancing:
 1. Write the session artifact to `docs/superomni/`
 2. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
 3. Immediately invoke the next pipeline skill
+
+**Note:** The REVIEW stage (plan-review) runs fully automatically — all decisions (mechanical and taste) are auto-resolved using the 6 Decision Principles. No user input is requested during REVIEW.
 
 ### Session Continuity
 
@@ -130,23 +688,16 @@ For a full performance evaluation spanning the entire sprint, use the `self-impr
 ```bash
 _TEL_END=$(date +%s)
 _TEL_DUR=$(( _TEL_END - _TEL_START ))
-~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
-```
-Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
+~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "---
+name: workflow
+description: |
+  Documents the end-to-end sprint workflow and inter-skill data flow.
+  Use to understand which skills to use, in what order, and how data flows between them.
+  Triggers: "workflow", "sprint", "pipeline", "what's next", "how do skills connect".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
 
-### Plan Mode Fallback
-
-If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
-
-1. **Skills take precedence over plan mode.** Treat loaded skill instructions as executable steps, not reference material. Follow them exactly — do not summarize, skip, or reorder.
-2. **STOP points in skills must be respected.** Do NOT call `ExitPlanMode` prematurely to bypass a skill's STOP/gate.
-3. **Safe operations in plan mode** — these are always allowed because they inform the plan, not produce code:
-   - Reading files, searching code, running `git log`/`git status`
-   - Writing to `docs/superomni/` (specs, plans, reviews)
-   - Writing to `~/.omni-skills/` (sessions, analytics)
-4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
-5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
-
+{{PREAMBLE}}
 
 # Workflow — Sprint Pipeline
 
@@ -161,7 +712,7 @@ THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
 spec-*   plan-*  approved  code   green  release  retro
 ```
 
-**REVIEW is the only human gate.** All other stages auto-advance on DONE.
+**THINK is the only human gate.** After spec generation, the user reviews and approves the spec. All subsequent stages auto-advance on DONE without user interaction.
 
 Each stage uses specific skills and produces artifacts consumed by the next stage.
 
@@ -229,15 +780,15 @@ docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*
 
 ## Stage 3: REVIEW — Validate the Plan
 
-**Skills:** `plan-review` (normal mode or auto mode via `/autoplan`)
+**Skills:** `plan-review` (always runs in full auto mode)
 
 **Input:** `docs/superomni/plans/plan-*.md` from Stage 2.
 
 **Process:**
 1. Use `plan-review` to validate the plan through 3 lenses: Strategy (CEO), Design (if UI), Engineering
-2. Auto-resolve mechanical decisions using the 6 decision principles
-3. Surface taste decisions to the user at the final gate
-4. If issues found → revise the plan and re-review
+2. Auto-resolve ALL decisions (both mechanical and taste) using the 6 decision principles
+3. Log all decisions with rationale in the review document
+4. If issues found → auto-revise the plan and re-review
 
 **Output:** Reviewed plan — review doc saved to `docs/superomni/reviews/`, plan updated with revisions.
 
@@ -246,10 +797,295 @@ docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*
 docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review doc
                                                        │
                                                        ▼
+                                                  [auto-advance to BUILD]
+```
+
+**"What's next" check:** Plan reviewed and auto-approved? → Auto-advance to BUILD.
+
+## Stage 4: BUILD — Execute the Plan
+
+**Skills:** `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
+
+**Input:** Reviewed `docs/superomni/plans/plan-*.md` from Stage 3.
+
+**Process:**
+1. Use `executing-plans` to work through the plan step by step
+2. For each step, use `test-driven-development` (Red → Green → Refactor)
+3. If high-risk operations are detected, `careful` activates automatically
+4. For independent steps, consider `subagent-development` for parallel execution
+5. Verify each step before moving to the next
+
+**Output:** Working code with tests — committed to a feature branch.
+
+**Data flow:**
+```
+docs/superomni/plans/plan-*.md → executing-plans ──┬──→ code changes (committed)
+                            │
+              test-driven-development → test files
+                            │
+                    careful (if triggered) → confirmation
+                            │
+                            ▼
+                       [next stage]
+```
+
+**"What's next" check:** All plan steps complete? Tests passing? → Move to VERIFY.
+
+## Stage 5: VERIFY — Code Review, QA & Production Readiness
+
+**Required skills:** `code-review`, `qa`, `verification`
+**Optional skills (by context):** `security-audit` (if security-relevant), `receiving-code-review` (if external feedback), `production-readiness` (if deploying to production)
+
+**Input:** Code changes from Stage 4.
+
+**Process:**
+1. **Required:** Use `code-review` for structured code review (self-review first, then submit PR)
+2. **Required:** Use `qa` for comprehensive quality assurance — run existing tests, write missing tests, explore edge cases
+3. **Required:** Use `verification` as final pre-completion checklist — includes explicit **goal alignment check** against the latest spec's acceptance criteria
+4. **If security-relevant:** Use `security-audit` for changes touching auth, data handling, or external input
+5. **If deploying:** Use `production-readiness` to run the pre-deploy gate (observability, reliability, operability)
+6. **If external feedback received:** Use `receiving-code-review` to process comments systematically
+
+**Output:** Verified code — reviewed, tested, goal-aligned. If deploying: production readiness report saved to `docs/superomni/production-readiness/`.
+
+**Data flow:**
+```
+code → code-review → qa → verification → [security-audit] → [production-readiness]
+                                                            │
+                                           READY or READY_WITH_CONCERNS?
+                                                            │ YES → [next stage]
+                                                            │ NO  → fix blockers → re-run
+```
+
+**"What's next" check:** Code reviewed? QA passed? Security clean? Verification complete? Production readiness READY? → Move to SHIP.
+
+## Stage 6: SHIP — Release
+
+**Skills:** `ship`, `finishing-branch`, `careful`
+
+**Input:** Verified and production-ready code from Stage 5.
+
+**Process:**
+1. Use `finishing-branch` to prepare the branch for merge
+2. Use `ship` for the release workflow (version bump, changelog, deploy)
+3. `careful` activates automatically for production deployments
+
+**Output:** Released software — merged to main, deployed, tagged.
+
+**Data flow:**
+```
+verified code → finishing-branch → merge to main → ship → deploy
+                                                            │
+                                                            ▼
+                                                       [next stage]
+```
+
+**"What's next" check:** Code merged? Deployed? Version tagged? → Move to REFLECT.
+
+## Stage 7: REFLECT — Evaluate & Retrospective
+
+**Skills:** `self-improvement`, `retro` (run sequentially in one stage)
+
+**Input:** Completed feature — the full journey from idea to deployment.
+
+**Process:**
+1. Use `self-improvement` to evaluate *how* you worked:
+   - Process adherence (were phases followed?)
+   - Agent behavior (scope management, instruction following, escalation)
+   - Skill effectiveness (were the right skills used correctly?)
+   - Generate 3 concrete improvement actions
+2. Use `retro` to analyze what was shipped:
+   - Commits, LOC, active days, streak
+   - Capture team/process patterns and lessons learned
+   - Review improvement actions from step 1
+
+**Output:** Improvement report + retrospective notes saved to `docs/superomni/improvements/`.
+
+**Data flow:**
+```
+shipped feature → self-improvement → improvement report
+                                            │
+                                            ▼
+                                     retro → retrospective notes
+                                            │
+                                     feed into next sprint THINK stage
+```
+
+**"What's next" check:** Improvement report + retro saved? → Start next sprint at THINK.
+
+## Quick Reference: Which Skill When?
+
+| I need to... | Use this skill |
+|--------------|---------------|
+| Understand a fuzzy idea | `brainstorm` |
+| Explore an unfamiliar system | `investigate` |
+| Break work into steps | `writing-plans` |
+| Validate a plan | `plan-review` |
+| Execute a plan | `executing-plans` |
+| Write code with tests | `test-driven-development` |
+| Run parallel tasks | `subagent-development` |
+| Review code | `code-review` |
+| Respond to review feedback | `receiving-code-review` |
+| Run QA checks | `qa` |
+| Audit for security | `security-audit` |
+| Handle risky operations | `careful` |
+| Verify work is complete | `verification` |
+| Check production readiness | `production-readiness` |
+| Debug an error | `systematic-debugging` |
+| Prepare branch for merge | `finishing-branch` |
+| Release software | `ship` |
+| Run a retrospective | `retro` |
+| Evaluate sprint performance | `self-improvement` |
+| Create a new skill | `writing-skills` |
+
+## Picking Up Mid-Sprint
+
+If you're joining a sprint already in progress:
+
+```bash
+# Check what exists
+ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md 2>/dev/null
+git log --oneline -10
+git status --short
+```
+
+- Nothing exists → You're at THINK stage
+- `docs/superomni/specs/spec-*.md` exists but no `docs/superomni/plans/plan-*.md` → You're at PLAN stage
+- `docs/superomni/plans/plan-*.md` exists but no review docs → You're at REVIEW stage (plan review)
+- Plan reviewed, has unchecked items → You're at BUILD stage
+- Code complete but not verified → You're at VERIFY stage (code review + QA)
+- Verified but not shipped → You're at SHIP stage
+- Shipped but no improvement/retro → You're at REFLECT stage
+
+## Report
+
+```
+Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+Stage: [current] | Branch: [branch]
+Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Next → [skill-name]: [reason]
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+```
+TEL_DUR" "OUTCOME" 2>/dev/null || true
+```
+Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
+
+### Plan Mode Fallback
+
+If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
+
+1. **Skills take precedence over plan mode.** Treat loaded skill instructions as executable steps, not reference material. Follow them exactly — do not summarize, skip, or reorder.
+2. **STOP points in skills must be respected.** Do NOT call `ExitPlanMode` prematurely to bypass a skill's STOP/gate.
+3. **Safe operations in plan mode** — these are always allowed because they inform the plan, not produce code:
+   - Reading files, searching code, running `git log`/`git status`
+   - Writing to `docs/superomni/` (specs, plans, reviews)
+   - Writing to `~/.omni-skills/` (sessions, analytics)
+4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
+5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
+
+
+# Workflow — Sprint Pipeline
+
+**Goal:** Guide a complete feature from idea to shipped code by orchestrating the right skills in the right order, with clear data handoffs between each stage.
+
+## The Pipeline
+
+```
+THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+  │        │       │        │       │       │       │
+  ▼        ▼       ▼        ▼       ▼       ▼       ▼
+spec-*   plan-*  approved  code   green  release  retro
+```
+
+**THINK is the only human gate.** After spec generation, the user reviews and approves the spec. All subsequent stages auto-advance on DONE without user interaction.
+
+Each stage uses specific skills and produces artifacts consumed by the next stage.
+
+## Stage 1: THINK — Define the Problem
+
+**Skills:** `brainstorm`, `investigate`
+
+**Input:** Fuzzy idea, user request, bug report, or feature ask.
+
+**Start-of-sprint context scan:**
+```bash
+# Always check for prior improvement actions from the last self-improvement run
+LATEST_IMPROVE=$(find docs/superomni/improvements -name "*.md" -type f 2>/dev/null |   sort -t- -k2,3 | tail -1)
+if [ -n "$LATEST_IMPROVE" ]; then
+  echo "=== Applying improvement actions from last sprint ==="
+  grep "^### ACTION" "$LATEST_IMPROVE" -A 4 | head -30
+fi
+
+# Check what spec/plan artifacts already exist
+_LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+_LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+test -n "$_LATEST_SPEC" && echo "spec found: $_LATEST_SPEC" || echo "No spec"
+test -n "$_LATEST_PLAN" && echo "plan found: $_LATEST_PLAN" || echo "No plan"
+```
+
+**Process:**
+1. If the problem space is unclear → use `investigate` to map the system
+2. Use `brainstorm` to crystallize the problem and explore solutions
+3. Generate 3 candidate approaches, evaluate tradeoffs
+4. Produce a spec document
+
+**Output:** `docs/superomni/specs/spec-[branch]-[session]-[date].md` — problem statement, goals, non-goals, proposed solution, acceptance criteria.
+
+**Data flow:**
+```
+user request → brainstorm → docs/superomni/specs/spec-[branch]-[session]-[date].md
+                                  │
+                                  ▼
+                             [next stage]
+```
+
+**"What's next" check:** Does any `docs/superomni/specs/spec-*.md` exist and have acceptance criteria? → Move to PLAN.
+
+## Stage 2: PLAN — Break It Down
+
+**Skills:** `writing-plans`
+
+**Input:** Latest `docs/superomni/specs/spec-*.md` from Stage 1.
+
+**Process:**
+1. Use `writing-plans` to decompose the spec into ordered, testable steps
+2. Each step must have: description, files to touch, verification criterion
+
+**Output:** `docs/superomni/plans/plan-[branch]-[session]-[date].md` — ordered steps with verification criteria, dependency graph, risk flags.
+
+**Data flow:**
+```
+docs/superomni/specs/spec-*.md → writing-plans → docs/superomni/plans/plan-*.md
+                                                       │
+                                                       ▼
                                                   [next stage]
 ```
 
-**"What's next" check:** Plan reviewed and approved? → Move to BUILD.
+**"What's next" check:** Does any `docs/superomni/plans/plan-*.md` exist? → Move to REVIEW.
+
+## Stage 3: REVIEW — Validate the Plan
+
+**Skills:** `plan-review` (always runs in full auto mode)
+
+**Input:** `docs/superomni/plans/plan-*.md` from Stage 2.
+
+**Process:**
+1. Use `plan-review` to validate the plan through 3 lenses: Strategy (CEO), Design (if UI), Engineering
+2. Auto-resolve ALL decisions (both mechanical and taste) using the 6 decision principles
+3. Log all decisions with rationale in the review document
+4. If issues found → auto-revise the plan and re-review
+
+**Output:** Reviewed plan — review doc saved to `docs/superomni/reviews/`, plan updated with revisions.
+
+**Data flow:**
+```
+docs/superomni/plans/plan-*.md → plan-review → plan-*.md (revised) + review doc
+                                                       │
+                                                       ▼
+                                                  [auto-advance to BUILD]
+```
+
+**"What's next" check:** Plan reviewed and auto-approved? → Auto-advance to BUILD.
 
 ## Stage 4: BUILD — Execute the Plan
 

@@ -89,6 +89,15 @@ validate_tmpl() {
     pass "phase/step structure present"
   fi
 
+  # 9. Iron Law example blocks (recommended for core skills)
+  if grep -q '## Iron Law' "$tmpl"; then
+    if ! grep -qE '### .*(Good|Bad|Correct|Incorrect|Compliant|Violat|Example)' "$tmpl"; then
+      warn "$rel_tmpl: Iron Law present but no example blocks found (recommended: add good/bad examples)"
+    else
+      pass "Iron Law example blocks present"
+    fi
+  fi
+
   # 8. SKILL.md built file must exist and be up to date
   if [ ! -f "$md" ]; then
     fail "$rel_tmpl: built $rel_md does not exist — run 'bash lib/gen-skill-docs.sh'"

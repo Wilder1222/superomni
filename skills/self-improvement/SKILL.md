@@ -22,9 +22,36 @@ echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
 ```
 
 ### PROACTIVE Mode
+
+Check proactive configuration:
+```bash
+_PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
+```
+
+**Legacy mode (single value):**
+If `proactive=true`: auto-invoke skills. If `proactive=false`: ask first.
+
 If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the
 user explicitly invokes. If you would have auto-invoked, say:
 *"I think [skill-name] might help here — want me to run it?"* and wait.
+
+**5-Level Trust Matrix (when configured):**
+
+Before executing any decision, classify its tacit knowledge intensity:
+
+| Decision Type | Config Key | Default | When to Use |
+|--------------|------------|---------|-------------|
+| Mechanical | proactive.mechanical | true | Iron Law applies, Gate Check is deterministic |
+| Structural | proactive.structural | true | Architecture, interface, module boundaries |
+| Stylistic | proactive.stylistic | ask | Naming, formatting, UI layout, comment style |
+| Strategic | proactive.strategic | ask | Approach selection, architecture trade-offs |
+| Destructive | proactive.destructive | false | Delete, overwrite, irreversible operations |
+
+Classification rules:
+- If a style profile exists (`docs/superomni/style-profiles/`), stylistic decisions
+  that match the profile can be treated as mechanical
+- Strategic decisions ALWAYS surface to user unless `proactive.strategic=true`
+- Destructive decisions ALWAYS confirm (integrates with `careful` Skill) regardless of config
 
 ### Completion Status Protocol
 Report status using one of these at the end of every skill session:
@@ -131,6 +158,43 @@ If any answer is NO, address it before reporting DONE. If it cannot be addressed
 
 For a full performance evaluation spanning the entire sprint, use the `self-improvement` skill.
 
+### TACIT-DENSE Detection (Tacit Knowledge Density Check)
+
+Before executing substantive decisions, check if any falls into these high-tacit-density categories.
+These are NOT about operational danger (that's the `careful` skill) — they're about whether the Agent
+has enough tacit knowledge to judge correctly.
+
+**D1 - Domain Expertise Decision**
+  Trigger: Requires judgment in a specialized domain (security, compliance, legal, medical, financial)
+  Examples: choosing encryption algorithm, deciding data retention policy, HIPAA compliance choice
+  Action: State "TACIT-DENSE [D1]", present options with trade-offs, wait for user selection
+
+**D2 - User-Facing Experience Decision**
+  Trigger: Substantive choices about UI copy, interaction flow, error messaging, onboarding
+  Examples: writing onboarding guidance text, choosing error message tone, designing empty states
+  Action: Provide draft with explicit markers on parts needing user review
+
+**D3 - Team Culture & Convention Decision**
+  Trigger: Major choices about team workflow, naming conventions, documentation style, file organization
+  Examples: naming convention for new module, choosing between monorepo approaches, doc format
+  Action: Check docs/superomni/style-profiles/ first; if no profile, ask user
+
+**D4 - Novel Pattern Decision**
+  Trigger: Task type has fewer than 3 precedents in project execution history
+  Examples: first-time integration of a new framework, first use of a new deployment target
+  Action: Reduce autonomy — add intermediate checkpoints, present approach before executing
+
+**Output format when TACIT-DENSE detected:**
+```
+TACIT-DENSE [D1/D2/D3/D4]: This is a [category] decision requiring your judgment.
+Question: [single most important question]
+My default recommendation: [recommendation + rationale]
+Please confirm or share your preference.
+```
+
+**Relationship with careful skill:** careful handles "can we undo this?" (operational risk).
+TACIT-DENSE handles "can we judge this correctly?" (knowledge risk). They are complementary.
+
 ### Telemetry (Local Only)
 ```bash
 _TEL_END=$(date +%s)
@@ -152,7 +216,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Self-Improvement — First-Principles Performance Review
 
 **Goal:** Close the feedback loop on every sprint by systematically evaluating process adherence, agent behavior, and skill effectiveness — then produce concrete improvement actions for the next session.
@@ -172,6 +235,58 @@ Performance problems in AI-assisted development reduce to three root causes:
 3. **Scope creep** — work expanded beyond what was planned
 
 Every metric in this skill traces back to one of these three root causes.
+
+## Phase 0: Tacit Gap Mining
+
+Before evaluating the current session, mine execution history for tacit knowledge gaps.
+
+### Signal Sources
+```bash
+# 1. Recurring review comments (3+ occurrences = uncodified standard)
+echo "=== Review comment patterns ==="
+for review in docs/superomni/reviews/review-*.md; do
+  [ -f "$review" ] && grep -h "^- " "$review" 2>/dev/null
+done | sort | uniq -c | sort -rn | head -10
+
+# 2. Execution deviation records (manual overrides = unmatched preferences)
+echo "=== Execution deviations ==="
+for exec in docs/superomni/executions/execution-*.md; do
+  [ -f "$exec" ] && grep -h -A1 "CONCERN\|DEVIATION\|override\|manual" "$exec" 2>/dev/null
+done | head -10
+
+# 3. Skill override frequency
+echo "=== Skill overrides ==="
+grep "override\|rejected\|skipped" ~/.omni-skills/analytics/usage.jsonl 2>/dev/null | tail -5
+```
+
+### Mining Questions
+Answer each with evidence from the sources above:
+- [ ] In the last 5 executions, which Agent suggestions were rejected by the user?
+- [ ] In code reviews, which comment types appeared 3+ times?
+- [ ] In which scenarios did the user manually modify Agent output?
+
+### Analysis Logic
+- User rejects Agent suggestion = Agent lacks a tacit preference at this point
+- Recurring review comment = Standard not yet captured by an Iron Law
+- Manual output modification = Style mismatch between Agent and user
+
+### Tacit Gap Output
+If any gaps are found, generate `docs/superomni/improvements/tacit-gaps-[date].md`:
+
+```markdown
+# Tacit Knowledge Gaps — [date]
+
+| Scenario | Agent Behavior | User Expected Behavior | Proposed Rule |
+|----------|---------------|----------------------|---------------|
+| [context] | [what Agent did] | [what user wanted] | [candidate rule to add] |
+
+## Recommendations
+- If a gap maps to a style preference: update docs/superomni/style-profiles/
+- If a gap maps to a process rule: propose new Iron Law or Gate Check
+- If a gap maps to domain knowledge: flag as permanent TACIT-DENSE category
+```
+
+If no gaps found, note: "No tacit gaps detected in available history — continue to Phase 1."
 
 ## Phase 1: Gather Session Evidence
 
@@ -332,6 +447,14 @@ Save the **full** evaluation report to `$REPORT_FILE` using the following struct
 **Branch:** [branch]
 **Task description:** [what was worked on this session]
 
+## Tacit Gaps (Phase 0)
+
+| Scenario | Agent Behavior | User Expected | Proposed Rule |
+|----------|---------------|--------------|---------------|
+| [from Phase 0 output, or "None detected"] | | | |
+
+Tacit gaps file: [path or "not generated"]
+
 ## Session Evidence (Phase 1)
 
 - Skills invoked: [list]
@@ -407,6 +530,7 @@ This report is the canonical record of agent and skill performance for this sess
 SELF-IMPROVEMENT REPORT
 ════════════════════════════════════════
 Session:            [branch / date / task description]
+Tacit gaps found:   [N gaps | none]
 Process adherence:  [N/N checks passed]
 Agent score:        [N/15] (scope: N/5 | instructions: N/5 | escalation: N/5)
 Skills evaluated:   [N skills] — avg [N]/5

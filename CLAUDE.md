@@ -48,6 +48,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |
 | self-improvement | "self-improve", "evaluate performance", "reflect on execution", "how did we do", "improve process" | P1 |
 | harness-engineering | "harness", "harness audit", "improve harness", "agent environment", "evaluation gates", "feedback loop" | P1 |
+| style-capture | "/style-capture", project init | P1 |
 
 ## Commands
 
@@ -58,6 +59,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
+| `/style-capture` | Capture code style preferences from examples |
 | `/harness-audit` | Audit the agent harness health and produce improvement backlog |
 | `/fd-audit` | Accessibility + performance check |
 | `/fd-critique` | UX review for clarity and hierarchy |
@@ -74,6 +76,7 @@ Philosophy: **Plan Lean, Execute Complete**
 
 Run `bin/config get proactive` to check PROACTIVE mode.
 Run `bin/config set proactive false` to disable auto-skill triggers.
+Run `bin/config set proactive.stylistic ask` to configure per-decision-type autonomy.
 
 ## Skill Data Directory
 
@@ -98,6 +101,7 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 | Improvements | `docs/superomni/improvements/` | `improvement-[branch]-[session]-[date].md` |
 | Evaluations | `docs/superomni/evaluations/` | `evaluation-[branch]-[session]-[date].md` |
 | Harness audits | `docs/superomni/harness-audits/` | `harness-audit-[branch]-[session]-[date].md` |
+| Style profiles | `docs/superomni/style-profiles/` | `<scope>.md` / `prompt-<scope>.md` |
 
 **`[session]` naming:** Auto-generate a short kebab-case identifier from conversation context (e.g., `vibe-skill`, `auth-refactor`). Max 30 chars. Enables agents to search and retrieve relevant prior sessions.
 
@@ -112,3 +116,4 @@ Documents in `docs/superomni/` serve as a permanent, indexable audit trail for a
 - Use status protocol: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
 - **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/specs/spec-*.md`, `docs/superomni/plans/plan-*.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
 - **EnterPlanMode → brainstorm:** Whenever about to call `EnterPlanMode`, invoke `brainstorm` skill instead. This is a hard routing rule — the impulse to plan IS the brainstorm trigger.
+- **TACIT-DENSE decisions:** Before executing substantive decisions, check preamble's TACIT-DENSE protocol (D1-D4). Flag high-tacit-density judgments to the user.

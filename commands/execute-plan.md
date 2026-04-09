@@ -31,8 +31,10 @@ Examples:
 ## Output
 
 - All steps completed with evidence
-- Execution report (steps completed, files changed, deviations)
+- Execution report artifact in `docs/superomni/executions/execution-[branch]-[session]-[date].md` (steps completed, files changed, deviations)
 - Triggers verification skill automatically
+
+If BUILD artifact evidence is missing, do not auto-advance.
 
 ## Handling Deviations
 

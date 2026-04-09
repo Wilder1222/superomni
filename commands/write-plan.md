@@ -37,7 +37,7 @@ A reviewed `docs/superomni/plans/plan-[branch]-[session]-[date].md` file with:
 - Rollback plan
 - Success criteria
 
-Ready to feed into `/execute-plan`.
+This plan file is the PLAN stage artifact gate. Once present and reviewed, workflow proceeds to REVIEW/BUILD.
 
 ## Skill Reference
 

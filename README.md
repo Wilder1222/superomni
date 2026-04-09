@@ -377,17 +377,38 @@ superomni/
 
 ### Building Skills from Templates
 
-23 skills use `{{PREAMBLE}}` as a macro that gets expanded during build:
+`skills/**/SKILL.md` are generated artifacts.
+
+Source-of-truth hierarchy:
+1. `lib/preamble.md`
+2. `skills/**/SKILL.md.tmpl`
+3. Generated output: `skills/**/SKILL.md`
+
+Do not hand-edit generated `SKILL.md` files. Edit template sources, then regenerate.
+
+`{{PREAMBLE}}` is expanded during generation:
 
 ```bash
 # Build all skills
 npm run gen-skills
-# or
-bash lib/gen-skill-docs.sh
+
+# Validate generated docs (drift + deprecated phrases + duplicate frontmatter)
+npm run check:skill-docs
+
+# Regenerate then validate in one command
+npm run verify:skill-docs
+
+# Linux/macOS bash path
+npm run gen-skills:bash
+
+# Windows PowerShell path
+npm run gen-skills:ps
 
 # Build a single skill
-bash lib/gen-skill-docs.sh skills/systematic-debugging/SKILL.md.tmpl
+node lib/gen-skill-docs.js skills/systematic-debugging/SKILL.md.tmpl
 ```
+
+If you are on Windows and see line-ending related bash failures (`$'\r'`), use `npm run gen-skills:ps`.
 
 ### Adding a New Skill
 
@@ -399,8 +420,9 @@ bash lib/gen-skill-docs.sh skills/systematic-debugging/SKILL.md.tmpl
 
 Or manually:
 1. Create `skills/<name>/SKILL.md.tmpl` (see `writing-skills` skill)
-2. Run `bash lib/gen-skill-docs.sh`
-3. Add to `CLAUDE.md` skills table
+2. Run `npm run gen-skills`
+3. Run `npm run check:skill-docs`
+4. Add to `CLAUDE.md` skills table
 
 ---
 

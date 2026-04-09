@@ -167,4 +167,35 @@ Status: DONE | NEEDS_CONTEXT
 ════════════════════════════════════════
 ```
 
+## Save Plan Review Document
+
+After completing the plan review, save the full report as a Markdown document. Use the plan's
+session identifier so the vibe stage-detection can confirm that REVIEW is complete.
+
+```bash
+# Extract session from plan filename for consistent naming
+_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+_PLAN_SESSION=$(basename "$_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d-%H%M%S)
+mkdir -p docs/superomni/reviews
+_REVIEW_FILE="docs/superomni/reviews/review-${_BRANCH}-${_PLAN_SESSION}-${_DATE}.md"
+cat > "$_REVIEW_FILE" << EOF
+# Plan Review: ${_BRANCH}
+
+**Date:** ${_DATE}
+**Reviewer:** superomni plan-review
+**Branch:** ${_BRANCH}
+**Plan:** ${_PLAN}
+
+[Paste the full PLAN REVIEW COMPLETE block here]
+EOF
+echo "Plan review saved to $_REVIEW_FILE"
+```
+
+Write the full PLAN REVIEW COMPLETE block (all phases, decision audit trail, and auto-resolved
+taste decisions) to `docs/superomni/reviews/review-[branch]-[plan-session]-[date].md`. This
+file serves as the permanent record and enables the vibe pipeline to detect that the REVIEW
+stage is complete and auto-advance to BUILD.
+
 **REVIEW auto-advances** — after reporting DONE, immediately advance to BUILD. All decisions (mechanical and taste) have been auto-resolved. No user confirmation is required. The THINK stage (brainstorm + spec approval) is the only human gate in the pipeline.

@@ -208,3 +208,29 @@ Concerns:
   - [any post-ship concerns]
 ════════════════════════════════════════
 ```
+
+## Save Ship Document
+
+After completing the ship workflow, save the full report as a Markdown document:
+
+```bash
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d-%H%M%S)
+_VERSION=$(cat package.json 2>/dev/null | grep '"version"' | cut -d'"' -f4 || echo "unknown")
+mkdir -p docs/superomni/ship
+_SHIP_FILE="docs/superomni/ship/ship-${_BRANCH}-v${_VERSION}-${_DATE}.md"
+cat > "$_SHIP_FILE" << EOF
+# Ship Report: ${_BRANCH} v${_VERSION}
+
+**Date:** ${_DATE}
+**Branch:** ${_BRANCH}
+**Version:** ${_VERSION}
+
+[Paste the full SHIP REPORT block here]
+EOF
+echo "Ship report saved to $_SHIP_FILE"
+```
+
+Write the full SHIP REPORT block (all steps, version, tag, and publish status) to
+`docs/superomni/ship/ship-[branch]-[version]-[date].md`. This file serves as the permanent
+release record for the sprint and feeds into `self-improvement` retrospectives.

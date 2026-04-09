@@ -15,347 +15,7 @@ mkdir -p ~/.omni-skills/sessions
 _PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _TEL_START=$(date +%s)
-echo "Branch: ---
-name: plan-review
-description: |
-  Multi-stage plan review pipeline: Strategy (CEO) → Design (if UI) → Engineering.
-  Applies 6 decision principles. Auto-resolves ALL decisions (mechanical and taste) without user input.
-  Triggers: "review this plan", "autoplan", "auto review", "is this plan good", before executing any plan.
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
----
-
-{{PREAMBLE}}
-
-# Plan Review Pipeline
-
-**Goal:** Review a plan through multiple lenses before execution begins. Catch problems before they become expensive mistakes.
-
-One command. Rough plan in, fully reviewed plan out.
-
-## The 6 Decision Principles (Reference)
-
-1. **Choose completeness** — cover more edge cases
-2. **Boil lakes** — fix everything in blast radius if <1 day effort
-3. **Pragmatic** — two equal options? Pick the cleaner one
-4. **DRY** — duplicates existing? Reject. Reuse what exists.
-5. **Explicit over clever** — 10-line obvious > 200-line abstraction
-6. **Bias toward action** — flag concerns but don't block
-
-**Conflict resolution:**
-- Strategy phase: Principles 1+2 dominate (completeness + lake-boiling)
-- Engineering phase: Principles 5+3 dominate (explicit + pragmatic)
-- Design phase: Principles 5+1 dominate (explicit + completeness)
-
-## Decision Classification
-
-**Mechanical** — one clearly right answer given constraints. Auto-decide silently, don't burden the user.
-**Taste** — reasonable engineers could disagree. Auto-resolve using the 6 Decision Principles and log the rationale. Do NOT ask the user.
-
----
-
-## Auto Mode (Default)
-
-Plan review ALWAYS runs in full auto mode when triggered from the pipeline:
-- **Mechanical decisions:** Auto-resolve silently using the 6 Decision Principles. Log each decision.
-- **Taste decisions:** Auto-resolve using best judgment and the 6 Decision Principles. Log rationale. Do NOT surface to user.
-- All 3 phases (Strategy, Design, Engineering) run automatically.
-- No final gate — auto-advance to BUILD immediately on DONE.
-
-Auto-decision log format:
-```
-AUTO-DECISION LOG ([Phase])
-  [P1] [topic]: [decision made] — Principle [N]
-  [TASTE-AUTO] [topic]: [decision made] — Principle [N] — Rationale: [why]
-```
-
----
-
-## Phase 1: Strategy Review (CEO Lens)
-
-Questions:
-1. **Premise validity** — are assumptions stated or just assumed?
-2. **Scope calibration** — right amount of work? Not too much, not too little?
-3. **Alternatives considered** — was the chosen approach selected, not just defaulted to?
-4. **What already exists** — is anything being reinvented? (DRY check)
-5. **Risk identification** — what are the top 3 risks if this goes wrong?
-6. **Success definition** — is there a measurable definition of done?
-
-```
-STRATEGY REVIEW
-  Premises: [explicit | implicit | missing]
-  Scope:    [right-sized | too large | too small]
-  Alternatives: [considered | not documented]
-  DRY:      [reuses existing | reinvents wheel]
-  Risks:    [list top 3]
-```
-
-**Auto-resolve:** Verify premises against the spec and existing codebase. If premises are valid, proceed silently. If premises are questionable, log the concern and apply Principle 6 (bias toward action) to proceed.
-
----
-
-## Phase 2: Design Review (conditional)
-
-**Only run this phase if the plan includes UI or user-facing changes.**
-
-Check:
-- [ ] **Information hierarchy** — is the most important thing most prominent?
-- [ ] **Missing states** — loading, empty, error, partial/degraded?
-- [ ] **Responsive strategy** — does it work at different screen sizes?
-- [ ] **Accessibility** — keyboard nav, screen readers, color contrast?
-- [ ] **Error recovery** — can users recover from mistakes?
-
-```
-DESIGN REVIEW (if applicable)
-  States covered: loading ✓/✗ | empty ✓/✗ | error ✓/✗
-  Responsive: [strategy described | missing]
-  Accessibility: [addressed | not addressed]
-```
-
----
-
-## Phase 3: Engineering Review
-
-Check:
-- [ ] **Architecture soundness** — appropriate layers, minimal coupling?
-- [ ] **Test coverage plan** — what will be tested, at what level?
-- [ ] **Performance risks** — N+1 queries, large payloads, unbounded operations?
-- [ ] **Error path handling** — every error case has a handling strategy?
-- [ ] **Security considerations** — auth, input validation, injection risks?
-- [ ] **Backward compatibility** — does this break existing behavior?
-- [ ] **Blast radius** — how many files/systems does this touch?
-
-```
-ENGINEERING REVIEW
-  Architecture: [sound | concerns: ...]
-  Test plan:    [comprehensive | gaps: ...]
-  Performance:  [no risks | risks: ...]
-  Security:     [clean | concerns: ...]
-  Blast radius: [N files, N systems]
-```
-
----
-
-## Decision Audit Trail
-
-| # | Phase | Decision | Type | Principle | Rationale |
-|---|-------|----------|------|-----------|-----------|
-| 1 | Strategy | [decision] | M/T | P1-P6 | [why] |
-
----
-
-## Final Gate: Auto-Resolved Taste Decisions
-
-All TASTE decisions are auto-resolved using the 6 Decision Principles. Log each decision with rationale:
-
-```
-TASTE DECISIONS — AUTO-RESOLVED
-═══════════════════════════════════════
-
-1. [Decision description]
-   Chosen: [option] — Principle [N] — Rationale: [why]
-
-2. [Decision description]
-   Chosen: [option] — Principle [N] — Rationale: [why]
-
-═══════════════════════════════════════
-```
-
-Do NOT present taste decisions to the user or wait for input. Apply best judgment and proceed.
-
----
-
-## Plan Review Report
-
-```
-PLAN REVIEW COMPLETE
-════════════════════════════════════════
-Phases completed:     [1, 2 (skipped), 3] or [1, 2, 3]
-Issues found:         [N]
-Decisions made:       [N mechanical, N taste — all auto-resolved]
-Plan status:          APPROVED | APPROVED_WITH_NOTES | NEEDS_REVISION
-
-Revisions applied:
-  - [revision 1]
-
-Taste decisions auto-resolved:
-  - [decision 1: chosen option — rationale]
-
-Status: DONE | NEEDS_CONTEXT
-════════════════════════════════════════
-```
-
-**REVIEW auto-advances** — after reporting DONE, immediately advance to BUILD. All decisions (mechanical and taste) have been auto-resolved. No user confirmation is required. The THINK stage (brainstorm + spec approval) is the only human gate in the pipeline.
-BRANCH | PROACTIVE: ---
-name: plan-review
-description: |
-  Multi-stage plan review pipeline: Strategy (CEO) → Design (if UI) → Engineering.
-  Applies 6 decision principles. Auto-resolves ALL decisions (mechanical and taste) without user input.
-  Triggers: "review this plan", "autoplan", "auto review", "is this plan good", before executing any plan.
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
----
-
-{{PREAMBLE}}
-
-# Plan Review Pipeline
-
-**Goal:** Review a plan through multiple lenses before execution begins. Catch problems before they become expensive mistakes.
-
-One command. Rough plan in, fully reviewed plan out.
-
-## The 6 Decision Principles (Reference)
-
-1. **Choose completeness** — cover more edge cases
-2. **Boil lakes** — fix everything in blast radius if <1 day effort
-3. **Pragmatic** — two equal options? Pick the cleaner one
-4. **DRY** — duplicates existing? Reject. Reuse what exists.
-5. **Explicit over clever** — 10-line obvious > 200-line abstraction
-6. **Bias toward action** — flag concerns but don't block
-
-**Conflict resolution:**
-- Strategy phase: Principles 1+2 dominate (completeness + lake-boiling)
-- Engineering phase: Principles 5+3 dominate (explicit + pragmatic)
-- Design phase: Principles 5+1 dominate (explicit + completeness)
-
-## Decision Classification
-
-**Mechanical** — one clearly right answer given constraints. Auto-decide silently, don't burden the user.
-**Taste** — reasonable engineers could disagree. Auto-resolve using the 6 Decision Principles and log the rationale. Do NOT ask the user.
-
----
-
-## Auto Mode (Default)
-
-Plan review ALWAYS runs in full auto mode when triggered from the pipeline:
-- **Mechanical decisions:** Auto-resolve silently using the 6 Decision Principles. Log each decision.
-- **Taste decisions:** Auto-resolve using best judgment and the 6 Decision Principles. Log rationale. Do NOT surface to user.
-- All 3 phases (Strategy, Design, Engineering) run automatically.
-- No final gate — auto-advance to BUILD immediately on DONE.
-
-Auto-decision log format:
-```
-AUTO-DECISION LOG ([Phase])
-  [P1] [topic]: [decision made] — Principle [N]
-  [TASTE-AUTO] [topic]: [decision made] — Principle [N] — Rationale: [why]
-```
-
----
-
-## Phase 1: Strategy Review (CEO Lens)
-
-Questions:
-1. **Premise validity** — are assumptions stated or just assumed?
-2. **Scope calibration** — right amount of work? Not too much, not too little?
-3. **Alternatives considered** — was the chosen approach selected, not just defaulted to?
-4. **What already exists** — is anything being reinvented? (DRY check)
-5. **Risk identification** — what are the top 3 risks if this goes wrong?
-6. **Success definition** — is there a measurable definition of done?
-
-```
-STRATEGY REVIEW
-  Premises: [explicit | implicit | missing]
-  Scope:    [right-sized | too large | too small]
-  Alternatives: [considered | not documented]
-  DRY:      [reuses existing | reinvents wheel]
-  Risks:    [list top 3]
-```
-
-**Auto-resolve:** Verify premises against the spec and existing codebase. If premises are valid, proceed silently. If premises are questionable, log the concern and apply Principle 6 (bias toward action) to proceed.
-
----
-
-## Phase 2: Design Review (conditional)
-
-**Only run this phase if the plan includes UI or user-facing changes.**
-
-Check:
-- [ ] **Information hierarchy** — is the most important thing most prominent?
-- [ ] **Missing states** — loading, empty, error, partial/degraded?
-- [ ] **Responsive strategy** — does it work at different screen sizes?
-- [ ] **Accessibility** — keyboard nav, screen readers, color contrast?
-- [ ] **Error recovery** — can users recover from mistakes?
-
-```
-DESIGN REVIEW (if applicable)
-  States covered: loading ✓/✗ | empty ✓/✗ | error ✓/✗
-  Responsive: [strategy described | missing]
-  Accessibility: [addressed | not addressed]
-```
-
----
-
-## Phase 3: Engineering Review
-
-Check:
-- [ ] **Architecture soundness** — appropriate layers, minimal coupling?
-- [ ] **Test coverage plan** — what will be tested, at what level?
-- [ ] **Performance risks** — N+1 queries, large payloads, unbounded operations?
-- [ ] **Error path handling** — every error case has a handling strategy?
-- [ ] **Security considerations** — auth, input validation, injection risks?
-- [ ] **Backward compatibility** — does this break existing behavior?
-- [ ] **Blast radius** — how many files/systems does this touch?
-
-```
-ENGINEERING REVIEW
-  Architecture: [sound | concerns: ...]
-  Test plan:    [comprehensive | gaps: ...]
-  Performance:  [no risks | risks: ...]
-  Security:     [clean | concerns: ...]
-  Blast radius: [N files, N systems]
-```
-
----
-
-## Decision Audit Trail
-
-| # | Phase | Decision | Type | Principle | Rationale |
-|---|-------|----------|------|-----------|-----------|
-| 1 | Strategy | [decision] | M/T | P1-P6 | [why] |
-
----
-
-## Final Gate: Auto-Resolved Taste Decisions
-
-All TASTE decisions are auto-resolved using the 6 Decision Principles. Log each decision with rationale:
-
-```
-TASTE DECISIONS — AUTO-RESOLVED
-═══════════════════════════════════════
-
-1. [Decision description]
-   Chosen: [option] — Principle [N] — Rationale: [why]
-
-2. [Decision description]
-   Chosen: [option] — Principle [N] — Rationale: [why]
-
-═══════════════════════════════════════
-```
-
-Do NOT present taste decisions to the user or wait for input. Apply best judgment and proceed.
-
----
-
-## Plan Review Report
-
-```
-PLAN REVIEW COMPLETE
-════════════════════════════════════════
-Phases completed:     [1, 2 (skipped), 3] or [1, 2, 3]
-Issues found:         [N]
-Decisions made:       [N mechanical, N taste — all auto-resolved]
-Plan status:          APPROVED | APPROVED_WITH_NOTES | NEEDS_REVISION
-
-Revisions applied:
-  - [revision 1]
-
-Taste decisions auto-resolved:
-  - [decision 1: chosen option — rationale]
-
-Status: DONE | NEEDS_CONTEXT
-════════════════════════════════════════
-```
-
-**REVIEW auto-advances** — after reporting DONE, immediately advance to BUILD. All decisions (mechanical and taste) have been auto-resolved. No user confirmation is required. The THINK stage (brainstorm + spec approval) is the only human gate in the pipeline.
-PROACTIVE"
+echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
 ```
 
 ### PROACTIVE Mode
@@ -472,177 +132,7 @@ For a full performance evaluation spanning the entire sprint, use the `self-impr
 ```bash
 _TEL_END=$(date +%s)
 _TEL_DUR=$(( _TEL_END - _TEL_START ))
-~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "---
-name: plan-review
-description: |
-  Multi-stage plan review pipeline: Strategy (CEO) → Design (if UI) → Engineering.
-  Applies 6 decision principles. Auto-resolves ALL decisions (mechanical and taste) without user input.
-  Triggers: "review this plan", "autoplan", "auto review", "is this plan good", before executing any plan.
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
----
-
-{{PREAMBLE}}
-
-# Plan Review Pipeline
-
-**Goal:** Review a plan through multiple lenses before execution begins. Catch problems before they become expensive mistakes.
-
-One command. Rough plan in, fully reviewed plan out.
-
-## The 6 Decision Principles (Reference)
-
-1. **Choose completeness** — cover more edge cases
-2. **Boil lakes** — fix everything in blast radius if <1 day effort
-3. **Pragmatic** — two equal options? Pick the cleaner one
-4. **DRY** — duplicates existing? Reject. Reuse what exists.
-5. **Explicit over clever** — 10-line obvious > 200-line abstraction
-6. **Bias toward action** — flag concerns but don't block
-
-**Conflict resolution:**
-- Strategy phase: Principles 1+2 dominate (completeness + lake-boiling)
-- Engineering phase: Principles 5+3 dominate (explicit + pragmatic)
-- Design phase: Principles 5+1 dominate (explicit + completeness)
-
-## Decision Classification
-
-**Mechanical** — one clearly right answer given constraints. Auto-decide silently, don't burden the user.
-**Taste** — reasonable engineers could disagree. Auto-resolve using the 6 Decision Principles and log the rationale. Do NOT ask the user.
-
----
-
-## Auto Mode (Default)
-
-Plan review ALWAYS runs in full auto mode when triggered from the pipeline:
-- **Mechanical decisions:** Auto-resolve silently using the 6 Decision Principles. Log each decision.
-- **Taste decisions:** Auto-resolve using best judgment and the 6 Decision Principles. Log rationale. Do NOT surface to user.
-- All 3 phases (Strategy, Design, Engineering) run automatically.
-- No final gate — auto-advance to BUILD immediately on DONE.
-
-Auto-decision log format:
-```
-AUTO-DECISION LOG ([Phase])
-  [P1] [topic]: [decision made] — Principle [N]
-  [TASTE-AUTO] [topic]: [decision made] — Principle [N] — Rationale: [why]
-```
-
----
-
-## Phase 1: Strategy Review (CEO Lens)
-
-Questions:
-1. **Premise validity** — are assumptions stated or just assumed?
-2. **Scope calibration** — right amount of work? Not too much, not too little?
-3. **Alternatives considered** — was the chosen approach selected, not just defaulted to?
-4. **What already exists** — is anything being reinvented? (DRY check)
-5. **Risk identification** — what are the top 3 risks if this goes wrong?
-6. **Success definition** — is there a measurable definition of done?
-
-```
-STRATEGY REVIEW
-  Premises: [explicit | implicit | missing]
-  Scope:    [right-sized | too large | too small]
-  Alternatives: [considered | not documented]
-  DRY:      [reuses existing | reinvents wheel]
-  Risks:    [list top 3]
-```
-
-**Auto-resolve:** Verify premises against the spec and existing codebase. If premises are valid, proceed silently. If premises are questionable, log the concern and apply Principle 6 (bias toward action) to proceed.
-
----
-
-## Phase 2: Design Review (conditional)
-
-**Only run this phase if the plan includes UI or user-facing changes.**
-
-Check:
-- [ ] **Information hierarchy** — is the most important thing most prominent?
-- [ ] **Missing states** — loading, empty, error, partial/degraded?
-- [ ] **Responsive strategy** — does it work at different screen sizes?
-- [ ] **Accessibility** — keyboard nav, screen readers, color contrast?
-- [ ] **Error recovery** — can users recover from mistakes?
-
-```
-DESIGN REVIEW (if applicable)
-  States covered: loading ✓/✗ | empty ✓/✗ | error ✓/✗
-  Responsive: [strategy described | missing]
-  Accessibility: [addressed | not addressed]
-```
-
----
-
-## Phase 3: Engineering Review
-
-Check:
-- [ ] **Architecture soundness** — appropriate layers, minimal coupling?
-- [ ] **Test coverage plan** — what will be tested, at what level?
-- [ ] **Performance risks** — N+1 queries, large payloads, unbounded operations?
-- [ ] **Error path handling** — every error case has a handling strategy?
-- [ ] **Security considerations** — auth, input validation, injection risks?
-- [ ] **Backward compatibility** — does this break existing behavior?
-- [ ] **Blast radius** — how many files/systems does this touch?
-
-```
-ENGINEERING REVIEW
-  Architecture: [sound | concerns: ...]
-  Test plan:    [comprehensive | gaps: ...]
-  Performance:  [no risks | risks: ...]
-  Security:     [clean | concerns: ...]
-  Blast radius: [N files, N systems]
-```
-
----
-
-## Decision Audit Trail
-
-| # | Phase | Decision | Type | Principle | Rationale |
-|---|-------|----------|------|-----------|-----------|
-| 1 | Strategy | [decision] | M/T | P1-P6 | [why] |
-
----
-
-## Final Gate: Auto-Resolved Taste Decisions
-
-All TASTE decisions are auto-resolved using the 6 Decision Principles. Log each decision with rationale:
-
-```
-TASTE DECISIONS — AUTO-RESOLVED
-═══════════════════════════════════════
-
-1. [Decision description]
-   Chosen: [option] — Principle [N] — Rationale: [why]
-
-2. [Decision description]
-   Chosen: [option] — Principle [N] — Rationale: [why]
-
-═══════════════════════════════════════
-```
-
-Do NOT present taste decisions to the user or wait for input. Apply best judgment and proceed.
-
----
-
-## Plan Review Report
-
-```
-PLAN REVIEW COMPLETE
-════════════════════════════════════════
-Phases completed:     [1, 2 (skipped), 3] or [1, 2, 3]
-Issues found:         [N]
-Decisions made:       [N mechanical, N taste — all auto-resolved]
-Plan status:          APPROVED | APPROVED_WITH_NOTES | NEEDS_REVISION
-
-Revisions applied:
-  - [revision 1]
-
-Taste decisions auto-resolved:
-  - [decision 1: chosen option — rationale]
-
-Status: DONE | NEEDS_CONTEXT
-════════════════════════════════════════
-```
-
-**REVIEW auto-advances** — after reporting DONE, immediately advance to BUILD. All decisions (mechanical and taste) have been auto-resolved. No user confirmation is required. The THINK stage (brainstorm + spec approval) is the only human gate in the pipeline.
-TEL_DUR" "OUTCOME" 2>/dev/null || true
+~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
@@ -659,7 +149,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Plan Review Pipeline
 
 **Goal:** Review a plan through multiple lenses before execution begins. Catch problems before they become expensive mistakes.
@@ -817,5 +306,36 @@ Taste decisions auto-resolved:
 Status: DONE | NEEDS_CONTEXT
 ════════════════════════════════════════
 ```
+
+## Save Plan Review Document
+
+After completing the plan review, save the full report as a Markdown document. Use the plan's
+session identifier so the vibe stage-detection can confirm that REVIEW is complete.
+
+```bash
+# Extract session from plan filename for consistent naming
+_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+_PLAN_SESSION=$(basename "$_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d-%H%M%S)
+mkdir -p docs/superomni/reviews
+_REVIEW_FILE="docs/superomni/reviews/review-${_BRANCH}-${_PLAN_SESSION}-${_DATE}.md"
+cat > "$_REVIEW_FILE" << EOF
+# Plan Review: ${_BRANCH}
+
+**Date:** ${_DATE}
+**Reviewer:** superomni plan-review
+**Branch:** ${_BRANCH}
+**Plan:** ${_PLAN}
+
+[Paste the full PLAN REVIEW COMPLETE block here]
+EOF
+echo "Plan review saved to $_REVIEW_FILE"
+```
+
+Write the full PLAN REVIEW COMPLETE block (all phases, decision audit trail, and auto-resolved
+taste decisions) to `docs/superomni/reviews/review-[branch]-[plan-session]-[date].md`. This
+file serves as the permanent record and enables the vibe pipeline to detect that the REVIEW
+stage is complete and auto-advance to BUILD.
 
 **REVIEW auto-advances** — after reporting DONE, immediately advance to BUILD. All decisions (mechanical and taste) have been auto-resolved. No user confirmation is required. The THINK stage (brainstorm + spec approval) is the only human gate in the pipeline.

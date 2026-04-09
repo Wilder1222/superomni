@@ -21,7 +21,11 @@
         "superomni": "./bin/superomni-cli"
     },
     "scripts": {
-        "gen-skills": "bash lib/gen-skill-docs.sh",
+        "gen-skills": "node lib/gen-skill-docs.js",
+        "gen-skills:bash": "bash lib/gen-skill-docs.sh",
+        "gen-skills:ps": "pwsh -NoProfile -ExecutionPolicy Bypass -File lib/gen-skill-docs.ps1",
+        "check:skill-docs": "node lib/check-skill-docs.js",
+        "verify:skill-docs": "npm run gen-skills && npm run check:skill-docs",
         "ensure:lf": "node lib/ensure-setup-lf.js",
         "test": "bash lib/validate-skills.sh",
         "setup": "node lib/setup.js"

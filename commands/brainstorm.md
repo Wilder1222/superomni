@@ -27,10 +27,13 @@ Examples:
 4. A visual diagram is created if helpful
 5. A `docs/superomni/specs/spec-[branch]-[session]-[date].md` document is written
 6. The spec is reviewed for quality
+7. The flow stops for user spec approval (the only THINK gate)
 
 ## Output
 
-A reviewed `docs/superomni/specs/spec-[branch]-[session]-[date].md` file ready to feed into `/write-plan`.
+A reviewed `docs/superomni/specs/spec-[branch]-[session]-[date].md` file ready for approval.
+
+After approval, the workflow auto-advances in wave mode to PLAN and subsequent stages.
 
 ## Skill Reference
 

@@ -5,35 +5,55 @@ Activate the full **superomni** skill framework and launch the default guided wo
 ## Usage
 
 ```
-/vibe              — activate all skills and show the guided workflow
+/vibe              — activate framework, detect stage, and continue workflow
 /vibe status       — show which skills are active and pipeline position
 /vibe reset        — restart the guided workflow from the beginning
 ```
 
 ## What Happens
 
-1. Loads `skills/using-skills/SKILL.md` — the meta-skill that governs all others
-2. Prints a welcome banner with the full sprint pipeline
-3. Lists every available command with a one-line description
-4. Prompts you for what you want to work on today
+1. Loads `skills/using-skills/SKILL.md` as the meta-routing protocol
+2. Detects current stage by scanning `docs/superomni/` artifacts
+3. Applies a single human gate in THINK (spec approval)
+4. Runs PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT in auto wave mode on DONE
+5. Falls back to guided menu only when stage is ambiguous or user asks `/vibe` with no context
 
 ## Core Workflow Pipeline
 
 ```
-brainstorm → write-plan → execute-plan → review
-     ↑                                      |
-     └──────────────────────────────────────┘
+THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
 ```
+
+Human confirmation gate:
+- Spec file review/approval in THINK
+
+`brainstorm` runs without manual gate. Everything after spec approval auto-advances in waves.
+
+## Stage Artifact Contract
+
+Every stage must leave document evidence before advancing:
+
+| Stage | Required artifact |
+|------|-------------------|
+| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
+| PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
+| REVIEW | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
+| BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
+| VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` |
+| SHIP | Release evidence in `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
+| REFLECT | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+
+If the stage artifact is missing, do not auto-advance.
 
 ## All Available Commands
 
 | Command | What it does |
 |---------|-------------|
-| `/vibe` | Activate the framework and launch the guided workflow |
+| `/vibe` | Activate framework, detect stage, and continue auto workflow |
 | `/brainstorm` | Design a feature — produces `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
 | `/write-plan` | Turn a spec into an executable plan |
-| `/execute-plan` | Run the plan step by step |
-| `/review` | Structured code review |
+| `/execute-plan` | Run the plan step by step and produce execution evidence |
+| `/review` | Structured code review and review artifact generation |
 
 ## First-Time Setup
 

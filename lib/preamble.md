@@ -24,19 +24,19 @@ Report status using one of these at the end of every skill session:
 
 ### Auto-Advance Rule
 
-Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+Pipeline stage order: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
 
-**THINK is the only human gate.** After the brainstorm skill generates a spec document, STOP and present the spec for user review. Once the user approves, all subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) auto-advance on DONE without asking the user.
+**THINK has exactly one human gate: spec review approval.** `brainstorm` runs without manual gate. After `spec-[branch]-[session]-[date].md` is generated, STOP for user spec approval. Once approved, all subsequent stages (PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT) auto-advance on DONE.
 
 | Status | At THINK stage (after spec generation) | At all other stages |
 |--------|----------------------------------------|-------------------|
-| **DONE** | STOP — present spec document for user review. Wait for user approval before advancing to PLAN. | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
-| **DONE_WITH_CONCERNS** | STOP — present concerns, wait for user decision | STOP — present concerns, wait for user decision |
-| **BLOCKED** / **NEEDS_CONTEXT** | STOP — present blocker, wait for user | STOP — present blocker, wait for user |
+| **DONE** | STOP - present spec document for user review. Wait for user approval before advancing to PLAN. | Auto-advance - print `[STAGE] DONE -> advancing to [NEXT-STAGE]` and immediately invoke next skill |
+| **DONE_WITH_CONCERNS** | STOP - present concerns, wait for user decision | STOP - present concerns, wait for user decision |
+| **BLOCKED** / **NEEDS_CONTEXT** | STOP - present blocker, wait for user | STOP - present blocker, wait for user |
 
 When auto-advancing:
 1. Write the session artifact to `docs/superomni/`
-2. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
+2. Print: `[STAGE] DONE -> advancing to [NEXT-STAGE] ([skill-name])`
 3. Immediately invoke the next pipeline skill
 
 **Note:** The REVIEW stage (plan-review) runs fully automatically — all decisions (mechanical and taste) are auto-resolved using the 6 Decision Principles. No user input is requested during REVIEW.

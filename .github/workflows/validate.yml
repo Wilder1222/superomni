@@ -18,17 +18,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Build skill docs
-        run: bash lib/gen-skill-docs.sh
+        run: npm run gen-skills
 
       - name: Check for uncommitted build changes
         run: |
           if ! git diff --quiet; then
             echo "ERROR: SKILL.md files are out of sync with their .tmpl sources."
-            echo "Run 'bash lib/gen-skill-docs.sh' and commit the generated files."
+            echo "Run 'npm run gen-skills' and commit the generated files."
             git diff --name-only
             exit 1
           fi
+
+      - name: Check skill docs guardrails
+        run: npm run check:skill-docs
 
       - name: Validate skill format
         run: bash lib/validate-skills.sh

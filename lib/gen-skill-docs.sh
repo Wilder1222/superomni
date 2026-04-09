@@ -9,7 +9,7 @@
 # The {{PREAMBLE}} token in any .tmpl file is replaced with the contents
 # of lib/preamble.md. The output is written as SKILL.md in the same directory.
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "${SCRIPT_DIR}")"
@@ -20,8 +20,8 @@ if [ ! -f "${PREAMBLE_FILE}" ]; then
   exit 1
 fi
 
-# Read preamble content (escape for sed: & and \ and newlines)
-PREAMBLE_CONTENT=$(cat "${PREAMBLE_FILE}")
+# Read preamble content. Strip CR to tolerate mixed line endings.
+PREAMBLE_CONTENT=$(tr -d '\r' < "${PREAMBLE_FILE}")
 
 process_template() {
   local tmpl_file="${1}"

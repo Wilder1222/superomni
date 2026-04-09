@@ -35,6 +35,9 @@ A **Code Review** report listing P0 issues (must fix), P1 issues (should fix),
 P2 suggestions, security status, test adequacy, and a verdict:
 `APPROVED`, `APPROVED_WITH_NOTES`, or `CHANGES_REQUESTED`.
 
+When used as workflow REVIEW evidence, persist the review artifact under
+`docs/superomni/reviews/review-[branch]-[session]-[date].md` before stage advancement.
+
 ## Skill Reference
 
 See `skills/code-review/SKILL.md` for the full protocol.

@@ -15,347 +15,7 @@ mkdir -p ~/.omni-skills/sessions
 _PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _TEL_START=$(date +%s)
-echo "Branch: ---
-name: vibe
-description: |
-  Unified entry point for the superomni framework.
-  Activates all skills, detects current pipeline stage, and launches the guided workflow.
-  Triggers: "/vibe", "activate framework", "start workflow", "what's next".
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
----
-
-{{PREAMBLE}}
-
-# Vibe — Framework Entry Point
-
-**Goal:** Activate the superomni skill framework, detect the current pipeline stage, and guide the user to the right skill.
-
-## Usage
-
-```
-/vibe              — activate framework, detect stage, show guided menu
-/vibe status       — show current pipeline position and available next steps
-/vibe reset        — clear superomni artifacts and restart from THINK
-```
-
-## Iron Law: One Entry Point, Full Pipeline
-
-`/vibe` is the single unified entry point. It never executes work itself — it **detects** the current stage and **delegates** to the appropriate skill.
-
-## Planning Route
-
-If you feel the impulse to call `EnterPlanMode`, that impulse IS the trigger for a superomni skill:
-- **Need to design/explore?** → Invoke `brainstorm` skill
-- **Need to plan implementation?** → Invoke `writing-plans` skill
-- **Need to execute?** → Invoke `executing-plans` or `subagent-development`
-
-Always follow this skill's phases (Phase 1-4) directly. Route all planning through superomni skills.
-
-## Phase 1: Detect Current Pipeline Stage
-
-Scan for existing artifacts to determine where the project is in the sprint pipeline:
-
-```bash
-# Artifact detection (glob for dynamic filenames)
-_HAS_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-_HAS_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
-_HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
-_HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
-
-# Session matching: extract session from plan filename for review detection
-if [ -n "$_HAS_PLAN" ]; then
-  _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
-  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
-  _PLAN_OPEN=$(grep -c '^\- \[ \]' "$_HAS_PLAN" 2>/dev/null || echo "0")
-  _PLAN_DONE=$(grep -c '^\- \[x\]' "$_HAS_PLAN" 2>/dev/null || echo "0")
-fi
-
-# Recent git activity
-git log --oneline -5 2>/dev/null
-git status --short 2>/dev/null
-```
-
-### Stage Detection Matrix
-
-Use the following priority-ordered rules (first match wins):
-
-| Priority | Condition | Stage | Skill |
-|----------|-----------|-------|-------|
-| 1 | No artifacts at all | **THINK** | `brainstorm` — **human gate: interactive brainstorm + spec approval** |
-| 2 | `spec-*.md` exists, no `plan-*.md` | **PLAN** | `writing-plans` — auto-advance |
-| 3 | `plan-*.md` exists, no review doc matching its session | **REVIEW** | `plan-review` — auto-advance (all decisions auto-resolved) |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` (+ `frontend-design` if UI steps detected) — auto-advance |
-| 5 | `plan-*.md` all checked | **VERIFY** | Required: `code-review` → `qa` → `verification`. Optional: `security-audit` (if security-relevant), `production-readiness` (if deploying) — auto-advance |
-| 6 | Verified | **SHIP** | `ship`, `finishing-branch` — auto-advance |
-| 7 | Shipped | **REFLECT** | `self-improvement` → `retro` (run sequentially in one stage) |
-
-**Session matching for REVIEW detection:** Extract the `[session]` segment from the plan filename (e.g., `plan-main-auth-refactor-20260404.md` → session = `auth-refactor`). A matching review doc must contain the same session identifier (e.g., `review-main-auth-refactor-*.md`). If no matching review exists → stage is REVIEW.
-
-### Auto-Advance Rule
-
-**THINK is the only human gate.** The brainstorm skill requires interactive dialogue and spec approval from the user. Once the spec is approved, all subsequent stages auto-advance on DONE without user interaction.
-
-- **THINK stage with DONE (spec approved):** Auto-invoke `writing-plans`. All subsequent stages chain automatically.
-- **All non-THINK stages with DONE:** Auto-invoke the next skill immediately. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
-- **Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT:** STOP and wait for user.
-
-Only show the guided menu when:
-- No clear next step can be determined
-- The user invoked `/vibe` without arguments
-
-If the user passes **arguments** with `/vibe` (e.g., `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
-
-## Phase 2: Show Guided Menu
-
-Present the available commands only when auto-advance does not apply:
-
-```
-| Command | What it does |
-|---------|-------------|
-| /brainstorm | Design a feature — produces spec-[branch]-[session]-[date].md |
-| /write-plan | Turn a spec into an executable plan |
-| /execute-plan | Run the plan step by step |
-| /review | Plan review (before BUILD) |
-| /qa | Quality assurance and test coverage |
-| /verify | Verify task completion |
-| /production-readiness | Pre-deploy readiness check |
-| /investigate | Exploratory investigation |
-| /self-improve | Post-task performance evaluation |
-| /retro | Engineering retrospective |
-| /workflow | See the full sprint pipeline |
-| /ship | Release workflow |
-| /fd-audit | Accessibility + performance check |
-| /fd-critique | UX review for clarity and hierarchy |
-| /fd-polish | Pre-deployment refinement |
-
-Suggested next step → [skill-name]: [reason based on detected stage]
-```
-
-## Phase 3: Handle Subcommands
-
-### `/vibe status`
-
-Run the stage detection from Phase 1 and display:
-
-```
-Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
-Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
-Next → [skill-name]: [reason]
-```
-
-### `/vibe reset`
-
-Warn before clearing artifacts:
-
-```
-WARNING: This will remove all superomni artifacts:
-  - docs/superomni/specs/spec-*.md
-  - docs/superomni/plans/plan-*.md
-  - docs/superomni/executions/
-  - docs/superomni/reviews/
-  - docs/superomni/subagents/
-  - docs/superomni/production-readiness/
-
-Self-improvement history will be preserved:
-  - docs/superomni/improvements/
-  - docs/superomni/evaluations/
-  - docs/superomni/harness-audits/
-
-Proceed? (Y/N)
-```
-
-If confirmed:
-```bash
-rm -f docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md
-rm -rf docs/superomni/executions/ docs/superomni/reviews/ docs/superomni/subagents/ docs/superomni/production-readiness/
-echo "Reset complete. Starting fresh from THINK stage."
-```
-
-Then re-run Phase 1-2 (will detect THINK stage).
-
-## Phase 4: Delegate to Skill
-
-After displaying the banner and menu:
-
-1. If the user provided arguments → invoke the detected skill with those arguments
-2. If no arguments → wait for user input
-3. When the user chooses a command or describes what they want to do → invoke the matching skill
-
-**Important:** `/vibe` never executes implementation work directly. It always delegates to the appropriate skill. Route all planning through superomni skills (`brainstorm`, `writing-plans`).
-
-Report status: **DONE** — framework activated, stage detected, user guided to next skill.
-BRANCH | PROACTIVE: ---
-name: vibe
-description: |
-  Unified entry point for the superomni framework.
-  Activates all skills, detects current pipeline stage, and launches the guided workflow.
-  Triggers: "/vibe", "activate framework", "start workflow", "what's next".
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
----
-
-{{PREAMBLE}}
-
-# Vibe — Framework Entry Point
-
-**Goal:** Activate the superomni skill framework, detect the current pipeline stage, and guide the user to the right skill.
-
-## Usage
-
-```
-/vibe              — activate framework, detect stage, show guided menu
-/vibe status       — show current pipeline position and available next steps
-/vibe reset        — clear superomni artifacts and restart from THINK
-```
-
-## Iron Law: One Entry Point, Full Pipeline
-
-`/vibe` is the single unified entry point. It never executes work itself — it **detects** the current stage and **delegates** to the appropriate skill.
-
-## Planning Route
-
-If you feel the impulse to call `EnterPlanMode`, that impulse IS the trigger for a superomni skill:
-- **Need to design/explore?** → Invoke `brainstorm` skill
-- **Need to plan implementation?** → Invoke `writing-plans` skill
-- **Need to execute?** → Invoke `executing-plans` or `subagent-development`
-
-Always follow this skill's phases (Phase 1-4) directly. Route all planning through superomni skills.
-
-## Phase 1: Detect Current Pipeline Stage
-
-Scan for existing artifacts to determine where the project is in the sprint pipeline:
-
-```bash
-# Artifact detection (glob for dynamic filenames)
-_HAS_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-_HAS_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
-_HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
-_HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
-
-# Session matching: extract session from plan filename for review detection
-if [ -n "$_HAS_PLAN" ]; then
-  _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
-  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
-  _PLAN_OPEN=$(grep -c '^\- \[ \]' "$_HAS_PLAN" 2>/dev/null || echo "0")
-  _PLAN_DONE=$(grep -c '^\- \[x\]' "$_HAS_PLAN" 2>/dev/null || echo "0")
-fi
-
-# Recent git activity
-git log --oneline -5 2>/dev/null
-git status --short 2>/dev/null
-```
-
-### Stage Detection Matrix
-
-Use the following priority-ordered rules (first match wins):
-
-| Priority | Condition | Stage | Skill |
-|----------|-----------|-------|-------|
-| 1 | No artifacts at all | **THINK** | `brainstorm` — **human gate: interactive brainstorm + spec approval** |
-| 2 | `spec-*.md` exists, no `plan-*.md` | **PLAN** | `writing-plans` — auto-advance |
-| 3 | `plan-*.md` exists, no review doc matching its session | **REVIEW** | `plan-review` — auto-advance (all decisions auto-resolved) |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` (+ `frontend-design` if UI steps detected) — auto-advance |
-| 5 | `plan-*.md` all checked | **VERIFY** | Required: `code-review` → `qa` → `verification`. Optional: `security-audit` (if security-relevant), `production-readiness` (if deploying) — auto-advance |
-| 6 | Verified | **SHIP** | `ship`, `finishing-branch` — auto-advance |
-| 7 | Shipped | **REFLECT** | `self-improvement` → `retro` (run sequentially in one stage) |
-
-**Session matching for REVIEW detection:** Extract the `[session]` segment from the plan filename (e.g., `plan-main-auth-refactor-20260404.md` → session = `auth-refactor`). A matching review doc must contain the same session identifier (e.g., `review-main-auth-refactor-*.md`). If no matching review exists → stage is REVIEW.
-
-### Auto-Advance Rule
-
-**THINK is the only human gate.** The brainstorm skill requires interactive dialogue and spec approval from the user. Once the spec is approved, all subsequent stages auto-advance on DONE without user interaction.
-
-- **THINK stage with DONE (spec approved):** Auto-invoke `writing-plans`. All subsequent stages chain automatically.
-- **All non-THINK stages with DONE:** Auto-invoke the next skill immediately. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
-- **Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT:** STOP and wait for user.
-
-Only show the guided menu when:
-- No clear next step can be determined
-- The user invoked `/vibe` without arguments
-
-If the user passes **arguments** with `/vibe` (e.g., `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
-
-## Phase 2: Show Guided Menu
-
-Present the available commands only when auto-advance does not apply:
-
-```
-| Command | What it does |
-|---------|-------------|
-| /brainstorm | Design a feature — produces spec-[branch]-[session]-[date].md |
-| /write-plan | Turn a spec into an executable plan |
-| /execute-plan | Run the plan step by step |
-| /review | Plan review (before BUILD) |
-| /qa | Quality assurance and test coverage |
-| /verify | Verify task completion |
-| /production-readiness | Pre-deploy readiness check |
-| /investigate | Exploratory investigation |
-| /self-improve | Post-task performance evaluation |
-| /retro | Engineering retrospective |
-| /workflow | See the full sprint pipeline |
-| /ship | Release workflow |
-| /fd-audit | Accessibility + performance check |
-| /fd-critique | UX review for clarity and hierarchy |
-| /fd-polish | Pre-deployment refinement |
-
-Suggested next step → [skill-name]: [reason based on detected stage]
-```
-
-## Phase 3: Handle Subcommands
-
-### `/vibe status`
-
-Run the stage detection from Phase 1 and display:
-
-```
-Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
-Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
-Next → [skill-name]: [reason]
-```
-
-### `/vibe reset`
-
-Warn before clearing artifacts:
-
-```
-WARNING: This will remove all superomni artifacts:
-  - docs/superomni/specs/spec-*.md
-  - docs/superomni/plans/plan-*.md
-  - docs/superomni/executions/
-  - docs/superomni/reviews/
-  - docs/superomni/subagents/
-  - docs/superomni/production-readiness/
-
-Self-improvement history will be preserved:
-  - docs/superomni/improvements/
-  - docs/superomni/evaluations/
-  - docs/superomni/harness-audits/
-
-Proceed? (Y/N)
-```
-
-If confirmed:
-```bash
-rm -f docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md
-rm -rf docs/superomni/executions/ docs/superomni/reviews/ docs/superomni/subagents/ docs/superomni/production-readiness/
-echo "Reset complete. Starting fresh from THINK stage."
-```
-
-Then re-run Phase 1-2 (will detect THINK stage).
-
-## Phase 4: Delegate to Skill
-
-After displaying the banner and menu:
-
-1. If the user provided arguments → invoke the detected skill with those arguments
-2. If no arguments → wait for user input
-3. When the user chooses a command or describes what they want to do → invoke the matching skill
-
-**Important:** `/vibe` never executes implementation work directly. It always delegates to the appropriate skill. Route all planning through superomni skills (`brainstorm`, `writing-plans`).
-
-Report status: **DONE** — framework activated, stage detected, user guided to next skill.
-PROACTIVE"
+echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
 ```
 
 ### PROACTIVE Mode
@@ -373,19 +33,19 @@ Report status using one of these at the end of every skill session:
 
 ### Auto-Advance Rule
 
-Pipeline stage order: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+Pipeline stage order: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
 
-**THINK is the only human gate.** After the brainstorm skill generates a spec document, STOP and present the spec for user review. Once the user approves, all subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) auto-advance on DONE without asking the user.
+**THINK has exactly one human gate: spec review approval.** `brainstorm` runs without manual gate. After `spec-[branch]-[session]-[date].md` is generated, STOP for user spec approval. Once approved, all subsequent stages (PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT) auto-advance on DONE.
 
 | Status | At THINK stage (after spec generation) | At all other stages |
 |--------|----------------------------------------|-------------------|
-| **DONE** | STOP — present spec document for user review. Wait for user approval before advancing to PLAN. | Auto-advance — print `[STAGE] DONE → advancing to [NEXT-STAGE]` and immediately invoke next skill |
-| **DONE_WITH_CONCERNS** | STOP — present concerns, wait for user decision | STOP — present concerns, wait for user decision |
-| **BLOCKED** / **NEEDS_CONTEXT** | STOP — present blocker, wait for user | STOP — present blocker, wait for user |
+| **DONE** | STOP - present spec document for user review. Wait for user approval before advancing to PLAN. | Auto-advance - print `[STAGE] DONE -> advancing to [NEXT-STAGE]` and immediately invoke next skill |
+| **DONE_WITH_CONCERNS** | STOP - present concerns, wait for user decision | STOP - present concerns, wait for user decision |
+| **BLOCKED** / **NEEDS_CONTEXT** | STOP - present blocker, wait for user | STOP - present blocker, wait for user |
 
 When auto-advancing:
 1. Write the session artifact to `docs/superomni/`
-2. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
+2. Print: `[STAGE] DONE -> advancing to [NEXT-STAGE] ([skill-name])`
 3. Immediately invoke the next pipeline skill
 
 **Note:** The REVIEW stage (plan-review) runs fully automatically — all decisions (mechanical and taste) are auto-resolved using the 6 Decision Principles. No user input is requested during REVIEW.
@@ -472,177 +132,7 @@ For a full performance evaluation spanning the entire sprint, use the `self-impr
 ```bash
 _TEL_END=$(date +%s)
 _TEL_DUR=$(( _TEL_END - _TEL_START ))
-~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "---
-name: vibe
-description: |
-  Unified entry point for the superomni framework.
-  Activates all skills, detects current pipeline stage, and launches the guided workflow.
-  Triggers: "/vibe", "activate framework", "start workflow", "what's next".
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
----
-
-{{PREAMBLE}}
-
-# Vibe — Framework Entry Point
-
-**Goal:** Activate the superomni skill framework, detect the current pipeline stage, and guide the user to the right skill.
-
-## Usage
-
-```
-/vibe              — activate framework, detect stage, show guided menu
-/vibe status       — show current pipeline position and available next steps
-/vibe reset        — clear superomni artifacts and restart from THINK
-```
-
-## Iron Law: One Entry Point, Full Pipeline
-
-`/vibe` is the single unified entry point. It never executes work itself — it **detects** the current stage and **delegates** to the appropriate skill.
-
-## Planning Route
-
-If you feel the impulse to call `EnterPlanMode`, that impulse IS the trigger for a superomni skill:
-- **Need to design/explore?** → Invoke `brainstorm` skill
-- **Need to plan implementation?** → Invoke `writing-plans` skill
-- **Need to execute?** → Invoke `executing-plans` or `subagent-development`
-
-Always follow this skill's phases (Phase 1-4) directly. Route all planning through superomni skills.
-
-## Phase 1: Detect Current Pipeline Stage
-
-Scan for existing artifacts to determine where the project is in the sprint pipeline:
-
-```bash
-# Artifact detection (glob for dynamic filenames)
-_HAS_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-_HAS_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
-_HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
-_HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
-
-# Session matching: extract session from plan filename for review detection
-if [ -n "$_HAS_PLAN" ]; then
-  _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
-  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
-  _PLAN_OPEN=$(grep -c '^\- \[ \]' "$_HAS_PLAN" 2>/dev/null || echo "0")
-  _PLAN_DONE=$(grep -c '^\- \[x\]' "$_HAS_PLAN" 2>/dev/null || echo "0")
-fi
-
-# Recent git activity
-git log --oneline -5 2>/dev/null
-git status --short 2>/dev/null
-```
-
-### Stage Detection Matrix
-
-Use the following priority-ordered rules (first match wins):
-
-| Priority | Condition | Stage | Skill |
-|----------|-----------|-------|-------|
-| 1 | No artifacts at all | **THINK** | `brainstorm` — **human gate: interactive brainstorm + spec approval** |
-| 2 | `spec-*.md` exists, no `plan-*.md` | **PLAN** | `writing-plans` — auto-advance |
-| 3 | `plan-*.md` exists, no review doc matching its session | **REVIEW** | `plan-review` — auto-advance (all decisions auto-resolved) |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` (+ `frontend-design` if UI steps detected) — auto-advance |
-| 5 | `plan-*.md` all checked | **VERIFY** | Required: `code-review` → `qa` → `verification`. Optional: `security-audit` (if security-relevant), `production-readiness` (if deploying) — auto-advance |
-| 6 | Verified | **SHIP** | `ship`, `finishing-branch` — auto-advance |
-| 7 | Shipped | **REFLECT** | `self-improvement` → `retro` (run sequentially in one stage) |
-
-**Session matching for REVIEW detection:** Extract the `[session]` segment from the plan filename (e.g., `plan-main-auth-refactor-20260404.md` → session = `auth-refactor`). A matching review doc must contain the same session identifier (e.g., `review-main-auth-refactor-*.md`). If no matching review exists → stage is REVIEW.
-
-### Auto-Advance Rule
-
-**THINK is the only human gate.** The brainstorm skill requires interactive dialogue and spec approval from the user. Once the spec is approved, all subsequent stages auto-advance on DONE without user interaction.
-
-- **THINK stage with DONE (spec approved):** Auto-invoke `writing-plans`. All subsequent stages chain automatically.
-- **All non-THINK stages with DONE:** Auto-invoke the next skill immediately. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
-- **Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT:** STOP and wait for user.
-
-Only show the guided menu when:
-- No clear next step can be determined
-- The user invoked `/vibe` without arguments
-
-If the user passes **arguments** with `/vibe` (e.g., `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
-
-## Phase 2: Show Guided Menu
-
-Present the available commands only when auto-advance does not apply:
-
-```
-| Command | What it does |
-|---------|-------------|
-| /brainstorm | Design a feature — produces spec-[branch]-[session]-[date].md |
-| /write-plan | Turn a spec into an executable plan |
-| /execute-plan | Run the plan step by step |
-| /review | Plan review (before BUILD) |
-| /qa | Quality assurance and test coverage |
-| /verify | Verify task completion |
-| /production-readiness | Pre-deploy readiness check |
-| /investigate | Exploratory investigation |
-| /self-improve | Post-task performance evaluation |
-| /retro | Engineering retrospective |
-| /workflow | See the full sprint pipeline |
-| /ship | Release workflow |
-| /fd-audit | Accessibility + performance check |
-| /fd-critique | UX review for clarity and hierarchy |
-| /fd-polish | Pre-deployment refinement |
-
-Suggested next step → [skill-name]: [reason based on detected stage]
-```
-
-## Phase 3: Handle Subcommands
-
-### `/vibe status`
-
-Run the stage detection from Phase 1 and display:
-
-```
-Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
-Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
-Next → [skill-name]: [reason]
-```
-
-### `/vibe reset`
-
-Warn before clearing artifacts:
-
-```
-WARNING: This will remove all superomni artifacts:
-  - docs/superomni/specs/spec-*.md
-  - docs/superomni/plans/plan-*.md
-  - docs/superomni/executions/
-  - docs/superomni/reviews/
-  - docs/superomni/subagents/
-  - docs/superomni/production-readiness/
-
-Self-improvement history will be preserved:
-  - docs/superomni/improvements/
-  - docs/superomni/evaluations/
-  - docs/superomni/harness-audits/
-
-Proceed? (Y/N)
-```
-
-If confirmed:
-```bash
-rm -f docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md
-rm -rf docs/superomni/executions/ docs/superomni/reviews/ docs/superomni/subagents/ docs/superomni/production-readiness/
-echo "Reset complete. Starting fresh from THINK stage."
-```
-
-Then re-run Phase 1-2 (will detect THINK stage).
-
-## Phase 4: Delegate to Skill
-
-After displaying the banner and menu:
-
-1. If the user provided arguments → invoke the detected skill with those arguments
-2. If no arguments → wait for user input
-3. When the user chooses a command or describes what they want to do → invoke the matching skill
-
-**Important:** `/vibe` never executes implementation work directly. It always delegates to the appropriate skill. Route all planning through superomni skills (`brainstorm`, `writing-plans`).
-
-Report status: **DONE** — framework activated, stage detected, user guided to next skill.
-TEL_DUR" "OUTCOME" 2>/dev/null || true
+~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
 ```
 Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
 
@@ -660,30 +150,30 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
 
-# Vibe — Framework Entry Point
+# Vibe - Framework Entry Point
 
-**Goal:** Activate the superomni skill framework, detect the current pipeline stage, and guide the user to the right skill.
+**Goal:** Activate the superomni skill framework, detect the current pipeline stage, and route to the right skill.
 
 ## Usage
 
 ```
-/vibe              — activate framework, detect stage, show guided menu
-/vibe status       — show current pipeline position and available next steps
-/vibe reset        — clear superomni artifacts and restart from THINK
+/vibe              - activate framework, detect stage, continue workflow
+/vibe status       - show current pipeline position and available next steps
+/vibe reset        - clear superomni artifacts and restart from THINK
 ```
 
 ## Iron Law: One Entry Point, Full Pipeline
 
-`/vibe` is the single unified entry point. It never executes work itself — it **detects** the current stage and **delegates** to the appropriate skill.
+`/vibe` is the single unified entry point. It never executes work itself - it detects the current stage and delegates to the appropriate skill.
 
 ## Planning Route
 
 If you feel the impulse to call `EnterPlanMode`, that impulse IS the trigger for a superomni skill:
-- **Need to design/explore?** → Invoke `brainstorm` skill
-- **Need to plan implementation?** → Invoke `writing-plans` skill
-- **Need to execute?** → Invoke `executing-plans` or `subagent-development`
+- Need to design/explore? -> Invoke `brainstorm`
+- Need to plan implementation? -> Invoke `writing-plans`
+- Need to execute? -> Invoke `executing-plans` or `subagent-development`
 
-Always follow this skill's phases (Phase 1-4) directly. Route all planning through superomni skills.
+Always follow this skill's phases directly. Route all planning through superomni skills.
 
 ## Phase 1: Detect Current Pipeline Stage
 
@@ -715,29 +205,46 @@ Use the following priority-ordered rules (first match wins):
 
 | Priority | Condition | Stage | Skill |
 |----------|-----------|-------|-------|
-| 1 | No artifacts at all | **THINK** | `brainstorm` — **human gate: interactive brainstorm + spec approval** |
-| 2 | `spec-*.md` exists, no `plan-*.md` | **PLAN** | `writing-plans` — auto-advance |
-| 3 | `plan-*.md` exists, no review doc matching its session | **REVIEW** | `plan-review` — auto-advance (all decisions auto-resolved) |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | **BUILD** | `executing-plans` (+ `frontend-design` if UI steps detected) — auto-advance |
-| 5 | `plan-*.md` all checked | **VERIFY** | Required: `code-review` → `qa` → `verification`. Optional: `security-audit` (if security-relevant), `production-readiness` (if deploying) — auto-advance |
-| 6 | Verified | **SHIP** | `ship`, `finishing-branch` — auto-advance |
-| 7 | Shipped | **REFLECT** | `self-improvement` → `retro` (run sequentially in one stage) |
+| 1 | No artifacts at all | THINK | `brainstorm` |
+| 2 | `spec-*.md` exists, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
+| 3 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
+| 4 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
+| 5 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `security-audit`, `production-readiness` - auto-advance |
+| 6 | Verified | SHIP | `ship`, `finishing-branch` - auto-advance |
+| 7 | Shipped | REFLECT | `self-improvement` -> `retro` - auto-advance |
 
-**Session matching for REVIEW detection:** Extract the `[session]` segment from the plan filename (e.g., `plan-main-auth-refactor-20260404.md` → session = `auth-refactor`). A matching review doc must contain the same session identifier (e.g., `review-main-auth-refactor-*.md`). If no matching review exists → stage is REVIEW.
+Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must contain the same session identifier.
 
-### Auto-Advance Rule
+### Auto-Advance Rule (Wave Mode)
 
-**THINK is the only human gate.** The brainstorm skill requires interactive dialogue and spec approval from the user. Once the spec is approved, all subsequent stages auto-advance on DONE without user interaction.
+THINK has exactly one human gate: spec review approval.
 
-- **THINK stage with DONE (spec approved):** Auto-invoke `writing-plans`. All subsequent stages chain automatically.
-- **All non-THINK stages with DONE:** Auto-invoke the next skill immediately. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
-- **Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT:** STOP and wait for user.
+- At THINK: `brainstorm` can run without manual gate; once `spec-[branch]-[session]-[date].md` is generated, STOP for user spec approval.
+- THINK stage with DONE (spec approved): auto-invoke `writing-plans`.
+- All non-THINK stages with DONE: auto-invoke next stage immediately. Print: `[STAGE] DONE -> advancing to [NEXT-STAGE] ([skill-name])`
+- Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT: STOP and wait for user.
+
+### Stage Artifact Contract (Required for Auto-Advance)
+
+Before advancing, verify at least one stage artifact exists for the current stage:
+
+| Stage | Required artifact(s) |
+|-------|-----------------------|
+| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
+| PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
+| REVIEW | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
+| BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
+| VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` (and `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md` when deploying) |
+| SHIP | Release evidence recorded in `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
+| REFLECT | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+
+If a required artifact is missing, do not advance. Report `DONE_WITH_CONCERNS` with the missing artifact path.
 
 Only show the guided menu when:
 - No clear next step can be determined
 - The user invoked `/vibe` without arguments
 
-If the user passes **arguments** with `/vibe` (e.g., `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
+If the user passes arguments with `/vibe` (example: `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
 
 ## Phase 2: Show Guided Menu
 
@@ -746,7 +253,7 @@ Present the available commands only when auto-advance does not apply:
 ```
 | Command | What it does |
 |---------|-------------|
-| /brainstorm | Design a feature — produces spec-[branch]-[session]-[date].md |
+| /brainstorm | Design a feature - produces spec-[branch]-[session]-[date].md |
 | /write-plan | Turn a spec into an executable plan |
 | /execute-plan | Run the plan step by step |
 | /review | Plan review (before BUILD) |
@@ -762,20 +269,20 @@ Present the available commands only when auto-advance does not apply:
 | /fd-critique | UX review for clarity and hierarchy |
 | /fd-polish | Pre-deployment refinement |
 
-Suggested next step → [skill-name]: [reason based on detected stage]
+Suggested next step -> [skill-name]: [reason based on detected stage]
 ```
 
 ## Phase 3: Handle Subcommands
 
 ### `/vibe status`
 
-Run the stage detection from Phase 1 and display:
+Run stage detection from Phase 1 and display:
 
 ```
-Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
+Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
 Stage: [current] | Branch: [branch]
 Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
-Next → [skill-name]: [reason]
+Next -> [skill-name]: [reason]
 ```
 
 ### `/vibe reset`
@@ -800,22 +307,21 @@ Proceed? (Y/N)
 ```
 
 If confirmed:
+
 ```bash
 rm -f docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md
 rm -rf docs/superomni/executions/ docs/superomni/reviews/ docs/superomni/subagents/ docs/superomni/production-readiness/
 echo "Reset complete. Starting fresh from THINK stage."
 ```
 
-Then re-run Phase 1-2 (will detect THINK stage).
+Then re-run Phase 1-2.
 
 ## Phase 4: Delegate to Skill
 
-After displaying the banner and menu:
+1. If the user provided arguments -> invoke the detected skill with those arguments
+2. If no arguments -> wait for user input
+3. When the user chooses a command or describes what they want to do -> invoke the matching skill
 
-1. If the user provided arguments → invoke the detected skill with those arguments
-2. If no arguments → wait for user input
-3. When the user chooses a command or describes what they want to do → invoke the matching skill
+Important: `/vibe` never executes implementation work directly. It always delegates to the appropriate skill.
 
-**Important:** `/vibe` never executes implementation work directly. It always delegates to the appropriate skill. Route all planning through superomni skills (`brainstorm`, `writing-plans`).
-
-Report status: **DONE** — framework activated, stage detected, user guided to next skill.
+Report status: DONE - framework activated, stage detected, user guided to next skill.

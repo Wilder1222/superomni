@@ -18,6 +18,34 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 "I think it works" is not evidence. "I believe it's correct" is not evidence.
 Evidence is: running the code and showing output, passing test results, or observable behavior.
 
+### Good Example (Evidence Required)
+```
+Agent claims feature is complete.
+Evidence provided:
+  1. npm test output: "15 tests, 15 passing, 0 failing"
+  2. Manual verification: curl -X POST /api/users -> 201 Created
+  3. Edge case tested: curl -X POST /api/users (empty body) -> 400 Bad Request
+  4. Screenshot: UI renders correctly with new component
+Result: DONE — all evidence is observable and reproducible
+```
+
+### Bad Example (AVOID)
+```
+Agent claims feature is complete.
+Evidence provided:
+  "I believe the implementation is correct based on the logic"
+  "It should work because I followed the pattern from the other module"
+Result: NOT ACCEPTABLE — "believe" and "should" are not evidence
+[VIOLATED: No test output, no command results, no observable behavior shown]
+```
+
+### Common Excuse Rebuttals
+| Excuse | Rebuttal |
+|--------|----------|
+| "The logic is straightforward, it must work" | Straightforward logic still needs proof — run the test |
+| "I followed the same pattern as module X" | Pattern match is not verification — show the output |
+| "Tests aren't set up for this area" | Then set them up — untestable claims cannot be verified |
+
 ## The Verification Checklist
 
 Run through this before reporting any status:

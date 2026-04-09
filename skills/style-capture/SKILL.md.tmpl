@@ -1,0 +1,197 @@
+---
+name: style-capture
+description: |
+  Capture user's code style preferences through examples, not rules.
+  Generates a style profile for consistent code generation across sessions.
+  Triggers: "/style-capture", "capture style", "show me your preferences",
+  "style profile", project initialization (new project detected by vibe).
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Style Capture — Learn From Examples
+
+**Goal:** Capture the user's implicit code style, architecture, and documentation preferences by analyzing examples they consider "good" and "bad" — then produce a reusable style profile that downstream skills reference.
+
+## Iron Law
+
+**LEARN FROM EXAMPLES, NOT JUST RULES.**
+
+Never ask "what's your style?" — ask "show me something you're satisfied with."
+Demonstration transfers tacit knowledge better than description (Polanyi's Paradox).
+
+### Good Example (Learn From Examples)
+```
+Agent: "Can you point me to 2-3 files in this project that you consider well-written?"
+User: "Look at src/auth/middleware.ts and src/utils/validation.ts"
+Agent: [reads both files, extracts patterns]
+  -> Naming: camelCase functions, PascalCase types, descriptive 2-3 word names
+  -> Comments: JSDoc on public APIs only, no inline comments
+  -> Error handling: early returns, typed errors
+  -> Saves to style profile with citations
+```
+
+### Bad Example (AVOID)
+```
+Agent: "What's your preferred coding style?"
+User: "Uh... clean code I guess?"
+Agent: [applies generic 'clean code' assumptions]
+  -> Writes overly abstracted code with dependency injection everywhere
+  [VIOLATED: Asked for rules instead of examples — got vague answer, applied wrong assumptions]
+```
+
+## Phase 1: Sample Collection
+
+Prompt the user to provide examples. Key principle: concrete examples, not abstract descriptions.
+
+### Collecting Good Examples
+Ask: **"Can you point me to 3-5 files, code snippets, or references that you consider well-written or 'feel right'?"**
+
+Accepted input formats:
+- File paths in the current project (preferred — most relevant)
+- Pasted code snippets
+- URLs to external repos or gists
+- Names of libraries/projects they admire
+
+If user provides fewer than 3: proceed but note gaps in the profile's "Unknown" section.
+
+### Collecting Bad Examples (Optional)
+Ask: **"Optionally — is there code in this project (or elsewhere) that you consider poorly written, or a style you want to avoid?"**
+
+1-2 contrast examples significantly improve feature extraction accuracy. If the user declines, proceed without.
+
+### Phase 1 Gate
+- [ ] At least 2 "good" examples collected
+- [ ] Examples are readable (file exists, code is accessible)
+- FAIL -> ask for additional examples before proceeding
+
+## Phase 2: Feature Extraction
+
+Analyze the collected examples across 6 style dimensions. For each dimension, compare good vs bad examples to identify the preference direction.
+
+### Extraction Dimensions
+
+| Dimension | What to Look For | Signal Examples |
+|-----------|-----------------|-----------------|
+| **Naming style** | Variable/function/type naming patterns | camelCase vs snake_case, descriptive vs concise, prefix conventions |
+| **Comment density** | Where and how comments are used | JSDoc only, inline explanations, no comments, "why" vs "what" |
+| **Function granularity** | Function length and decomposition | Short single-purpose vs longer procedural, helper count |
+| **Error handling** | How errors are managed | Early returns, try/catch depth, error types, fallback strategies |
+| **Abstraction level** | DRY extremism vs concrete-first | Utility extraction threshold, interface vs implementation |
+| **Documentation style** | How docs/READMEs are written | What vs Why vs How emphasis, examples included, formal vs casual |
+
+### Extraction Process
+
+For each dimension:
+1. Scan all good examples for the pattern
+2. Scan bad examples (if provided) for the anti-pattern
+3. Rate confidence: HIGH (clear pattern in 3+ examples) / MEDIUM (2 examples) / LOW (1 example)
+4. If confidence is LOW, mark as "Unknown — ask before assuming"
+
+## Phase 3: Style Profile Output
+
+Generate the style profile document:
+
+```bash
+_SCOPE="${1:-project}"  # default scope is "project"; can be "frontend", "api", "docs"
+mkdir -p docs/superomni/style-profiles
+_PROFILE="docs/superomni/style-profiles/${_SCOPE}.md"
+```
+
+Write `docs/superomni/style-profiles/<scope>.md`:
+
+```markdown
+# Style Profile: <scope>
+
+**Generated:** [date]
+**Based on:** [N] good examples, [N] bad examples
+**Confidence:** [HIGH/MEDIUM/LOW overall]
+
+## Confirmed Preferences
+
+### Naming
+- [Observed pattern with citation: "In `file.ts:12`, functions use camelCase..."]
+
+### Comments
+- [Observed pattern with citation]
+
+### Function Granularity
+- [Observed pattern with citation]
+
+### Error Handling
+- [Observed pattern with citation]
+
+### Abstraction Level
+- [Observed pattern with citation]
+
+### Documentation
+- [Observed pattern with citation]
+
+## Reference Examples
+
+### Good Examples
+- `[file path]` — [why it's a good reference for: naming, error handling]
+- `[file path]` — [why it's a good reference for: comments, granularity]
+
+### Bad Examples (Contrast)
+- `[file path]` — [what to avoid: over-abstraction, unclear naming]
+
+## Unknown / Ask Before Assuming
+- [Dimension where signal is insufficient — e.g., "No test files were provided; testing style is unknown"]
+- [Dimension where examples conflict — e.g., "Two examples use different error patterns"]
+```
+
+## Phase 4: Injection Verification
+
+Distill the profile into a compact prompt fragment for downstream skill consumption:
+
+```bash
+_PROMPT_FILE="docs/superomni/style-profiles/prompt-${_SCOPE}.md"
+```
+
+Write `docs/superomni/style-profiles/prompt-<scope>.md`:
+
+```markdown
+## Style Guidelines (from style profile)
+
+Apply these preferences when writing code for this project:
+- Naming: [1-line summary]
+- Comments: [1-line summary]
+- Functions: [1-line summary]
+- Errors: [1-line summary]
+- Abstraction: [1-line summary]
+- Docs: [1-line summary]
+
+When in doubt about style, check: docs/superomni/style-profiles/<scope>.md
+```
+
+### Downstream Integration Check
+Verify that the profile is discoverable by other skills:
+```bash
+# These skills should reference style profiles when they exist:
+echo "Integration points:"
+echo "  brainstorm     -> references profile for aesthetic decisions"
+echo "  executing-plans -> references profile when writing code"
+echo "  code-review    -> uses profile as review criteria"
+echo "  self-improvement -> treats profile as improvement target"
+ls docs/superomni/style-profiles/*.md 2>/dev/null
+```
+
+## Style Profile Report
+
+```
+STYLE CAPTURE REPORT
+════════════════════════════════════════
+Scope:              [project / frontend / api / docs]
+Good examples:      [N files/snippets analyzed]
+Bad examples:       [N files/snippets analyzed]
+Dimensions captured: [N/6]
+Unknown dimensions: [list]
+Profile saved:      docs/superomni/style-profiles/<scope>.md
+Prompt fragment:    docs/superomni/style-profiles/prompt-<scope>.md
+Status:             DONE | DONE_WITH_CONCERNS
+Concerns:
+  - [e.g., "Only 2 examples provided — LOW confidence on naming and comments"]
+════════════════════════════════════════
+```

@@ -1,10 +1,11 @@
 ---
-name: brainstorm
+name: style-capture
 description: |
-  Use when starting a new feature, project, or design decision.
-  Guides from fuzzy idea to concrete spec through structured dialogue.
-  Triggers: "brainstorm", "design", "spec this out", "let's think through".
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebSearch]
+  Capture user's code style preferences through examples, not rules.
+  Generates a style profile for consistent code generation across sessions.
+  Triggers: "/style-capture", "capture style", "show me your preferences",
+  "style profile", project initialization (new project detected by vibe).
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
 ## Preamble
@@ -213,175 +214,188 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-# Brainstorming & Specification
+# Style Capture — Learn From Examples
 
-**Goal:** Transform a fuzzy idea into a concrete, reviewable spec document.
+**Goal:** Capture the user's implicit code style, architecture, and documentation preferences by analyzing examples they consider "good" and "bad" — then produce a reusable style profile that downstream skills reference.
 
-## Iron Law: Search Before Building
+## Iron Law
 
-Before designing anything:
-1. **Layer 1 — Tried and true:** Does a well-established solution already exist?
-2. **Layer 2 — New and popular:** Is there a recently popular approach? Evaluate carefully.
-3. **Layer 3 — First principles:** Only design from scratch if nothing fits.
+**LEARN FROM EXAMPLES, NOT JUST RULES.**
 
-Run: `grep -r "similar functionality" . --include="*.md" -l` to check existing docs.
+Never ask "what's your style?" — ask "show me something you're satisfied with."
+Demonstration transfers tacit knowledge better than description (Polanyi's Paradox).
 
-## Phase 1: Problem Crystallization
-
-Ask ONE clarifying question at a time. Do not ask multiple questions at once.
-
-Required understanding before proceeding:
-- [ ] What is the problem being solved? (not the solution)
-- [ ] Who experiences this problem?
-- [ ] What does success look like? (measurable outcome)
-- [ ] What constraints exist? (time, technology, team size)
-- [ ] What already exists that's related?
-- [ ] TACIT probe: at least 3 of 5 dimensions answered
-
-### TACIT Five-Dimensional Probe
-
-After initial understanding is established, systematically probe these 5 tacit knowledge dimensions.
-Each dimension requires exactly ONE targeted question:
-
-**T - Team & Culture**
-  -> "Does your team have any preferences or taboos regarding [key technical choice in this task]?"
-  Purpose: Capture implicit team conventions and consensus
-
-**A - Aesthetic & Style**
-  -> "Is there existing code or a system you consider 'feels right' as a reference?"
-  Purpose: Capture code style, architecture taste, implicit quality standards
-  Note: If `docs/superomni/style-profiles/` exists, reference it instead of asking
-
-**C - Constraints Unstated**
-  -> "What absolutely must NOT be touched or changed this time?"
-  Purpose: Capture hidden boundaries, forbidden zones, political constraints
-
-**I - Integration Expectations**
-  -> "After this feature is complete, what will the user do first?"
-  Purpose: Capture implicit acceptance scenarios and success experience
-
-**T - Time & Quality Trade-offs**
-  -> "If you had to cut one feature to ship on time, which would you cut first?"
-  Purpose: Capture implicit priority weights and non-negotiables
-
-**TACIT Probe Gate:**
-Before proceeding to Phase 2, verify:
-- [ ] At least 3 of 5 TACIT dimensions received an explicit answer
-- [ ] If any answer revealed new constraints, problem definition has been updated
-- FAIL -> continue clarification, do NOT enter Phase 2
-
-Rule: **Ask one question. Wait for answer. Then ask the next.**
-Confirmation rule: each answer (text input or single-choice) is an immediate confirmation — do NOT re-ask or add a "confirm?" prompt after the user replies.
-
-## Phase 2: Solution Space Exploration
-
-Generate 3 candidate approaches, then always offer an "Other" option for the user's own idea:
-
+### Good Example (Learn From Examples)
 ```
-Option A: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
-  Effort: [S/M/L]
-
-Option B: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
-  Effort: [S/M/L]
-
-Option C: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
-  Effort: [S/M/L]
-
-Option D (Other): describe your own approach — ___________
+Agent: "Can you point me to 2-3 files in this project that you consider well-written?"
+User: "Look at src/auth/middleware.ts and src/utils/validation.ts"
+Agent: [reads both files, extracts patterns]
+  -> Naming: camelCase functions, PascalCase types, descriptive 2-3 word names
+  -> Comments: JSDoc on public APIs only, no inline comments
+  -> Error handling: early returns, typed errors
+  -> Saves to style profile with citations
 ```
 
-Apply the 6 Decision Principles when evaluating:
-- Prefer completeness (covers more cases)
-- Prefer DRY (reuses existing)
-- Prefer explicit over clever
+### Bad Example (AVOID)
+```
+Agent: "What's your preferred coding style?"
+User: "Uh... clean code I guess?"
+Agent: [applies generic 'clean code' assumptions]
+  -> Writes overly abstracted code with dependency injection everywhere
+  [VIOLATED: Asked for rules instead of examples — got vague answer, applied wrong assumptions]
+```
 
-Surface only TASTE decisions to the user. Decide MECHANICAL ones silently.
+## Phase 1: Sample Collection
 
-## Phase 3: Visual Companion (if applicable)
+Prompt the user to provide examples. Key principle: concrete examples, not abstract descriptions.
 
-For UI or architecture work, produce a text diagram or ASCII wireframe.
-See `visual-companion.md` for diagram formats.
+### Collecting Good Examples
+Ask: **"Can you point me to 3-5 files, code snippets, or references that you consider well-written or 'feel right'?"**
 
-**Frontend Design Integration:**
-If the spec involves UI components, pages, or visual design:
-- Note in the spec: *"This involves UI work — recommend running the `frontend-design` skill during BUILD to ensure design quality."*
-- When generating acceptance criteria, include: "Passes designer agent review at 7+/10 on all dimensions"
+Accepted input formats:
+- File paths in the current project (preferred — most relevant)
+- Pasted code snippets
+- URLs to external repos or gists
+- Names of libraries/projects they admire
 
-## Phase 4: Spec Document Output
+If user provides fewer than 3: proceed but note gaps in the profile's "Unknown" section.
+
+### Collecting Bad Examples (Optional)
+Ask: **"Optionally — is there code in this project (or elsewhere) that you consider poorly written, or a style you want to avoid?"**
+
+1-2 contrast examples significantly improve feature extraction accuracy. If the user declines, proceed without.
+
+### Phase 1 Gate
+- [ ] At least 2 "good" examples collected
+- [ ] Examples are readable (file exists, code is accessible)
+- FAIL -> ask for additional examples before proceeding
+
+## Phase 2: Feature Extraction
+
+Analyze the collected examples across 6 style dimensions. For each dimension, compare good vs bad examples to identify the preference direction.
+
+### Extraction Dimensions
+
+| Dimension | What to Look For | Signal Examples |
+|-----------|-----------------|-----------------|
+| **Naming style** | Variable/function/type naming patterns | camelCase vs snake_case, descriptive vs concise, prefix conventions |
+| **Comment density** | Where and how comments are used | JSDoc only, inline explanations, no comments, "why" vs "what" |
+| **Function granularity** | Function length and decomposition | Short single-purpose vs longer procedural, helper count |
+| **Error handling** | How errors are managed | Early returns, try/catch depth, error types, fallback strategies |
+| **Abstraction level** | DRY extremism vs concrete-first | Utility extraction threshold, interface vs implementation |
+| **Documentation style** | How docs/READMEs are written | What vs Why vs How emphasis, examples included, formal vs casual |
+
+### Extraction Process
+
+For each dimension:
+1. Scan all good examples for the pattern
+2. Scan bad examples (if provided) for the anti-pattern
+3. Rate confidence: HIGH (clear pattern in 3+ examples) / MEDIUM (2 examples) / LOW (1 example)
+4. If confidence is LOW, mark as "Unknown — ask before assuming"
+
+## Phase 3: Style Profile Output
+
+Generate the style profile document:
 
 ```bash
-mkdir -p docs/superomni/specs
-_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_SESSION="<auto-generate-kebab-case-from-context>"  # e.g., auth-refactor, vibe-skill
-_DATE=$(date +%Y%m%d)
-_SPEC_FILE="docs/superomni/specs/spec-${_BRANCH}-${_SESSION}-${_DATE}.md"
+_SCOPE="${1:-project}"  # default scope is "project"; can be "frontend", "api", "docs"
+mkdir -p docs/superomni/style-profiles
+_PROFILE="docs/superomni/style-profiles/${_SCOPE}.md"
 ```
 
-Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this structure:
+Write `docs/superomni/style-profiles/<scope>.md`:
 
 ```markdown
-# [Feature Name] — Spec
+# Style Profile: <scope>
 
-## Problem
-[1 paragraph: what is broken or missing and for whom]
+**Generated:** [date]
+**Based on:** [N] good examples, [N] bad examples
+**Confidence:** [HIGH/MEDIUM/LOW overall]
 
-## Goals
-- [Measurable outcome 1]
-- [Measurable outcome 2]
+## Confirmed Preferences
 
-## Non-Goals (YAGNI)
-- [What we are explicitly NOT building]
+### Naming
+- [Observed pattern with citation: "In `file.ts:12`, functions use camelCase..."]
 
-## Proposed Solution
-[Selected approach + rationale]
+### Comments
+- [Observed pattern with citation]
 
-## Key Design Decisions
-| Decision | Choice | Rationale | Principle Applied |
+### Function Granularity
+- [Observed pattern with citation]
 
-## Acceptance Criteria
-- [ ] [Testable criterion 1]
-- [ ] [Testable criterion 2]
+### Error Handling
+- [Observed pattern with citation]
 
-## Open Questions
-- [Any unresolved taste decisions requiring user input]
+### Abstraction Level
+- [Observed pattern with citation]
+
+### Documentation
+- [Observed pattern with citation]
+
+## Reference Examples
+
+### Good Examples
+- `[file path]` — [why it's a good reference for: naming, error handling]
+- `[file path]` — [why it's a good reference for: comments, granularity]
+
+### Bad Examples (Contrast)
+- `[file path]` — [what to avoid: over-abstraction, unclear naming]
+
+## Unknown / Ask Before Assuming
+- [Dimension where signal is insufficient — e.g., "No test files were provided; testing style is unknown"]
+- [Dimension where examples conflict — e.g., "Two examples use different error patterns"]
 ```
 
-## Phase 5: Spec Review
+## Phase 4: Injection Verification
 
-Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
+Distill the profile into a compact prompt fragment for downstream skill consumption:
 
-## Phase 6: Human Gate — Spec Approval
-
-**THINK is the human gate.** After the spec is generated and self-reviewed, STOP and present the spec to the user for approval.
-
-Present:
+```bash
+_PROMPT_FILE="docs/superomni/style-profiles/prompt-${_SCOPE}.md"
 ```
-SPEC READY FOR REVIEW
+
+Write `docs/superomni/style-profiles/prompt-<scope>.md`:
+
+```markdown
+## Style Guidelines (from style profile)
+
+Apply these preferences when writing code for this project:
+- Naming: [1-line summary]
+- Comments: [1-line summary]
+- Functions: [1-line summary]
+- Errors: [1-line summary]
+- Abstraction: [1-line summary]
+- Docs: [1-line summary]
+
+When in doubt about style, check: docs/superomni/style-profiles/<scope>.md
+```
+
+### Downstream Integration Check
+Verify that the profile is discoverable by other skills:
+```bash
+# These skills should reference style profiles when they exist:
+echo "Integration points:"
+echo "  brainstorm     -> references profile for aesthetic decisions"
+echo "  executing-plans -> references profile when writing code"
+echo "  code-review    -> uses profile as review criteria"
+echo "  self-improvement -> treats profile as improvement target"
+ls docs/superomni/style-profiles/*.md 2>/dev/null
+```
+
+## Style Profile Report
+
+```
+STYLE CAPTURE REPORT
 ════════════════════════════════════════
-File: [spec file path]
-
-[Summary: 3-5 bullet points of the proposed solution]
-
-Acceptance criteria:
-  - [criterion 1]
-  - [criterion 2]
-  ...
-
-Please review the spec above.
-  Y) Approve — proceed to PLAN (all subsequent stages will auto-execute)
-  N) Reject — describe what needs to change
-  [Or provide revision notes directly]
+Scope:              [project / frontend / api / docs]
+Good examples:      [N files/snippets analyzed]
+Bad examples:       [N files/snippets analyzed]
+Dimensions captured: [N/6]
+Unknown dimensions: [list]
+Profile saved:      docs/superomni/style-profiles/<scope>.md
+Prompt fragment:    docs/superomni/style-profiles/prompt-<scope>.md
+Status:             DONE | DONE_WITH_CONCERNS
+Concerns:
+  - [e.g., "Only 2 examples provided — LOW confidence on naming and comments"]
 ════════════════════════════════════════
 ```
-
-**Wait for user response.** This is the ONLY human gate in the entire pipeline.
-- If approved → report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) will execute automatically without further user input.
-- If rejected → revise the spec based on feedback and re-present for review.
-
-Report status: **DONE** — spec written, reviewed, and approved by user. Path: [spec file path]

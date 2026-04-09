@@ -32,6 +32,39 @@ Required understanding before proceeding:
 - [ ] What does success look like? (measurable outcome)
 - [ ] What constraints exist? (time, technology, team size)
 - [ ] What already exists that's related?
+- [ ] TACIT probe: at least 3 of 5 dimensions answered
+
+### TACIT Five-Dimensional Probe
+
+After initial understanding is established, systematically probe these 5 tacit knowledge dimensions.
+Each dimension requires exactly ONE targeted question:
+
+**T - Team & Culture**
+  -> "Does your team have any preferences or taboos regarding [key technical choice in this task]?"
+  Purpose: Capture implicit team conventions and consensus
+
+**A - Aesthetic & Style**
+  -> "Is there existing code or a system you consider 'feels right' as a reference?"
+  Purpose: Capture code style, architecture taste, implicit quality standards
+  Note: If `docs/superomni/style-profiles/` exists, reference it instead of asking
+
+**C - Constraints Unstated**
+  -> "What absolutely must NOT be touched or changed this time?"
+  Purpose: Capture hidden boundaries, forbidden zones, political constraints
+
+**I - Integration Expectations**
+  -> "After this feature is complete, what will the user do first?"
+  Purpose: Capture implicit acceptance scenarios and success experience
+
+**T - Time & Quality Trade-offs**
+  -> "If you had to cut one feature to ship on time, which would you cut first?"
+  Purpose: Capture implicit priority weights and non-negotiables
+
+**TACIT Probe Gate:**
+Before proceeding to Phase 2, verify:
+- [ ] At least 3 of 5 TACIT dimensions received an explicit answer
+- [ ] If any answer revealed new constraints, problem definition has been updated
+- FAIL -> continue clarification, do NOT enter Phase 2
 
 Rule: **Ask one question. Wait for answer. Then ask the next.**
 Confirmation rule: each answer (text input or single-choice) is an immediate confirmation — do NOT re-ask or add a "confirm?" prompt after the user replies.

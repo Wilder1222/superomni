@@ -20,9 +20,36 @@ echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
 ```
 
 ### PROACTIVE Mode
+
+Check proactive configuration:
+```bash
+_PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
+```
+
+**Legacy mode (single value):**
+If `proactive=true`: auto-invoke skills. If `proactive=false`: ask first.
+
 If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the
 user explicitly invokes. If you would have auto-invoked, say:
 *"I think [skill-name] might help here — want me to run it?"* and wait.
+
+**5-Level Trust Matrix (when configured):**
+
+Before executing any decision, classify its tacit knowledge intensity:
+
+| Decision Type | Config Key | Default | When to Use |
+|--------------|------------|---------|-------------|
+| Mechanical | proactive.mechanical | true | Iron Law applies, Gate Check is deterministic |
+| Structural | proactive.structural | true | Architecture, interface, module boundaries |
+| Stylistic | proactive.stylistic | ask | Naming, formatting, UI layout, comment style |
+| Strategic | proactive.strategic | ask | Approach selection, architecture trade-offs |
+| Destructive | proactive.destructive | false | Delete, overwrite, irreversible operations |
+
+Classification rules:
+- If a style profile exists (`docs/superomni/style-profiles/`), stylistic decisions
+  that match the profile can be treated as mechanical
+- Strategic decisions ALWAYS surface to user unless `proactive.strategic=true`
+- Destructive decisions ALWAYS confirm (integrates with `careful` Skill) regardless of config
 
 ### Completion Status Protocol
 Report status using one of these at the end of every skill session:
@@ -129,6 +156,43 @@ If any answer is NO, address it before reporting DONE. If it cannot be addressed
 
 For a full performance evaluation spanning the entire sprint, use the `self-improvement` skill.
 
+### TACIT-DENSE Detection (Tacit Knowledge Density Check)
+
+Before executing substantive decisions, check if any falls into these high-tacit-density categories.
+These are NOT about operational danger (that's the `careful` skill) — they're about whether the Agent
+has enough tacit knowledge to judge correctly.
+
+**D1 - Domain Expertise Decision**
+  Trigger: Requires judgment in a specialized domain (security, compliance, legal, medical, financial)
+  Examples: choosing encryption algorithm, deciding data retention policy, HIPAA compliance choice
+  Action: State "TACIT-DENSE [D1]", present options with trade-offs, wait for user selection
+
+**D2 - User-Facing Experience Decision**
+  Trigger: Substantive choices about UI copy, interaction flow, error messaging, onboarding
+  Examples: writing onboarding guidance text, choosing error message tone, designing empty states
+  Action: Provide draft with explicit markers on parts needing user review
+
+**D3 - Team Culture & Convention Decision**
+  Trigger: Major choices about team workflow, naming conventions, documentation style, file organization
+  Examples: naming convention for new module, choosing between monorepo approaches, doc format
+  Action: Check docs/superomni/style-profiles/ first; if no profile, ask user
+
+**D4 - Novel Pattern Decision**
+  Trigger: Task type has fewer than 3 precedents in project execution history
+  Examples: first-time integration of a new framework, first use of a new deployment target
+  Action: Reduce autonomy — add intermediate checkpoints, present approach before executing
+
+**Output format when TACIT-DENSE detected:**
+```
+TACIT-DENSE [D1/D2/D3/D4]: This is a [category] decision requiring your judgment.
+Question: [single most important question]
+My default recommendation: [recommendation + rationale]
+Please confirm or share your preference.
+```
+
+**Relationship with careful skill:** careful handles "can we undo this?" (operational risk).
+TACIT-DENSE handles "can we judge this correctly?" (knowledge risk). They are complementary.
+
 ### Telemetry (Local Only)
 ```bash
 _TEL_END=$(date +%s)
@@ -149,7 +213,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
    - Writing to `~/.omni-skills/` (sessions, analytics)
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
-
 
 # Investigate
 

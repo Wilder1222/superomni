@@ -32,6 +32,58 @@ Performance problems in AI-assisted development reduce to three root causes:
 
 Every metric in this skill traces back to one of these three root causes.
 
+## Phase 0: Tacit Gap Mining
+
+Before evaluating the current session, mine execution history for tacit knowledge gaps.
+
+### Signal Sources
+```bash
+# 1. Recurring review comments (3+ occurrences = uncodified standard)
+echo "=== Review comment patterns ==="
+for review in docs/superomni/reviews/review-*.md; do
+  [ -f "$review" ] && grep -h "^- " "$review" 2>/dev/null
+done | sort | uniq -c | sort -rn | head -10
+
+# 2. Execution deviation records (manual overrides = unmatched preferences)
+echo "=== Execution deviations ==="
+for exec in docs/superomni/executions/execution-*.md; do
+  [ -f "$exec" ] && grep -h -A1 "CONCERN\|DEVIATION\|override\|manual" "$exec" 2>/dev/null
+done | head -10
+
+# 3. Skill override frequency
+echo "=== Skill overrides ==="
+grep "override\|rejected\|skipped" ~/.omni-skills/analytics/usage.jsonl 2>/dev/null | tail -5
+```
+
+### Mining Questions
+Answer each with evidence from the sources above:
+- [ ] In the last 5 executions, which Agent suggestions were rejected by the user?
+- [ ] In code reviews, which comment types appeared 3+ times?
+- [ ] In which scenarios did the user manually modify Agent output?
+
+### Analysis Logic
+- User rejects Agent suggestion = Agent lacks a tacit preference at this point
+- Recurring review comment = Standard not yet captured by an Iron Law
+- Manual output modification = Style mismatch between Agent and user
+
+### Tacit Gap Output
+If any gaps are found, generate `docs/superomni/improvements/tacit-gaps-[date].md`:
+
+```markdown
+# Tacit Knowledge Gaps — [date]
+
+| Scenario | Agent Behavior | User Expected Behavior | Proposed Rule |
+|----------|---------------|----------------------|---------------|
+| [context] | [what Agent did] | [what user wanted] | [candidate rule to add] |
+
+## Recommendations
+- If a gap maps to a style preference: update docs/superomni/style-profiles/
+- If a gap maps to a process rule: propose new Iron Law or Gate Check
+- If a gap maps to domain knowledge: flag as permanent TACIT-DENSE category
+```
+
+If no gaps found, note: "No tacit gaps detected in available history — continue to Phase 1."
+
 ## Phase 1: Gather Session Evidence
 
 Collect objective data about what happened in this session:
@@ -191,6 +243,14 @@ Save the **full** evaluation report to `$REPORT_FILE` using the following struct
 **Branch:** [branch]
 **Task description:** [what was worked on this session]
 
+## Tacit Gaps (Phase 0)
+
+| Scenario | Agent Behavior | User Expected | Proposed Rule |
+|----------|---------------|--------------|---------------|
+| [from Phase 0 output, or "None detected"] | | | |
+
+Tacit gaps file: [path or "not generated"]
+
 ## Session Evidence (Phase 1)
 
 - Skills invoked: [list]
@@ -266,6 +326,7 @@ This report is the canonical record of agent and skill performance for this sess
 SELF-IMPROVEMENT REPORT
 ════════════════════════════════════════
 Session:            [branch / date / task description]
+Tacit gaps found:   [N gaps | none]
 Process adherence:  [N/N checks passed]
 Agent score:        [N/15] (scope: N/5 | instructions: N/5 | escalation: N/5)
 Skills evaluated:   [N skills] — avg [N]/5

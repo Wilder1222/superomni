@@ -18,6 +18,37 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 
 If you haven't completed Phase 1, you cannot propose fixes. "I think it might be X" is not a root cause. A root cause is a specific, testable claim about what is wrong.
 
+### Good Execution Example
+```
+User reports: Button click has no response
+Agent:
+  1. Check event listener bindings -> confirmed bound correctly
+  2. Check if handler function is called -> found it is NOT called
+  3. Check for event propagation blockers -> found parent element has e.stopPropagation()
+  4. Root cause identified: parent stopPropagation() prevents click from reaching button
+  5. Fix: remove incorrect stopPropagation() call
+```
+
+### Bad Execution Example (AVOID)
+```
+User reports: Button click has no response
+Agent:
+  Guesses it might be CSS pointer-events: none
+  -> Adds pointer-events: auto
+  -> Still broken
+  -> Guesses it might be z-index
+  -> Adjusts z-index
+  -> Still broken
+  [VIOLATED: Started fixing without root cause investigation]
+```
+
+### Common Excuse Rebuttals
+| Excuse | Rebuttal |
+|--------|----------|
+| "The problem is obvious, root cause is X" | "Obvious" is not evidence — spend 2 minutes verifying |
+| "Similar bug was fixed this way before" | Similar is not identical — verify root cause before applying fix |
+| "User described the cause already" | User describes symptoms, not causes — investigate anyway |
+
 ## Phase 1: Root Cause Investigation
 
 ### Scope Lock (built-in freeze)

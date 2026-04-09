@@ -54,7 +54,6 @@ Philosophy: **Plan Lean, Execute Complete**
 | Command | Description |
 |---------|-------------|
 | `/vibe` | Activate full framework, detect pipeline stage, launch guided workflow. Subcommands: `/vibe status`, `/vibe reset` |
-| `/vibe [prompt] --loops N` | Start full pipeline then auto-iterate N times from REVIEW stage, optimizing toward user goal |
 | `/brainstorm` | Design a feature — produces `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
@@ -101,8 +100,6 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 | Improvements | `docs/superomni/improvements/` | `improvement-[branch]-[session]-[date].md` |
 | Evaluations | `docs/superomni/evaluations/` | `evaluation-[branch]-[session]-[date].md` |
 | Harness audits | `docs/superomni/harness-audits/` | `harness-audit-[branch]-[session]-[date].md` |
-| Iteration reports | `docs/superomni/iterations/` | `iteration-[branch]-[session]-[NN]-[date].md` |
-
 **`[session]` naming:** Auto-generate a short kebab-case identifier from conversation context (e.g., `vibe-skill`, `auth-refactor`). Max 30 chars. Enables agents to search and retrieve relevant prior sessions.
 
 Documents in `docs/superomni/` serve as a permanent, indexable audit trail for agent self-improvement.
@@ -113,7 +110,7 @@ Only two moments in the full pipeline require human interaction:
 1. **Brainstorm dialogue** — clarifying questions during `brainstorm` (THINK stage)
 2. **Spec approval** — the human gate presented after spec generation; user approves or revises
 
-All other stages (PLAN, REVIEW, BUILD, VERIFY, SHIP, REFLECT, and `--loops` iterations) run automatically.
+All other stages (PLAN, REVIEW, BUILD, VERIFY, SHIP, REFLECT) run automatically.
 
 ## Notes for Claude
 

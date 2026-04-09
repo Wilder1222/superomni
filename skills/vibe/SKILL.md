@@ -156,21 +156,11 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 ## Usage
 
 ```
-/vibe                        — activate framework, detect stage, show guided menu
-/vibe status                 — show current pipeline position and available next steps
-/vibe reset                  — clear superomni artifacts and restart from THINK
-/vibe [prompt]               — start with a specific goal; routes to detected skill with context
-/vibe [prompt] --loops N     — start full pipeline then auto-iterate N times from REVIEW stage
-/vibe --loops N              — apply N auto-iterations from REVIEW on existing artifacts
+/vibe              — activate framework, detect stage, show guided menu
+/vibe status       — show current pipeline position and available next steps
+/vibe reset        — clear superomni artifacts and restart from THINK
+/vibe [prompt]     — start with a specific goal; routes to detected skill with context
 ```
-
-### `--loops N` (Auto-Iteration Mode)
-
-Specifying `--loops N` activates **auto-iteration mode**. After the initial pipeline completes
-(THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT), the agent automatically loops
-back to the REVIEW stage **N additional times**, using the original user goal as the north star
-for each cycle. Each iteration runs: `code-review` → (apply fixes if needed) → `qa` →
-`verification` → `self-improvement`, and saves a report to `docs/superomni/iterations/`.
 
 ## Iron Law: One Entry Point, Full Pipeline
 
@@ -181,7 +171,7 @@ current stage and **delegates** to the appropriate skill.
 1. **Brainstorm dialogue** — clarifying questions during `brainstorm` (THINK stage)
 2. **Spec approval** — the human gate at the end of `brainstorm` before PLAN begins
 
-All other stages (PLAN, REVIEW, BUILD, VERIFY, SHIP, REFLECT, and all iteration loops) run
+All other stages (PLAN, REVIEW, BUILD, VERIFY, SHIP, REFLECT) run
 fully automatically without user interaction until they reach DONE.
 
 ## Planning Route
@@ -191,47 +181,7 @@ If you feel the impulse to call `EnterPlanMode`, that impulse IS the trigger for
 - **Need to plan implementation?** → Invoke `writing-plans` skill
 - **Need to execute?** → Invoke `executing-plans` or `subagent-development`
 
-Always follow this skill's phases (Phase 1-5) directly. Route all planning through superomni skills.
-
-## Phase 0: Parse Arguments
-
-Before detecting the stage, parse any arguments passed to `/vibe`:
-
-```bash
-_VIBE_ARGS="$*"
-_VIBE_LOOPS=0
-_VIBE_GOAL=""
-
-# Extract --loops N
-if echo "$_VIBE_ARGS" | grep -q '\-\-loops'; then
-  _VIBE_LOOPS=$(echo "$_VIBE_ARGS" | grep -oE '\-\-loops [0-9]+' | grep -oE '[0-9]+' || echo "0")
-fi
-
-# Extract user goal (everything except --loops N)
-_VIBE_GOAL=$(echo "$_VIBE_ARGS" | sed 's/--loops [0-9]*//' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
-
-# Load existing state if present
-_VIBE_STATE=".superomni/vibe-state.json"
-if [ -f "$_VIBE_STATE" ]; then
-  _SAVED_LOOPS=$(grep -o '"max_loops":[^,}]*' "$_VIBE_STATE" | grep -o '[0-9]*' || echo "0")
-  _SAVED_GOAL=$(grep -o '"user_goal":"[^"]*"' "$_VIBE_STATE" | sed 's/"user_goal":"//;s/"//' || echo "")
-  _CURRENT_LOOP=$(grep -o '"current_loop":[^,}]*' "$_VIBE_STATE" | grep -o '[0-9]*' || echo "0")
-  # Prefer freshly-passed values over saved values
-  [ "$_VIBE_LOOPS" = "0" ] && _VIBE_LOOPS="$_SAVED_LOOPS"
-  [ -z "$_VIBE_GOAL" ] && _VIBE_GOAL="$_SAVED_GOAL"
-fi
-
-# Persist state (create/update)
-mkdir -p .superomni
-cat > "$_VIBE_STATE" << STATEOF
-{
-  "user_goal": "$_VIBE_GOAL",
-  "max_loops": $_VIBE_LOOPS,
-  "current_loop": ${_CURRENT_LOOP:-0},
-  "updated_at": "$(date -Iseconds 2>/dev/null || date)"
-}
-STATEOF
-```
+Always follow this skill's phases (Phase 1-4) directly. Route all planning through superomni skills.
 
 ## Phase 1: Detect Current Pipeline Stage
 
@@ -282,11 +232,10 @@ without user interaction.
 - **THINK stage with DONE (spec approved):** Auto-invoke `writing-plans`. All subsequent stages chain automatically.
 - **All non-THINK stages with DONE:** Auto-invoke the next skill immediately. Print: `[STAGE] DONE → advancing to [NEXT-STAGE] ([skill-name])`
 - **Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT:** STOP and wait for user.
-- **Iteration loop active (`--loops N`):** After REFLECT completes, advance to Phase 5 (Auto-Iteration Loop).
 
 Only show the guided menu when:
 - No clear next step can be determined
-- The user invoked `/vibe` without arguments and no `--loops` state is active
+- The user invoked `/vibe` without arguments
 
 If the user passes **arguments** with `/vibe` (e.g., `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
 
@@ -326,7 +275,6 @@ Run the stage detection from Phase 1 and display:
 Pipeline: THINK → PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT
 Stage: [current] | Branch: [branch]
 Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
-Iteration: [current_loop]/[max_loops] loops active
 Next → [skill-name]: [reason]
 ```
 
@@ -342,8 +290,6 @@ WARNING: This will remove all superomni artifacts:
   - docs/superomni/reviews/
   - docs/superomni/subagents/
   - docs/superomni/production-readiness/
-  - docs/superomni/iterations/
-  - .superomni/vibe-state.json
 
 Self-improvement history will be preserved:
   - docs/superomni/improvements/
@@ -356,12 +302,11 @@ Proceed? (Y/N)
 If confirmed:
 ```bash
 rm -f docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md
-rm -rf docs/superomni/executions/ docs/superomni/reviews/ docs/superomni/subagents/ docs/superomni/production-readiness/ docs/superomni/iterations/
-rm -f .superomni/vibe-state.json
+rm -rf docs/superomni/executions/ docs/superomni/reviews/ docs/superomni/subagents/ docs/superomni/production-readiness/
 echo "Reset complete. Starting fresh from THINK stage."
 ```
 
-Then re-run Phase 0-2 (will detect THINK stage).
+Then re-run Phase 1-2 (will detect THINK stage).
 
 ## Phase 4: Delegate to Skill
 
@@ -373,143 +318,4 @@ After displaying the banner and menu:
 
 **Important:** `/vibe` never executes implementation work directly. It always delegates to the appropriate skill. Route all planning through superomni skills (`brainstorm`, `writing-plans`).
 
-After the pipeline reaches REFLECT and DONE:
-- If `_VIBE_LOOPS` > 0 (from Phase 0 state), automatically advance to **Phase 5**.
-- Otherwise, report **DONE** and show the "What's next →" hint.
-
-## Phase 5: Auto-Iteration Loop
-
-This phase runs automatically when `--loops N` was specified and the initial pipeline has
-reached REFLECT → DONE. It loops back to the REVIEW stage (code-review) N times, with the
-original user goal as the guiding north star, applying progressive improvements.
-
-### Iteration State Management
-
-```bash
-_VIBE_STATE=".superomni/vibe-state.json"
-_CURRENT_LOOP=$(grep -o '"current_loop":[^,}]*' "$_VIBE_STATE" | grep -o '[0-9]*' || echo "0")
-_MAX_LOOPS=$(grep -o '"max_loops":[^,}]*' "$_VIBE_STATE" | grep -o '[0-9]*' || echo "0")
-_USER_GOAL=$(grep -o '"user_goal":"[^"]*"' "$_VIBE_STATE" | sed 's/"user_goal":"//;s/"//' || echo "")
-_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-mkdir -p docs/superomni/iterations
-```
-
-### Iteration Loop Protocol
-
-For each iteration i from `($_CURRENT_LOOP + 1)` to `$_MAX_LOOPS`:
-
-```
-[ITERATION i/N] ══════════════════════════════════════════
-User Goal: [user_goal]
-Loop: i of N
-Stage: REVIEW → BUILD (if needed) → VERIFY → REFLECT
-────────────────────────────────────────────────────────────
-```
-
-**Step 1 — Code Review (auto)**
-Invoke `code-review` skill with context:
-```
-Context: Iteration i of N. User goal: [user_goal].
-Review all changes made since the previous iteration.
-Focus on: how well does the current implementation satisfy the user goal?
-Auto-resolve all feedback internally — do NOT wait for user input.
-```
-
-**Step 2 — Apply Fixes (conditional, auto)**
-If code-review reports P0 or P1 issues:
-- Invoke `receiving-code-review` skill to apply all fixes automatically
-- If new steps are required (new files, refactors), invoke `executing-plans` for those steps only
-- All decisions in this step are resolved automatically using the 6 Decision Principles
-
-If code-review reports APPROVED or only P2 suggestions → skip to Step 3.
-
-**Step 3 — QA (auto)**
-Invoke `qa` skill. All gaps are filled automatically. No user confirmation required.
-
-**Step 4 — Verification (auto)**
-Invoke `verification` skill. Check all acceptance criteria from the spec AND the original user goal:
-```
-Acceptance criteria source: [spec-*.md acceptance criteria]
-User goal check: Does the implementation fully satisfy: "[user_goal]"?
-```
-
-**Step 5 — Self-Improvement (auto)**
-Invoke `self-improvement` skill. It evaluates the iteration's process and produces improvement actions.
-
-**Step 6 — Save Iteration Report**
-```bash
-_ITER_FILE="docs/superomni/iterations/iteration-${_BRANCH}-${_SESSION}-$(printf '%02d' $i)-$(date +%Y%m%d-%H%M%S).md"
-cat > "$_ITER_FILE" << ITEREOF
-# Iteration $i of $_MAX_LOOPS — ${_BRANCH}
-
-**Date:** $(date)
-**User Goal:** ${_USER_GOAL}
-**Loop:** $i / $_MAX_LOOPS
-
-## Code Review Summary
-[Paste CODE REVIEW block]
-
-## Fixes Applied
-[List of changes made in Step 2, or "none — approved"]
-
-## QA Summary
-[Paste QA SCOPE and outcomes]
-
-## Verification Result
-[Paste VERIFICATION REPORT block]
-
-## Goal Alignment
-| Criterion | Met? | Evidence |
-|-----------|------|----------|
-| User goal satisfied | ✓/✗ | [evidence] |
-
-## Self-Improvement Actions
-[Paste improvement actions from self-improvement skill]
-
-**Status:** DONE | DONE_WITH_CONCERNS
-ITEREOF
-echo "[ITERATION $i/$_MAX_LOOPS] Report saved to $_ITER_FILE"
-```
-
-**Step 7 — Update State**
-```bash
-# Increment current_loop counter
-cat > "$_VIBE_STATE" << STATEOF
-{
-  "user_goal": "$_USER_GOAL",
-  "max_loops": $_MAX_LOOPS,
-  "current_loop": $i,
-  "updated_at": "$(date -Iseconds 2>/dev/null || date)"
-}
-STATEOF
-echo "[ITERATION $i/$_MAX_LOOPS] DONE → $([ $i -lt $_MAX_LOOPS ] && echo "advancing to iteration $((i+1))" || echo "all iterations complete")"
-```
-
-### Loop Completion
-
-After all N iterations complete:
-
-```
-[AUTO-ITERATION COMPLETE]
-════════════════════════════════════════
-Total iterations: N
-User Goal: [user_goal]
-Reports: docs/superomni/iterations/
-
-Summary of improvements across all iterations:
-  Iteration 1: [1-line summary]
-  Iteration 2: [1-line summary]
-  ...
-  Iteration N: [1-line summary]
-
-Recommendation: [Is the user goal fully satisfied? Any remaining concerns?]
-════════════════════════════════════════
-```
-
-Clear iteration state:
-```bash
-rm -f "$_VIBE_STATE"
-```
-
-Report status: **DONE** — all N iterations complete. Implementation progressively optimized
-toward user goal. See `docs/superomni/iterations/` for the full audit trail.
+Report status: **DONE** — framework activated, stage detected, user guided to next skill.

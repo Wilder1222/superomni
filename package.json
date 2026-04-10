@@ -41,6 +41,7 @@
         "hooks/",
         "lib/",
         "skills/",
+        "setup",
         "CLAUDE.md",
         "ETHOS.md",
         "LICENSE",

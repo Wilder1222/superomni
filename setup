@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+// setup — Entry point called by Claude Code plugin installer
+// Delegates to lib/setup.js which handles hook path rewriting.
+require('./lib/setup').run();

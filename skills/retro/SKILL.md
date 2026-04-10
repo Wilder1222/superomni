@@ -213,6 +213,7 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
+
 # /retro — Engineering Retrospective
 
 **Goal:** Understand what was shipped, patterns in how you work, and trends over time.
@@ -372,9 +373,12 @@ git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" \
 ## Step 10: Save Report
 
 ```bash
-RETRO_DIR=".context/retros"
+RETRO_DIR="docs/superomni/retros"
 mkdir -p "${RETRO_DIR}"
-RETRO_FILE="${RETRO_DIR}/$(date +%Y-%m-%d).md"
+RETRO_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+RETRO_SESSION="engineering-retro"
+RETRO_DATE=$(date +%Y%m%d)
+RETRO_FILE="${RETRO_DIR}/retro-${RETRO_BRANCH}-${RETRO_SESSION}-${RETRO_DATE}.md"
 ```
 
 Write the full report to the file and print a summary.

@@ -213,6 +213,7 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
+
 # Plan Review Pipeline
 
 **Goal:** Review a plan through multiple lenses before execution begins. Catch problems before they become expensive mistakes.
@@ -372,3 +373,27 @@ Status: DONE | NEEDS_CONTEXT
 ```
 
 **REVIEW auto-advances** — after reporting DONE, immediately advance to BUILD. All decisions (mechanical and taste) have been auto-resolved. No user confirmation is required. The THINK stage (brainstorm + spec approval) is the only human gate in the pipeline.
+
+## Save Review Artifact
+
+Persist the review result before auto-advancing:
+
+```bash
+_REVIEW_DATE=$(date +%Y%m%d)
+_REVIEW_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_PLAN_FILE=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+
+if [ -n "$_PLAN_FILE" ]; then
+  _PLAN_BASE=$(basename "$_PLAN_FILE" .md)
+  _REVIEW_SESSION=$(echo "$_PLAN_BASE" | sed -E "s/^plan-${_REVIEW_BRANCH}-//" | sed -E 's/-[0-9]{8}$//')
+fi
+
+if [ -z "$_REVIEW_SESSION" ]; then
+  _REVIEW_SESSION="plan-review"
+fi
+
+mkdir -p docs/superomni/reviews
+_REVIEW_FILE="docs/superomni/reviews/review-${_REVIEW_BRANCH}-${_REVIEW_SESSION}-${_REVIEW_DATE}.md"
+```
+
+Write the full `PLAN REVIEW COMPLETE` report block to `$_REVIEW_FILE` and include all decision logs.

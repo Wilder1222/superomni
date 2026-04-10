@@ -38,5 +38,38 @@ jobs:
       - name: Check skill docs guardrails
         run: npm run check:skill-docs
 
+      - name: Check workflow contract
+        run: npm run check:workflow-contract
+
+      - name: Score workflow reports
+        run: npm run score:workflow
+
       - name: Validate skill format
         run: bash lib/validate-skills.sh
+
+  validate-windows:
+    name: Workflow Contract Validation (Windows)
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build skill docs
+        run: npm run gen-skills
+
+      - name: Check skill docs guardrails
+        run: npm run check:skill-docs
+
+      - name: Check workflow contract
+        run: npm run check:workflow-contract
+
+      - name: Score workflow reports
+        run: npm run score:workflow

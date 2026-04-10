@@ -14,21 +14,20 @@ previous skill produced. This is fragile. Each skill should:
 
 ## Contract Directory
 
-User-facing artifacts go in `docs/superomni/`, internal state stays in `.superomni/`:
+All workflow artifacts go in `docs/superomni/` (single source of truth):
 
 ```
 docs/superomni/
 ├── specs/spec-[branch]-[session]-[date].md  ← brainstorm output
 ├── plans/plan-[branch]-[session]-[date].md  ← writing-plans output
-├── reviews/               ← code-review output
+├── reviews/               ← plan-review and code-review output
 ├── executions/            ← executing-plans output
 ├── subagents/             ← subagent-development session records
 ├── production-readiness/  ← production-readiness output
-
-.superomni/
-├── evaluations/       ← verification output (internal)
-├── improvements/      ← self-improvement output (internal)
-├── harness-audits/    ← harness-engineering output (internal)
+├── evaluations/            ← verification output
+├── improvements/           ← self-improvement output
+├── harness-audits/         ← harness-engineering output
+└── retros/                 ← retro output
 ```
 
 ## Per-Skill Contracts
@@ -85,6 +84,31 @@ Required structure in `docs/superomni/plans/plan-[branch]-[session]-[date].md`:
 ```
 
 **Consumed by:** `executing-plans` reads `docs/superomni/plans/plan-*.md` step by step
+
+---
+
+### `plan-review` → `executing-plans`
+
+**Produces:** `docs/superomni/reviews/review-[branch]-[session]-[date].md`
+
+Required sections:
+```markdown
+# Plan Review: [branch]
+
+## Strategy Review
+[premises, scope, alternatives, risk]
+
+## Engineering Review
+[architecture, test plan, performance, security]
+
+## Decision Audit Trail
+| # | Phase | Decision | Type | Principle | Rationale |
+
+## Verdict
+**Status:** DONE | NEEDS_CONTEXT
+```
+
+**Consumed by:** `executing-plans` uses the review findings to execute the approved/revised plan
 
 ---
 
@@ -207,7 +231,7 @@ Required sections:
 
 ### `retro` → `self-improvement`
 
-**Produces:** `.context/retros/[date].md` (commit metrics, streak, ship of week)
+**Produces:** `docs/superomni/retros/retro-[branch]-[session]-[date].md` (commit metrics, streak, ship of week)
 
 **Consumed by:** `self-improvement` reads retro data as evidence for the process evaluation
 

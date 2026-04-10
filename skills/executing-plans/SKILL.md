@@ -213,6 +213,7 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
+
 # Executing Plans
 
 **Goal:** Execute a written implementation plan precisely, with verification at each stage — running independent steps in parallel to minimize elapsed time.
@@ -430,9 +431,20 @@ Concerns (if any):
 After completing execution, save the results as a Markdown document:
 
 ```bash
-_EXEC_DATE=$(date +%Y%m%d-%H%M%S)
+_EXEC_DATE=$(date +%Y%m%d)
 _EXEC_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_EXEC_FILE="execution-${_EXEC_BRANCH}-${_EXEC_DATE}.md"
+_PLAN_FILE=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+
+if [ -n "$_PLAN_FILE" ]; then
+        _PLAN_BASE=$(basename "$_PLAN_FILE" .md)
+        _EXEC_SESSION=$(echo "$_PLAN_BASE" | sed -E "s/^plan-${_EXEC_BRANCH}-//" | sed -E 's/-[0-9]{8}$//')
+fi
+
+if [ -z "$_EXEC_SESSION" ]; then
+        _EXEC_SESSION="execution-run"
+fi
+
+_EXEC_FILE="execution-${_EXEC_BRANCH}-${_EXEC_SESSION}-${_EXEC_DATE}.md"
 mkdir -p docs/superomni/executions
 cat > "docs/superomni/executions/${_EXEC_FILE}" << EOF
 # Execution Results: ${_EXEC_BRANCH}

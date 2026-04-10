@@ -101,6 +101,7 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 | Improvements | `docs/superomni/improvements/` | `improvement-[branch]-[session]-[date].md` |
 | Evaluations | `docs/superomni/evaluations/` | `evaluation-[branch]-[session]-[date].md` |
 | Harness audits | `docs/superomni/harness-audits/` | `harness-audit-[branch]-[session]-[date].md` |
+| Retros | `docs/superomni/retros/` | `retro-[branch]-[session]-[date].md` |
 | Style profiles | `docs/superomni/style-profiles/` | `<scope>.md` / `prompt-<scope>.md` |
 
 **`[session]` naming:** Auto-generate a short kebab-case identifier from conversation context (e.g., `vibe-skill`, `auth-refactor`). Max 30 chars. Enables agents to search and retrieve relevant prior sessions.

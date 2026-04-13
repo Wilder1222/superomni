@@ -61,16 +61,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | `/review` | Structured code review |
 | `/style-capture` | Capture code style preferences from examples |
 | `/harness-audit` | Audit the agent harness health and produce improvement backlog |
-| `/fd-audit` | Accessibility + performance check |
-| `/fd-critique` | UX review for clarity and hierarchy |
-| `/fd-polish` | Pre-deployment refinement |
-| `/fd-distill` | Reduce complexity |
-| `/fd-clarify` | UX copy improvement |
-| `/fd-animate` | Add purposeful motion |
-| `/fd-colorize` | Strategic color introduction |
-| `/fd-harden` | Error handling + i18n |
-| `/fd-arrange` | Layout and spacing fixes |
-| `/fd-typeset` | Font and hierarchy fixes |
+| `/front-design` | Unified frontend optimization command with automatic mode detection and application |
 
 ## Configuration
 

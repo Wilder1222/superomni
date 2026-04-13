@@ -173,22 +173,13 @@ Gate result: PASS | RETRY | ESCALATE
 
 ---
 
-## Steering Commands
+## Steering Command
 
-These commands invoke specific modes of the frontend-design skill:
+Use a single command to invoke frontend-design with automatic mode detection:
 
 | Command | Mode | What it does |
 |---------|------|-------------|
-| `/fd-audit` | Audit | Accessibility + performance check (WCAG, contrast, keyboard, perf) |
-| `/fd-critique` | Critique | UX review for clarity, hierarchy, and user flow |
-| `/fd-polish` | Polish | Final refinement pass across all 7 design dimensions |
-| `/fd-distill` | Distill | Reduce complexity — remove visual noise, simplify |
-| `/fd-clarify` | Clarify | Improve UX copy — labels, errors, empty states |
-| `/fd-animate` | Animate | Add purposeful motion with proper easing and reduced-motion |
-| `/fd-colorize` | Colorize | Introduce/improve color system — OKLCH, tinted neutrals, dark mode |
-| `/fd-harden` | Harden | Production hardening — error boundaries, i18n, RTL, fallbacks |
-| `/fd-arrange` | Arrange | Fix layout and spacing — 4pt grid, whitespace rhythm |
-| `/fd-typeset` | Typeset | Fix typography — modular scale, font choice, line-height |
+| `/front-design` | Auto (or explicit mode hint) | Detects and applies one or more high-impact modes (audit, critique, polish, distill, clarify, animate, colorize, harden, arrange, typeset) |
 
 ### Steering Command Protocol
 
@@ -226,6 +217,6 @@ Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ```
 
 Report status using the completion protocol. After DONE, suggest next steps:
-- "Run `/fd-polish` for a final refinement pass"
-- "Run `/fd-audit` to verify accessibility compliance"
+- "Run `/front-design mode:polish` for a final refinement pass"
+- "Run `/front-design mode:audit` to verify accessibility compliance"
 - "Ready for code review — the designer agent will run automatically for UI changes"

@@ -40,7 +40,7 @@ Add to Step Execution Protocol:
 ### Change 2: `vibe/SKILL.md` — Menu and routing
 
 - Stage Detection Matrix: BUILD stage notes `frontend-design` for UI steps
-- Phase 2 menu: add `/fd-audit`, `/fd-critique`, `/fd-polish` commands
+- Phase 2 menu: add `/front-design mode:audit`, `/front-design mode:critique`, `/front-design mode:polish` command usage
 
 ### Change 3: `workflow/SKILL.md` — Documentation
 
@@ -92,7 +92,7 @@ The only skill with a significant integration gap. All other 27 skills are well-
 - [x] executing-plans Step Execution Protocol includes Frontend Check (step 3)
 - [x] executing-plans includes Frontend-Design Integration flow diagram
 - [x] vibe Stage Detection Matrix notes frontend-design for BUILD
-- [x] vibe Phase 2 menu includes `/fd-audit`, `/fd-critique`, `/fd-polish`
+- [x] vibe Phase 2 menu includes `/front-design mode:audit`, `/front-design mode:critique`, `/front-design mode:polish`
 - [x] workflow BUILD stage lists frontend-design in skills
 - [x] workflow data flow diagram includes frontend-design
 - [x] workflow Quick Reference includes frontend-design entry

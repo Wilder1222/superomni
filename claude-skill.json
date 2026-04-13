@@ -1,40 +1,58 @@
 {
-  "name": "superomni",
-  "version": "0.5.4",
-  "type": "skill",
-  "displayName": "superomni",
-  "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
-  "author": "Wilder1222",
-  "repository": "https://github.com/Wilder1222/superomni",
-  "homepage": "https://github.com/Wilder1222/superomni",
-  "skillsDir": "./skills",
-  "agentsDir": "./agents",
-  "entrySkill": "skills/using-skills/SKILL.md",
-  "commands": [
-    { "name": "vibe",             "file": "commands/vibe.md" },
-    { "name": "brainstorm",       "file": "commands/brainstorm.md" },
-    { "name": "write-plan",       "file": "commands/write-plan.md" },
-    { "name": "execute-plan",     "file": "commands/execute-plan.md" },
-    { "name": "review",           "file": "commands/review.md" },
-    { "name": "office-hours",     "file": "commands/office-hours.md" },
-    { "name": "document-release", "file": "commands/document-release.md" },
-    { "name": "harness-audit",    "file": "commands/harness-audit.md" },
-    { "name": "fd-animate",      "file": "commands/fd-animate.md" },
-    { "name": "fd-arrange",      "file": "commands/fd-arrange.md" },
-    { "name": "fd-audit",        "file": "commands/fd-audit.md" },
-    { "name": "fd-clarify",      "file": "commands/fd-clarify.md" },
-    { "name": "fd-colorize",     "file": "commands/fd-colorize.md" },
-    { "name": "fd-critique",     "file": "commands/fd-critique.md" },
-    { "name": "fd-distill",      "file": "commands/fd-distill.md" },
-    { "name": "fd-harden",       "file": "commands/fd-harden.md" },
-    { "name": "fd-polish",       "file": "commands/fd-polish.md" },
-    { "name": "fd-typeset",      "file": "commands/fd-typeset.md" }
-  ],
-  "hooks": {
-    "source": "./hooks/hooks.json",
-    "installDir": "~/.claude/hooks/superomni-hooks.json"
-  },
-  "install": {
-    "script": "./setup"
-  }
+    "name": "superomni",
+    "version": "0.5.4",
+    "type": "skill",
+    "displayName": "superomni",
+    "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
+    "author": "Wilder1222",
+    "repository": "https://github.com/Wilder1222/superomni",
+    "homepage": "https://github.com/Wilder1222/superomni",
+    "skillsDir": "./skills",
+    "agentsDir": "./agents",
+    "entrySkill": "skills/using-skills/SKILL.md",
+    "commands": [
+        {
+            "name": "vibe",
+            "file": "commands/vibe.md"
+        },
+        {
+            "name": "brainstorm",
+            "file": "commands/brainstorm.md"
+        },
+        {
+            "name": "write-plan",
+            "file": "commands/write-plan.md"
+        },
+        {
+            "name": "execute-plan",
+            "file": "commands/execute-plan.md"
+        },
+        {
+            "name": "review",
+            "file": "commands/review.md"
+        },
+        {
+            "name": "office-hours",
+            "file": "commands/office-hours.md"
+        },
+        {
+            "name": "document-release",
+            "file": "commands/document-release.md"
+        },
+        {
+            "name": "harness-audit",
+            "file": "commands/harness-audit.md"
+        },
+        {
+            "name": "front-design",
+            "file": "commands/front-design.md"
+        }
+    ],
+    "hooks": {
+        "source": "./hooks/hooks.json",
+        "installDir": "~/.claude/hooks/superomni-hooks.json"
+    },
+    "install": {
+        "script": "./setup"
+    }
 }

@@ -1,6 +1,6 @@
 {
     "name": "superomni",
-    "version": "0.5.5",
+    "version": "0.5.6",
     "type": "skill",
     "displayName": "superomni",
     "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",

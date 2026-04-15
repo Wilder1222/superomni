@@ -34,7 +34,7 @@ if [ -d "${SKILLS_DIR}/skills" ]; then
   _SKILLS_COUNT=$(find "${SKILLS_DIR}/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 fi
 
-echo "superomni v0.5.4 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE}"
+echo "superomni v0.5.5 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE}"
 
 # ── Log session start ────────────────────────────────────────────────────────
 echo "{\"event\":\"session_start\",\"project\":\"${_PROJECT}\",\"branch\":\"${_BRANCH}\",\"platform\":\"${_PLATFORM}\",\"session\":\"${_SESSION_ID}\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \

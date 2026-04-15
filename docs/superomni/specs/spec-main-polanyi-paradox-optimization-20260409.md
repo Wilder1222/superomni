@@ -2,7 +2,7 @@
 
 ## Problem
 
-superomni v0.5.4 already contains multiple implicit mechanisms for addressing the Polanyi Paradox (users cannot fully articulate their intent, but the Agent must fully execute what they actually want). However, these mechanisms lack **systematic depth** — leading to avoidable misalignment between Agent output and user expectations. Specific gaps:
+superomni v0.5.5 already contains multiple implicit mechanisms for addressing the Polanyi Paradox (users cannot fully articulate their intent, but the Agent must fully execute what they actually want). However, these mechanisms lack **systematic depth** — leading to avoidable misalignment between Agent output and user expectations. Specific gaps:
 
 1. **brainstorm asks generic questions** — Phase 1 has no systematic probe for the five most common tacit knowledge dimensions (team culture, aesthetic preferences, unstated constraints, integration expectations, priority trade-offs). Result: specs miss hidden requirements.
 2. **No "show me, don't tell me" channel** — Users can only describe preferences via rules; there is no mechanism to learn from examples. This contradicts Polanyi's core insight that demonstration transfers tacit knowledge better than description.

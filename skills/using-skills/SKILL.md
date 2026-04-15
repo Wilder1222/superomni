@@ -60,9 +60,15 @@ HARD ROUTING RULE: Whenever you are about to call `EnterPlanMode`, STOP and invo
 
 **After any superomni skill session completes**, the agent stays in superomni mode for all subsequent messages in the conversation. When the user sends a new message:
 
-### Step 1 — Scan for existing context
+### Step 1 — Scan for current-session context
 ```bash
-ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null
+_SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+# Only consider artifacts modified after current session start
+for f in docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md; do
+  [ -f "$f" ] || continue
+  fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+  [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && echo "$f"
+done
 git log --oneline -3 2>/dev/null
 git status --short 2>/dev/null
 ```
@@ -70,9 +76,9 @@ git status --short 2>/dev/null
 ### Step 2 — Determine current stage and re-engage
 Use the scan results to locate the current pipeline stage:
 
-| Context found | Current stage | Skill to use |
-|---------------|--------------|--------------|
-| No artifacts | THINK | `brainstorm` |
+| Current-session context found | Current stage | Skill to use |
+|-------------------------------|--------------|--------------|
+| No current-session artifacts | THINK | `brainstorm` |
 | `docs/superomni/specs/spec-*.md` only | PLAN | `writing-plans` |
 | `docs/superomni/specs/spec-*.md` + `docs/superomni/plans/plan-*.md` but no review | REVIEW | `plan-review` |
 | `docs/superomni/plans/plan-*.md` reviewed + open items | BUILD | `executing-plans` or `subagent-development` |

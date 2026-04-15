@@ -16,6 +16,9 @@ _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _PROJECT=$(basename "$(pwd)")
 _SESSION_ID=$(date +%s)
 
+# Write session timestamp marker for vibe fresh-start detection
+echo "${_SESSION_ID}" > "${STATE_DIR}/sessions/current-session-ts"
+
 # ── Platform Detection ───────────────────────────────────────────────────────
 _PLATFORM="unknown"
 if [ -n "${CLAUDE_CODE_VERSION:-}" ] || [ -n "${CLAUDE_CODE:-}" ]; then
@@ -34,7 +37,7 @@ if [ -d "${SKILLS_DIR}/skills" ]; then
   _SKILLS_COUNT=$(find "${SKILLS_DIR}/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 fi
 
-echo "superomni v0.5.5 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE}"
+echo "superomni v0.5.6 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE}"
 
 # ── Log session start ────────────────────────────────────────────────────────
 echo "{\"event\":\"session_start\",\"project\":\"${_PROJECT}\",\"branch\":\"${_BRANCH}\",\"platform\":\"${_PLATFORM}\",\"session\":\"${_SESSION_ID}\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \

@@ -79,20 +79,35 @@ When auto-advancing:
 ### Session Continuity
 
 When the user sends a **follow-up message after a completed session**, before doing anything else:
-1. Scan for prior session context:
+1. Scan for **current-session** context (only artifacts modified after session start):
    ```bash
-   ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null | head -20
+   _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+   # List recent artifacts, filtering by session timestamp
+   for f in docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md; do
+     [ -f "$f" ] || continue
+     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && echo "$f"
+   done
    git log --oneline -3 2>/dev/null
    ```
-   To find the latest spec or plan:
+   To find the latest current-session spec or plan:
    ```bash
-   _LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-   _LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+   _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+   _LATEST_SPEC=""
+   _LATEST_PLAN=""
+   for f in $(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort); do
+     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && _LATEST_SPEC="$f"
+   done
+   for f in $(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort); do
+     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && _LATEST_PLAN="$f"
+   done
    ```
-2. If context exists → re-engage the skill framework. Pick the skill that matches the
+2. If current-session context exists → re-engage the skill framework. Pick the skill that matches the
    current stage (see `workflow` skill for stage → skill mapping) and announce:
    *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
-3. If no context → treat as a fresh session and offer the relevant skill from the
+3. If no current-session context → treat as a fresh session and offer the relevant skill from the
    Quick Reference table in `using-skills/SKILL.md`.
 
 ### Question Confirmation Protocol
@@ -211,7 +226,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
    - Writing to `~/.omni-skills/` (sessions, analytics)
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
-
 
 # Writing Implementation Plans
 

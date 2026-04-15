@@ -39,16 +39,32 @@ Always follow this skill's phases directly. Route all planning through superomni
 Scan for existing artifacts to determine where the project is in the sprint pipeline:
 
 ```bash
-# Artifact detection (glob for dynamic filenames)
-_HAS_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-_HAS_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
-_HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
-_HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
+# Session-aware artifact detection
+# Read current session start timestamp (written by hooks/session-start)
+_SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+
+# Helper: filter files modified AFTER session start
+_session_files() {
+  local pattern="$1"
+  for f in $pattern; do
+    [ -f "$f" ] || continue
+    local fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+    if [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null; then
+      echo "$f"
+    fi
+  done
+}
+
+# Only detect artifacts created/modified in the CURRENT session
+_HAS_SPEC=$(_session_files "docs/superomni/specs/spec-*.md" | sort | tail -1)
+_HAS_PLAN=$(_session_files "docs/superomni/plans/plan-*.md" | sort | tail -1)
+_HAS_EXECUTIONS=$(_session_files "docs/superomni/executions/*.md" | head -1)
+_HAS_IMPROVEMENTS=$(_session_files "docs/superomni/improvements/*.md" | head -1)
 
 # Session matching: extract session from plan filename for review detection
 if [ -n "$_HAS_PLAN" ]; then
   _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
-  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
+  _HAS_MATCHING_REVIEW=$(_session_files "docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md" | head -1)
   _PLAN_OPEN=$(grep -c '^\- \[ \]' "$_HAS_PLAN" 2>/dev/null || echo "0")
   _PLAN_DONE=$(grep -c '^\- \[x\]' "$_HAS_PLAN" 2>/dev/null || echo "0")
 fi
@@ -103,7 +119,17 @@ Only show the guided menu when:
 - No clear next step can be determined
 - The user invoked `/vibe` without arguments
 
-If the user passes arguments with `/vibe` (example: `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
+### Session-Aware Routing
+
+The artifact detection above only considers files created or modified during the current session.
+Old artifacts from prior sessions are ignored for stage detection purposes.
+
+- If NO current-session artifacts exist → stage resolves to THINK (Priority 1) → `brainstorm`
+- If current-session artifacts exist → normal stage detection applies
+
+If the user passes arguments with `/vibe` (example: `/vibe I want to build a CLI tool`),
+treat the arguments as the starting prompt and route to the detected skill with that context.
+Since a new session has no artifacts yet, this will naturally route to `brainstorm`.
 
 ## Phase 2: Show Guided Menu
 

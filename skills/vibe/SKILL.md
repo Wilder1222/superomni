@@ -80,20 +80,35 @@ When auto-advancing:
 ### Session Continuity
 
 When the user sends a **follow-up message after a completed session**, before doing anything else:
-1. Scan for prior session context:
+1. Scan for **current-session** context (only artifacts modified after session start):
    ```bash
-   ls docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/ .superomni/ 2>/dev/null | head -20
+   _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+   # List recent artifacts, filtering by session timestamp
+   for f in docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md; do
+     [ -f "$f" ] || continue
+     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && echo "$f"
+   done
    git log --oneline -3 2>/dev/null
    ```
-   To find the latest spec or plan:
+   To find the latest current-session spec or plan:
    ```bash
-   _LATEST_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-   _LATEST_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+   _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+   _LATEST_SPEC=""
+   _LATEST_PLAN=""
+   for f in $(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort); do
+     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && _LATEST_SPEC="$f"
+   done
+   for f in $(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort); do
+     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && _LATEST_PLAN="$f"
+   done
    ```
-2. If context exists → re-engage the skill framework. Pick the skill that matches the
+2. If current-session context exists → re-engage the skill framework. Pick the skill that matches the
    current stage (see `workflow` skill for stage → skill mapping) and announce:
    *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
-3. If no context → treat as a fresh session and offer the relevant skill from the
+3. If no current-session context → treat as a fresh session and offer the relevant skill from the
    Quick Reference table in `using-skills/SKILL.md`.
 
 ### Question Confirmation Protocol
@@ -213,7 +228,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Vibe - Framework Entry Point
 
 **Goal:** Activate the superomni skill framework, detect the current pipeline stage, and route to the right skill.
@@ -244,16 +258,32 @@ Always follow this skill's phases directly. Route all planning through superomni
 Scan for existing artifacts to determine where the project is in the sprint pipeline:
 
 ```bash
-# Artifact detection (glob for dynamic filenames)
-_HAS_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-_HAS_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
-_HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
-_HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
+# Session-aware artifact detection
+# Read current session start timestamp (written by hooks/session-start)
+_SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+
+# Helper: filter files modified AFTER session start
+_session_files() {
+  local pattern="$1"
+  for f in $pattern; do
+    [ -f "$f" ] || continue
+    local fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
+    if [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null; then
+      echo "$f"
+    fi
+  done
+}
+
+# Only detect artifacts created/modified in the CURRENT session
+_HAS_SPEC=$(_session_files "docs/superomni/specs/spec-*.md" | sort | tail -1)
+_HAS_PLAN=$(_session_files "docs/superomni/plans/plan-*.md" | sort | tail -1)
+_HAS_EXECUTIONS=$(_session_files "docs/superomni/executions/*.md" | head -1)
+_HAS_IMPROVEMENTS=$(_session_files "docs/superomni/improvements/*.md" | head -1)
 
 # Session matching: extract session from plan filename for review detection
 if [ -n "$_HAS_PLAN" ]; then
   _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
-  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
+  _HAS_MATCHING_REVIEW=$(_session_files "docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md" | head -1)
   _PLAN_OPEN=$(grep -c '^\- \[ \]' "$_HAS_PLAN" 2>/dev/null || echo "0")
   _PLAN_DONE=$(grep -c '^\- \[x\]' "$_HAS_PLAN" 2>/dev/null || echo "0")
 fi
@@ -308,7 +338,17 @@ Only show the guided menu when:
 - No clear next step can be determined
 - The user invoked `/vibe` without arguments
 
-If the user passes arguments with `/vibe` (example: `/vibe I want to build a CLI tool`), treat the arguments as the starting prompt and route to the detected skill with that context.
+### Session-Aware Routing
+
+The artifact detection above only considers files created or modified during the current session.
+Old artifacts from prior sessions are ignored for stage detection purposes.
+
+- If NO current-session artifacts exist → stage resolves to THINK (Priority 1) → `brainstorm`
+- If current-session artifacts exist → normal stage detection applies
+
+If the user passes arguments with `/vibe` (example: `/vibe I want to build a CLI tool`),
+treat the arguments as the starting prompt and route to the detected skill with that context.
+Since a new session has no artifacts yet, this will naturally route to `brainstorm`.
 
 ## Phase 2: Show Guided Menu
 

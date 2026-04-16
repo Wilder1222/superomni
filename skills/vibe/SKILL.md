@@ -261,6 +261,7 @@ Scan for existing artifacts to determine where the project is in the sprint pipe
 # Session-aware artifact detection
 # Read current session start timestamp (written by hooks/session-start)
 _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
+_SESSION_ID=$(cat ~/.omni-skills/sessions/current-session-id 2>/dev/null || echo "")
 
 # Helper: filter files modified AFTER session start
 _session_files() {
@@ -274,16 +275,36 @@ _session_files() {
   done
 }
 
-# Only detect artifacts created/modified in the CURRENT session
+# Detect all 7 artifact types in current session
 _HAS_SPEC=$(_session_files "docs/superomni/specs/spec-*.md" | sort | tail -1)
 _HAS_PLAN=$(_session_files "docs/superomni/plans/plan-*.md" | sort | tail -1)
+_HAS_REVIEW=$(_session_files "docs/superomni/reviews/review-*.md" | head -1)
 _HAS_EXECUTIONS=$(_session_files "docs/superomni/executions/*.md" | head -1)
+_HAS_EVALUATION=$(_session_files "docs/superomni/evaluations/evaluation-*.md" | head -1)
+_HAS_PROD_READINESS=$(_session_files "docs/superomni/production-readiness/*.md" | head -1)
 _HAS_IMPROVEMENTS=$(_session_files "docs/superomni/improvements/*.md" | head -1)
+
+# Cross-session fallback: if no current-session artifacts exist but
+# last-session-artifacts.txt shows incomplete work, detect from disk
+if [ -z "$_HAS_SPEC" ] && [ -z "$_HAS_PLAN" ]; then
+  _LAST_ARTIFACTS="${HOME}/.omni-skills/sessions/last-session-artifacts.txt"
+  if [ -f "$_LAST_ARTIFACTS" ] && [ -s "$_LAST_ARTIFACTS" ]; then
+    # Last session had artifacts — detect from disk regardless of mtime
+    _HAS_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
+    _HAS_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+    _HAS_REVIEW=$(ls docs/superomni/reviews/review-*.md 2>/dev/null | head -1)
+    _HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
+    _HAS_EVALUATION=$(ls docs/superomni/evaluations/evaluation-*.md 2>/dev/null | head -1)
+    _HAS_PROD_READINESS=$(ls docs/superomni/production-readiness/*.md 2>/dev/null | head -1)
+    _HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
+    _CROSS_SESSION=true
+  fi
+fi
 
 # Session matching: extract session from plan filename for review detection
 if [ -n "$_HAS_PLAN" ]; then
   _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
-  _HAS_MATCHING_REVIEW=$(_session_files "docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md" | head -1)
+  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
   _PLAN_OPEN=$(grep -c '^\- \[ \]' "$_HAS_PLAN" 2>/dev/null || echo "0")
   _PLAN_DONE=$(grep -c '^\- \[x\]' "$_HAS_PLAN" 2>/dev/null || echo "0")
 fi
@@ -315,8 +336,32 @@ THINK has exactly one human gate: spec review approval.
 
 - At THINK: `brainstorm` can run without manual gate; once `spec-[branch]-[session]-[date].md` is generated, STOP for user spec approval.
 - THINK stage with DONE (spec approved): auto-invoke `writing-plans`.
-- All non-THINK stages with DONE: auto-invoke next stage immediately. Print: `[STAGE] DONE -> advancing to [NEXT-STAGE] ([skill-name])`
+- All non-THINK stages with DONE: **verify artifact exists first**, then auto-invoke next stage. Print: `[STAGE] DONE -> advancing to [NEXT-STAGE] ([skill-name])`
 - Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT: STOP and wait for user.
+
+**Artifact verification before auto-advance** (run this check before invoking the next skill):
+
+```bash
+_verify_stage_artifact() {
+  local from_stage="$1"
+  case "$from_stage" in
+    THINK)   [ -n "$_HAS_SPEC" ] ;;
+    PLAN)    [ -n "$_HAS_PLAN" ] ;;
+    REVIEW)  [ -n "$_HAS_REVIEW" ] ;;
+    BUILD)   [ -n "$_HAS_EXECUTIONS" ] ;;
+    VERIFY)  [ -n "$_HAS_EVALUATION" ] ;;
+    SHIP)    [ -n "$_HAS_PROD_READINESS" ] || true ;;  # optional
+    REFLECT) [ -n "$_HAS_IMPROVEMENTS" ] ;;
+  esac
+}
+
+# Usage: before auto-advancing from stage X to stage Y:
+# if ! _verify_stage_artifact "X"; then
+#   echo "DONE_WITH_CONCERNS: Missing artifact for stage X"
+#   echo "Cannot auto-advance. Please complete the current stage first."
+#   # STOP and wait for user
+# fi
+```
 
 ### Stage Artifact Contract (Required for Auto-Advance)
 
@@ -340,11 +385,15 @@ Only show the guided menu when:
 
 ### Session-Aware Routing
 
-The artifact detection above only considers files created or modified during the current session.
-Old artifacts from prior sessions are ignored for stage detection purposes.
+The artifact detection above first checks for files created or modified during the current session.
+If the current session has no artifacts but the previous session left incomplete work
+(tracked in `~/.omni-skills/sessions/last-session-artifacts.txt`), detection falls back
+to scanning all files on disk, enabling the pipeline to resume across sessions.
 
-- If NO current-session artifacts exist → stage resolves to THINK (Priority 1) → `brainstorm`
+- If NO artifacts exist (current or prior session) → stage resolves to THINK (Priority 1) → `brainstorm`
 - If current-session artifacts exist → normal stage detection applies
+- If only prior-session artifacts exist (`_CROSS_SESSION=true`) → normal stage detection applies,
+  and announce: *"Resuming incomplete pipeline from previous session — picking up at [stage]."*
 
 If the user passes arguments with `/vibe` (example: `/vibe I want to build a CLI tool`),
 treat the arguments as the starting prompt and route to the detected skill with that context.

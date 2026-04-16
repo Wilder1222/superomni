@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# bin/build-skills — Compile SKILL.md.tmpl → SKILL.md by injecting preamble.md
+#
+# Usage:
+#   bin/build-skills            — rebuild all skills whose tmpl is newer than md
+#   bin/build-skills --force    — rebuild all skills regardless of freshness
+#   bin/build-skills <skill>    — rebuild a single skill by name
+#
+# Each SKILL.md.tmpl contains a {{PREAMBLE}} placeholder that gets replaced
+# with the contents of lib/preamble.md. Skills without a .tmpl (e.g. using-skills)
+# are skipped.
+
+set -e
+
+SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PREAMBLE="${SKILLS_DIR}/lib/preamble.md"
+
+if [ ! -f "${PREAMBLE}" ]; then
+  echo "ERROR: Preamble not found at ${PREAMBLE}" >&2
+  exit 1
+fi
+
+FORCE=false
+TARGET=""
+
+for arg in "$@"; do
+  case "$arg" in
+    --force|-f) FORCE=true ;;
+    -*) echo "Unknown option: $arg" >&2; exit 1 ;;
+    *) TARGET="$arg" ;;
+  esac
+done
+
+build_one() {
+  local skill_dir="$1"
+  local tmpl="${skill_dir}/SKILL.md.tmpl"
+  local output="${skill_dir}/SKILL.md"
+  local skill_name
+  skill_name=$(basename "$skill_dir")
+
+  if [ ! -f "$tmpl" ]; then
+    return 1  # skip skills without templates (e.g. using-skills)
+  fi
+
+  # Skip if output is newer than both tmpl and preamble (unless forced)
+  if [ "$FORCE" = false ] && [ -f "$output" ]; then
+    if [ "$output" -nt "$tmpl" ] && [ "$output" -nt "$PREAMBLE" ]; then
+      return 1  # already up to date
+    fi
+  fi
+
+  # Replace FIRST occurrence of {{PREAMBLE}} with preamble.md contents
+  # Subsequent occurrences are left as-is (e.g. documentation examples)
+  # Use awk for portability (works on Git Bash, Linux, macOS)
+  awk '
+    !done && /\{\{PREAMBLE\}\}/ {
+      # Print everything before the placeholder on the same line
+      sub(/\{\{PREAMBLE\}\}/, "")
+      printf "%s", $0
+      # Insert preamble contents
+      while ((getline line < "'"${PREAMBLE}"'") > 0) {
+        print line
+      }
+      close("'"${PREAMBLE}"'")
+      done = 1
+      next
+    }
+    { print }
+  ' "$tmpl" > "$output"
+
+  echo "Built: ${skill_name}/SKILL.md"
+  return 0
+}
+
+BUILT=0
+
+if [ -n "$TARGET" ]; then
+  # Build a single skill
+  target_dir="${SKILLS_DIR}/skills/${TARGET}"
+  if [ ! -d "$target_dir" ]; then
+    echo "ERROR: Skill '${TARGET}' not found at ${target_dir}" >&2
+    exit 1
+  fi
+  if build_one "$target_dir"; then
+    BUILT=$((BUILT + 1))
+  fi
+else
+  # Build all skills
+  for tmpl in "${SKILLS_DIR}"/skills/*/SKILL.md.tmpl; do
+    [ -f "$tmpl" ] || continue
+    skill_dir=$(dirname "$tmpl")
+    if build_one "$skill_dir"; then
+      BUILT=$((BUILT + 1))
+    fi
+  done
+fi
+
+echo ""
+echo "Done. Built ${BUILT} skill(s)."

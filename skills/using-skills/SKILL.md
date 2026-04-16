@@ -63,8 +63,11 @@ HARD ROUTING RULE: Whenever you are about to call `EnterPlanMode`, STOP and invo
 ### Step 1 — Scan for current-session context
 ```bash
 _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
-# Only consider artifacts modified after current session start
-for f in docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md; do
+# Consider all artifact types, filtering by current session start
+for f in docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md \
+         docs/superomni/reviews/review-*.md docs/superomni/executions/*.md \
+         docs/superomni/evaluations/evaluation-*.md docs/superomni/improvements/*.md \
+         docs/superomni/production-readiness/*.md; do
   [ -f "$f" ] || continue
   fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
   [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && echo "$f"
@@ -74,19 +77,17 @@ git status --short 2>/dev/null
 ```
 
 ### Step 2 — Determine current stage and re-engage
-Use the scan results to locate the current pipeline stage:
+Use the scan results to locate the current pipeline stage (priority-ordered, first match wins):
 
 | Current-session context found | Current stage | Skill to use |
 |-------------------------------|--------------|--------------|
-| No current-session artifacts | THINK | `brainstorm` |
-| `docs/superomni/specs/spec-*.md` only | PLAN | `writing-plans` |
-| `docs/superomni/specs/spec-*.md` + `docs/superomni/plans/plan-*.md` but no review | REVIEW | `plan-review` |
-| `docs/superomni/plans/plan-*.md` reviewed + open items | BUILD | `executing-plans` or `subagent-development` |
-| Plan all checked, no verification/prod-readiness | VERIFY | `code-review` → `qa` → `verification` → `production-readiness` |
-| `docs/superomni/production-readiness/` files exist | SHIP | `ship` |
-| Shipped (tagged release or merged PR), no improvement/retro report | REFLECT | `self-improvement` → `retro` |
-| `docs/superomni/executions/` files exist | Continuing run | Resume with the same skill |
-| `docs/superomni/reviews/` files exist | Post-review | `receiving-code-review` |
+| No artifacts at all | THINK | `brainstorm` |
+| `spec-*.md` only (no plan) | PLAN | `writing-plans` |
+| `plan-*.md` exists, no matching `review-*.md` | REVIEW | `plan-review` |
+| Plan reviewed, has open items (`- [ ]`) | BUILD | `executing-plans` or `subagent-development` |
+| Plan all checked (`- [x]`), no `evaluation-*.md` | VERIFY | `code-review` → `qa` → `verification` |
+| `evaluation-*.md` exists | SHIP | `ship` → `finishing-branch` |
+| Shipped (tagged/merged), no `improvement-*.md` | REFLECT | `self-improvement` → `retro` |
 
 ### Step 3 — Announce continuity
 Before handling the user's new request, say:

@@ -158,6 +158,7 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
+
 # Harness Engineering
 
 **Goal:** Design and maintain the agent harness — the scaffolding of environment, context, tools, constraints, evaluation gates, and feedback loops that determine how well agents perform.

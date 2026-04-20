@@ -30,17 +30,58 @@ One human gate: spec approval at THINK. Everything after auto-advances on DONE. 
 
 ### Install
 
-Pick the method that matches your AI CLI:
+| Platform | Slash Commands | Recommended Install |
+|----------|---------------|---------------------|
+| **Claude Code** | ✅ Full support | Plugin (recommended) or `npx` |
+| **Gemini CLI** | ✅ Full support | `npx` |
+| **GitHub Copilot** (VS Code) | ✅ Via prompt files | `npx` |
+| **GitHub Copilot** (CLI) | ⚠️ Plugin only | Plugin |
+| **Codex CLI** | ❌ Not supported | `npx` (context via `AGENTS.md`) |
 
 ---
 
-#### Claude Code (marketplace plugin — recommended)
+#### Claude Code — Plugin (recommended)
 
 ```
 /plugin marketplace add Wilder1222/superomni
 ```
 
-Installs skills, slash commands, and session hooks automatically. Then type `/vibe` to start.
+Installs skills, slash commands, and session hooks automatically. Type `/vibe` to start.
+
+---
+
+#### Claude Code — npx (project-level)
+
+```bash
+npx github:Wilder1222/superomni --only claude
+```
+
+Installs slash commands to `.claude/commands/` and skills to `.superomni/`. Works identically to the plugin for slash command support.
+
+---
+
+#### Gemini CLI
+
+```bash
+npx github:Wilder1222/superomni --only gemini
+```
+
+Installs slash commands to `.gemini/commands/` as `.toml` files. Type `/vibe`, `/brainstorm`, etc. directly in Gemini CLI.
+
+---
+
+#### GitHub Copilot (VS Code extension)
+
+```bash
+npx github:Wilder1222/superomni --only copilot
+```
+
+Installs slash commands to `.github/prompts/` as `.prompt.md` files. Use `/vibe`, `/brainstorm`, etc. in VS Code Copilot Chat.
+
+> **Copilot CLI users:** Slash commands are not supported in `gh copilot` CLI. Install via plugin instead:
+> ```
+> /plugin marketplace add Wilder1222/superomni
+> ```
 
 ---
 
@@ -50,25 +91,7 @@ Installs skills, slash commands, and session hooks automatically. Then type `/vi
 npx github:Wilder1222/superomni --only codex
 ```
 
-Open your project in Codex — it reads `AGENTS.md` automatically.
-
----
-
-#### GitHub Copilot
-
-```bash
-npx github:Wilder1222/superomni --only copilot
-```
-
-Copilot loads `.github/copilot-instructions.md` on every chat session.
-
----
-
-#### Gemini CLI
-
-```bash
-npx github:Wilder1222/superomni --only gemini
-```
+Installs project context to `AGENTS.md`. Codex CLI does not support custom slash commands (they are hardcoded in the binary). Activate skills using trigger phrases in conversation — e.g., *"brainstorm this feature"*, *"write a plan"*, *"debug this"*.
 
 ---
 
@@ -82,14 +105,7 @@ npx github:Wilder1222/superomni
 npm install -g github:Wilder1222/superomni && superomni setup
 ```
 
-| Platform | Project config file | Global config location |
-|----------|--------------------|-----------------------|
-| Claude Code | `CLAUDE.md` | `~/.claude/skills/superomni` |
-| Codex CLI | `AGENTS.md` | `~/.codex/AGENTS.md` |
-| Gemini CLI | `GEMINI.md` | `~/.gemini/GEMINI.md` |
-| GitHub Copilot | `.github/copilot-instructions.md` | (project-only) |
-
-#### CLI Options
+#### npx Options
 
 ```bash
 npx github:Wilder1222/superomni --only claude   # Single platform
@@ -222,21 +238,15 @@ See [`docs/AGENTS.md`](docs/AGENTS.md) for the full agent library reference.
 
 ## Multi-Platform Support
 
-superomni supports the following AI coding platforms:
+| Platform | Slash Commands | npx install | Plugin install |
+|----------|---------------|-------------|----------------|
+| **Claude Code** | ✅ | `.claude/commands/` | ✅ recommended |
+| **Gemini CLI** | ✅ | `.gemini/commands/*.toml` | — |
+| **Copilot** (VS Code) | ✅ | `.github/prompts/*.prompt.md` | ✅ |
+| **Copilot** (CLI `gh`) | ❌ | context only via `.github/copilot-instructions.md` | ✅ |
+| **Codex CLI** | ❌ | context only via `AGENTS.md` | — |
 
-| Platform | Slash Commands | Install method |
-|----------|---------------|----------------|
-| **Claude Code** | ✅ Full support | `/plugin marketplace add Wilder1222/superomni` or `npx` |
-| **Gemini CLI** | ✅ Full support | `npx github:Wilder1222/superomni --only gemini` |
-| **GitHub Copilot** (VS Code) | ✅ Via `.github/prompts/` | `npx github:Wilder1222/superomni --only copilot` |
-| **GitHub Copilot** (CLI) | ⚠️ Plugin only | `/plugin marketplace add Wilder1222/superomni` |
-| **Codex CLI** | ❌ Not supported | `npx` installs context via `AGENTS.md`; no custom slash commands |
-
-All installation methods are **fully automatic**:
-- `npx` runs `bin/superomni-cli` which invokes `lib/setup.js` (pure Node.js)
-- Platform detection is automatic
-- Skills, commands, and platform-specific config files are generated
-- Global install: `npm install -g github:Wilder1222/superomni && superomni setup`
+All `npx` installation methods are **fully automatic** — platform detection, skill copying, and config file generation require no manual steps.
 
 ---
 

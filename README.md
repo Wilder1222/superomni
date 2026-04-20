@@ -224,12 +224,13 @@ See [`docs/AGENTS.md`](docs/AGENTS.md) for the full agent library reference.
 
 superomni supports the following AI coding platforms:
 
-| Platform | Status | Install method |
-|----------|--------|-----------------|
+| Platform | Slash Commands | Install method |
+|----------|---------------|----------------|
 | **Claude Code** | ✅ Full support | `/plugin marketplace add Wilder1222/superomni` or `npx` |
-| **Codex CLI** | ✅ Full support | `npx github:Wilder1222/superomni --only codex` |
 | **Gemini CLI** | ✅ Full support | `npx github:Wilder1222/superomni --only gemini` |
-| **GitHub Copilot** | ✅ Full support | `npx github:Wilder1222/superomni --only copilot` |
+| **GitHub Copilot** (VS Code) | ✅ Via `.github/prompts/` | `npx github:Wilder1222/superomni --only copilot` |
+| **GitHub Copilot** (CLI) | ⚠️ Plugin only | `/plugin marketplace add Wilder1222/superomni` |
+| **Codex CLI** | ❌ Not supported | `npx` installs context via `AGENTS.md`; no custom slash commands |
 
 All installation methods are **fully automatic**:
 - `npx` runs `bin/superomni-cli` which invokes `lib/setup.js` (pure Node.js)

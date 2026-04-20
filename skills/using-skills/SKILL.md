@@ -87,7 +87,7 @@ Use the scan results to locate the current pipeline stage (priority-ordered, fir
 | Plan reviewed, has open items (`- [ ]`) | BUILD | `executing-plans` or `subagent-development` |
 | Plan all checked (`- [x]`), no `evaluation-*.md` | VERIFY | `code-review` → `qa` → `verification` |
 | `evaluation-*.md` exists | SHIP | `ship` → `finishing-branch` |
-| Shipped (tagged/merged), no `improvement-*.md` | REFLECT | `self-improvement` → `retro` |
+| Shipped (tagged/merged), no `improvement-*.md` | REFLECT | `self-improvement` (retro scope) |
 
 ### Step 3 — Announce continuity
 Before handling the user's new request, say:
@@ -172,12 +172,12 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Complex task needing parallel agents (includes wave planning) | `subagent-development` |
 | Working on multiple features at once | `git-worktrees` |
 | Finishing and merging a branch | `finishing-branch` |
-| Weekly engineering summary | `retro` |
+| Weekly engineering summary | `self-improvement` (`retro` scope) |
 | Deploying/releasing software | `ship` |
 | Creating a new skill | `writing-skills` |
 | Exploratory investigation | `investigate` |
-| Responding to review feedback | `receiving-code-review` |
-| Auditing for security vulnerabilities | `security-audit` |
+| Responding to review feedback | `code-review` (`receiving` mode) |
+| Auditing for security vulnerabilities | `code-review` (`security` mode) |
 | Quality assurance and testing | `qa` |
 | Safety guardrails for high-risk operations | `careful` |
 | Sprint pipeline orchestration | `workflow` |

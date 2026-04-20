@@ -7,6 +7,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.8] — 2026-04-20
+
+### Changed
+- Skill consolidation review artifacts updated to final-state wording so historical review docs match the merged canonical skill model.
+- Documentation cleanup continued for canonical naming consistency in active docs and review artifacts.
+
+### Fixed
+- Version metadata synchronized to `0.5.8` across package/runtime/plugin manifests (`package.json`, `claude-skill.json`, `.claude-plugin/*`, `lib/setup.js`, `hooks/session-start`).
+- README synchronized with current stable version.
+
 ## [0.5.7] — 2026-04-20
 
 ### Added

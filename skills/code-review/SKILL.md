@@ -1,8 +1,11 @@
 ---
 name: code-review
 description: |
-  Use when reviewing code changes, PRs, or preparing code for review.
-  Triggers: "review this", "code review", "ready for PR", "check this code".
+  Canonical review skill for code quality workflows.
+  Modes: giving (review code), receiving (address review feedback), security (security-focused review).
+  Triggers: "review this", "code review", "ready for PR", "check this code",
+  "address review", "fix review comments", "respond to feedback",
+  "security audit", "security review", "threat model", "vulnerability scan".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -160,6 +163,18 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 
 **Goal:** Provide structured, actionable code review feedback that improves quality without blocking momentum.
 
+## Consolidated Modes
+
+`code-review` is the canonical review skill. Similar skills are routed here by mode:
+
+- `giving` (default): standard code/PR review.
+- `receiving`: apply and respond to review feedback (absorbs prior standalone feedback flow).
+- `security`: run security-prioritized review using OWASP/STRIDE checklist depth.
+
+Routing rule:
+- If user intent is review feedback handling, run `receiving` mode.
+- If intent is vulnerability/threat audit, run `security` mode first and escalate to the `security-auditor` agent for deep-dive when high-risk scope requires it.
+
 ## Review Principles
 
 Grounded in the 6 Decision Principles:
@@ -298,6 +313,55 @@ git diff main...HEAD --stat
 ```
 
 See `requesting-review.md` for how to request and respond to reviews.
+
+## Mode: Receiving (Merged)
+
+When review feedback arrives, run this receiving workflow inside `code-review`:
+
+1. Triage comments into `P0`/`P1`/`P2`.
+2. Fix all `P0` first, then `P1`.
+3. For disagreements, restate reviewer intent and provide a concrete alternative.
+4. Re-run tests and summarize changes by comment.
+
+Receiving output block:
+
+```
+REVIEW RESPONSE
+════════════════════════════════════════
+P0 fixed:
+  [file:line] — [change]
+
+P1 fixed:
+  [file:line] — [change]
+
+P2 discussed:
+  [file:line] — [decision + rationale]
+
+Retest: PASS | FAIL
+Ready for re-review: YES | NO
+════════════════════════════════════════
+```
+
+## Mode: Security (Merged)
+
+For security-focused reviews, extend normal review with:
+
+1. Attack surface map (entry points, auth boundaries, sensitive data paths).
+2. OWASP Top 10 checklist pass.
+3. STRIDE-oriented threat notes for high-risk flows.
+4. Explicit exploitability statement for each finding.
+
+Security finding format:
+
+```
+SECURITY FINDING [ID]
+Severity: P0 | P1 | P2
+Category: [OWASP/STRIDE]
+Location: [file:line]
+Exploit scenario: [how it can be abused]
+Recommended fix: [specific remediation]
+Evidence: [code/path/output]
+```
 
 ## Save Review Document
 

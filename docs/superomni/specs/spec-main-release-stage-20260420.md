@@ -36,7 +36,7 @@
 ```
 
 **RELEASE 阶段行为：**
-- 并行执行 `ship` skill 和 `self-improvement`/`retro` skill
+- 并行执行 `ship` skill 和 `self-improvement`（`retro` scope）
 - 产出单一 artifact：`docs/superomni/releases/release-[branch]-[session]-[date].md`
 - Artifact 结构：
   ```markdown
@@ -52,7 +52,7 @@
 
 | Priority | Condition | Stage | Skill |
 |----------|-----------|-------|-------|
-| 6 | Verified | RELEASE | `ship` + `self-improvement` → `retro` (并行) |
+| 6 | Verified | RELEASE | `ship` + `self-improvement`（`retro` scope，并行） |
 
 ### 2. 风险修复
 

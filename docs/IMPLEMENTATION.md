@@ -397,11 +397,11 @@ There is no automated test suite currently. Testing is done manually:
    # Should output something like "superomni-abc123"
    ```
 
-6. **New skills test:**
+6. **Merged skills test:**
    ```bash
-   # Verify new skill directories exist
-   ls skills/receiving-code-review/SKILL.md
-   ls skills/security-audit/SKILL.md
+   # Verify merged canonical skill files exist
+   ls skills/code-review/SKILL.md
+   ls skills/self-improvement/SKILL.md
    ls skills/qa/SKILL.md
    ls skills/careful/SKILL.md
    ls skills/workflow/SKILL.md
@@ -464,8 +464,8 @@ A skill meets the quality bar when:
 
 - [x] `/ship` command registration
 - [x] More commands (`/investigate`, `/review`, `/workflow`, `/qa`, `/security`)
-- [x] `receiving-code-review` skill — respond to review feedback
-- [x] `security-audit` skill — OWASP/STRIDE security vulnerability audit
+- [x] `code-review` merged mode — respond to review feedback (`receiving`)
+- [x] `code-review` merged mode — OWASP/STRIDE security review (`security`)
 - [x] `qa` skill — quality assurance with checklists
 - [x] `careful` skill — safety guardrails for destructive operations
 - [x] `workflow` skill — sprint pipeline orchestration

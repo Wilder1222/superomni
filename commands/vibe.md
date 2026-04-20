@@ -15,13 +15,13 @@ Activate the full **superomni** skill framework and launch the default guided wo
 1. Loads `skills/using-skills/SKILL.md` as the meta-routing protocol
 2. Detects current stage by scanning `docs/superomni/` artifacts
 3. Applies a single human gate in THINK (spec approval)
-4. Runs PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT in auto wave mode on DONE
+4. Runs PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE in auto wave mode on DONE
 5. Falls back to guided menu only when stage is ambiguous or user asks `/vibe` with no context
 
 ## Core Workflow Pipeline
 
 ```
-THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
+THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
 ```
 
 Human confirmation gate:
@@ -40,8 +40,7 @@ Every stage must leave document evidence before advancing:
 | REVIEW | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
 | BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
 | VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` |
-| SHIP | Release evidence in `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
-| REFLECT | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+| RELEASE | `docs/superomni/releases/release-[branch]-[session]-[date].md` |
 
 If the stage artifact is missing, do not auto-advance.
 

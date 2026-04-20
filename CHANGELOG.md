@@ -7,6 +7,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.7] — 2026-04-20
+
+### Added
+- **RELEASE stage** — merged SHIP + REFLECT into a single `RELEASE` stage; pipeline is now 6 stages (THINK → PLAN → REVIEW → BUILD → VERIFY → RELEASE)
+- New `skills/release/` skill with parallel Release + Retrospective output in one artifact (`docs/superomni/releases/`)
+- New `/release` command registered in `claude-skill.json` and `commands/release.md`
+
+### Fixed
+- **Windows Git Bash compatibility** — replaced `stat -c %Y`/`stat -f %m` loop in `_session_files()` with cross-platform `find -newer` approach
+- **Soft artifact skip removed** — `_verify_stage_artifact("SHIP") || true` eliminated; RELEASE now requires `release-*.md` artifact before auto-advancing
+- **Spec approval gate** — `brainstorm` now writes `.approved-spec-*` marker on approval; `vibe` stage detection uses this to prevent auto-advancing past THINK without explicit user approval
+
+### Changed
+- `lib/preamble.md` compressed from 221 → 148 lines (−33%) by replacing verbose bash blocks with prose descriptions
+- All 30 compiled `SKILL.md` files updated with new preamble and RELEASE pipeline references
+- `CLAUDE.md` updated with 6-stage pipeline, `release` skill entry, and `docs/superomni/releases/` directory
+
+---
+
 ## [0.5.4] — 2026-04-08
 
 ### Added

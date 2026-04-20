@@ -44,26 +44,24 @@ Scan for existing artifacts to determine where the project is in the sprint pipe
 _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
 _SESSION_ID=$(cat ~/.omni-skills/sessions/current-session-id 2>/dev/null || echo "")
 
-# Helper: filter files modified AFTER session start
-_session_files() {
-  local pattern="$1"
-  for f in $pattern; do
-    [ -f "$f" ] || continue
-    local fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
-    if [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null; then
-      echo "$f"
-    fi
-  done
-}
+# Helper: create a reference file with session-start mtime (cross-platform: Git Bash / Linux / macOS)
+_ref=$(mktemp 2>/dev/null || echo "/tmp/_omni_ref_$$")
+touch -d "@${_SESSION_TS}" "$_ref" 2>/dev/null || \
+  touch -t "$(date -d "@${_SESSION_TS}" +%Y%m%d%H%M.%S 2>/dev/null || \
+              date -r "${_SESSION_TS}" +%Y%m%d%H%M.%S 2>/dev/null || echo "$(date +%Y%m%d%H%M.%S)")" \
+  "$_ref" 2>/dev/null || touch "$_ref"
 
-# Detect all 7 artifact types in current session
-_HAS_SPEC=$(_session_files "docs/superomni/specs/spec-*.md" | sort | tail -1)
-_HAS_PLAN=$(_session_files "docs/superomni/plans/plan-*.md" | sort | tail -1)
-_HAS_REVIEW=$(_session_files "docs/superomni/reviews/review-*.md" | head -1)
-_HAS_EXECUTIONS=$(_session_files "docs/superomni/executions/*.md" | head -1)
-_HAS_EVALUATION=$(_session_files "docs/superomni/evaluations/evaluation-*.md" | head -1)
-_HAS_PROD_READINESS=$(_session_files "docs/superomni/production-readiness/*.md" | head -1)
-_HAS_IMPROVEMENTS=$(_session_files "docs/superomni/improvements/*.md" | head -1)
+# Detect all artifact types in current session using find -newer (no stat dependency)
+_HAS_SPEC=$(find docs/superomni/specs -name "spec-*.md" -newer "$_ref" 2>/dev/null | sort | tail -1)
+_HAS_SPEC_APPROVAL=$(find docs/superomni/specs -name ".approved-spec-*" -newer "$_ref" 2>/dev/null | head -1)
+# Also check non-session approval files (approval persists across sessions)
+[ -z "$_HAS_SPEC_APPROVAL" ] && _HAS_SPEC_APPROVAL=$(ls docs/superomni/specs/.approved-spec-* 2>/dev/null | head -1)
+_HAS_PLAN=$(find docs/superomni/plans -name "plan-*.md" -newer "$_ref" 2>/dev/null | sort | tail -1)
+_HAS_REVIEW=$(find docs/superomni/reviews -name "review-*.md" -newer "$_ref" 2>/dev/null | head -1)
+_HAS_EXECUTIONS=$(find docs/superomni/executions -name "*.md" -newer "$_ref" 2>/dev/null | head -1)
+_HAS_EVALUATION=$(find docs/superomni/evaluations -name "evaluation-*.md" -newer "$_ref" 2>/dev/null | head -1)
+_HAS_RELEASE=$(find docs/superomni/releases -name "release-*.md" -newer "$_ref" 2>/dev/null | head -1)
+rm -f "$_ref" 2>/dev/null
 
 # Cross-session fallback: if no current-session artifacts exist but
 # last-session-artifacts.txt shows incomplete work, detect from disk
@@ -76,8 +74,7 @@ if [ -z "$_HAS_SPEC" ] && [ -z "$_HAS_PLAN" ]; then
     _HAS_REVIEW=$(ls docs/superomni/reviews/review-*.md 2>/dev/null | head -1)
     _HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
     _HAS_EVALUATION=$(ls docs/superomni/evaluations/evaluation-*.md 2>/dev/null | head -1)
-    _HAS_PROD_READINESS=$(ls docs/superomni/production-readiness/*.md 2>/dev/null | head -1)
-    _HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
+    _HAS_RELEASE=$(ls docs/superomni/releases/release-*.md 2>/dev/null | head -1)
     _CROSS_SESSION=true
   fi
 fi
@@ -102,12 +99,12 @@ Use the following priority-ordered rules (first match wins):
 | Priority | Condition | Stage | Skill |
 |----------|-----------|-------|-------|
 | 1 | No artifacts at all | THINK | `brainstorm` |
-| 2 | `spec-*.md` exists, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
-| 3 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
-| 5 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `security-audit`, `production-readiness` - auto-advance |
-| 6 | Verified | SHIP | `ship`, `finishing-branch` - auto-advance |
-| 7 | Shipped | REFLECT | `self-improvement` -> `retro` - auto-advance |
+| 2 | `spec-*.md` exists but no `.approved-spec-*` marker | THINK | `brainstorm` (spec awaiting approval) |
+| 3 | `spec-*.md` + `.approved-spec-*` exist, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
+| 4 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
+| 5 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
+| 6 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `security-audit`, `production-readiness` - auto-advance |
+| 7 | Verified | RELEASE | `release` skill - auto-advance |
 
 Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must contain the same session identifier.
 
@@ -126,13 +123,12 @@ THINK has exactly one human gate: spec review approval.
 _verify_stage_artifact() {
   local from_stage="$1"
   case "$from_stage" in
-    THINK)   [ -n "$_HAS_SPEC" ] ;;
+    THINK)   [ -n "$_HAS_SPEC" ] && [ -n "$_HAS_SPEC_APPROVAL" ] ;;
     PLAN)    [ -n "$_HAS_PLAN" ] ;;
     REVIEW)  [ -n "$_HAS_REVIEW" ] ;;
     BUILD)   [ -n "$_HAS_EXECUTIONS" ] ;;
     VERIFY)  [ -n "$_HAS_EVALUATION" ] ;;
-    SHIP)    [ -n "$_HAS_PROD_READINESS" ] || true ;;  # optional
-    REFLECT) [ -n "$_HAS_IMPROVEMENTS" ] ;;
+    RELEASE) [ -n "$_HAS_RELEASE" ] ;;
   esac
 }
 
@@ -150,13 +146,12 @@ Before advancing, verify at least one stage artifact exists for the current stag
 
 | Stage | Required artifact(s) |
 |-------|-----------------------|
-| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
+| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` + `docs/superomni/specs/.approved-spec-[branch]-[session]-[date]` |
 | PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
 | REVIEW | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
 | BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
-| VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` (and `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md` when deploying) |
-| SHIP | Release evidence recorded in `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
-| REFLECT | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+| VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` |
+| RELEASE | `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain `## Release` and `## Retrospective`) |
 
 If a required artifact is missing, do not advance. Report `DONE_WITH_CONCERNS` with the missing artifact path.
 
@@ -211,9 +206,9 @@ Suggested next step -> [skill-name]: [reason based on detected stage]
 Run stage detection from Phase 1 and display:
 
 ```
-Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
+Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
 Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Artifacts: spec-*.md [Y/N] | .approved-spec-* [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | releases [N]
 Next -> [skill-name]: [reason]
 ```
 
@@ -228,10 +223,8 @@ WARNING: This will remove all superomni artifacts:
   - docs/superomni/executions/
   - docs/superomni/reviews/
   - docs/superomni/subagents/
-  - docs/superomni/production-readiness/
-
 Self-improvement history will be preserved:
-  - docs/superomni/improvements/
+  - docs/superomni/releases/
   - docs/superomni/evaluations/
   - docs/superomni/harness-audits/
 

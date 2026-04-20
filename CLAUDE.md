@@ -40,8 +40,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | git-worktrees | Parallel work | P2 |
 | finishing-branch | "finish branch", "merge" | P2 |
 | investigate | "investigate", "explore" | P2 |
-| retro | "retro", "weekly review" | P2 |
-| ship | "ship", "release" | P2 |
+| release | "release", "ship and reflect", "end sprint" | P2 |
 | writing-skills | "create skill", "install skill", "list skills" | P2 |
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
 | document-release | "update docs", "sync docs" (optional post-ship) | P3 |
@@ -90,6 +89,7 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 | Sub-agent sessions | `docs/superomni/subagents/` | `subagent-[branch]-[session]-[date].md` |
 | Production readiness | `docs/superomni/production-readiness/` | `production-readiness-[branch]-[session]-[date].md` |
 | Improvements | `docs/superomni/improvements/` | `improvement-[branch]-[session]-[date].md` |
+| Releases | `docs/superomni/releases/` | `release-[branch]-[session]-[date].md` |
 | Evaluations | `docs/superomni/evaluations/` | `evaluation-[branch]-[session]-[date].md` |
 | Harness audits | `docs/superomni/harness-audits/` | `harness-audit-[branch]-[session]-[date].md` |
 | Retros | `docs/superomni/retros/` | `retro-[branch]-[session]-[date].md` |
@@ -109,3 +109,4 @@ Documents in `docs/superomni/` serve as a permanent, indexable audit trail for a
 - **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/specs/spec-*.md`, `docs/superomni/plans/plan-*.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
 - **EnterPlanMode → brainstorm:** Whenever about to call `EnterPlanMode`, invoke `brainstorm` skill instead. This is a hard routing rule — the impulse to plan IS the brainstorm trigger.
 - **TACIT-DENSE decisions:** Before executing substantive decisions, check preamble's TACIT-DENSE protocol (D1-D4). Flag high-tacit-density judgments to the user.
+- **Pipeline is 6 stages:** THINK → PLAN → REVIEW → BUILD → VERIFY → RELEASE (SHIP and REFLECT are merged into RELEASE)

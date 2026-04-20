@@ -46,6 +46,10 @@
         {
             "name": "front-design",
             "file": "commands/front-design.md"
+        },
+        {
+            "name": "release",
+            "file": "commands/release.md"
         }
     ],
     "hooks": {

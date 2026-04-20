@@ -1,9 +1,9 @@
 ---
-name: verification
+name: release
 description: |
-  Use before claiming any task is complete.
-  Performs a structured self-check to ensure all acceptance criteria are met.
-  Triggers: "I'm done", "that's complete", "finished", before reporting DONE.
+  Combined RELEASE stage: execute ship workflow and retrospective in parallel.
+  Produces a single release artifact with ## Release and ## Retrospective sections.
+  Triggers: "/release", "release", "ship and reflect", "end sprint".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -156,248 +156,171 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-# Verification Before Completion
+# /release — Release & Retrospective
 
-**Goal:** Systematically verify that work is complete and correct before declaring done.
+**Goal:** Close the sprint by shipping the software and capturing what was learned — in one combined step.
 
-## Iron Law: Evidence Required
+## Iron Law: Release Evidence Required
 
-"I think it works" is not evidence. "I believe it's correct" is not evidence.
-Evidence is: running the code and showing output, passing test results, or observable behavior.
+Never mark RELEASE as DONE without both sections populated in the artifact.
+`## Release` without `## Retrospective` is incomplete. Both are required.
 
-### Good Example (Evidence Required)
-```
-Agent claims feature is complete.
-Evidence provided:
-  1. npm test output: "15 tests, 15 passing, 0 failing"
-  2. Manual verification: curl -X POST /api/users -> 201 Created
-  3. Edge case tested: curl -X POST /api/users (empty body) -> 400 Bad Request
-  4. Screenshot: UI renders correctly with new component
-Result: DONE — all evidence is observable and reproducible
-```
-
-### Bad Example (AVOID)
-```
-Agent claims feature is complete.
-Evidence provided:
-  "I believe the implementation is correct based on the logic"
-  "It should work because I followed the pattern from the other module"
-Result: NOT ACCEPTABLE — "believe" and "should" are not evidence
-[VIOLATED: No test output, no command results, no observable behavior shown]
-```
-
-### Common Excuse Rebuttals
-| Excuse | Rebuttal |
-|--------|----------|
-| "The logic is straightforward, it must work" | Straightforward logic still needs proof — run the test |
-| "I followed the same pattern as module X" | Pattern match is not verification — show the output |
-| "Tests aren't set up for this area" | Then set them up — untestable claims cannot be verified |
-
-## The Verification Checklist
-
-Run through this before reporting any status:
-
-### 0. Goal Alignment Check (run first)
-
-Before any technical checks, verify the output achieves what the user originally asked for.
+## Phase 1: Pre-Release Assessment
 
 ```bash
-# Read acceptance criteria from spec or plan
-_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
-_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
-cat "$_SPEC" 2>/dev/null | grep -A 30 "Acceptance Criteria" | head -40 || \
-  cat "$_PLAN" 2>/dev/null | grep -A 20 "Success Criteria" | head -30 || \
-  echo "No docs/superomni/specs/spec-*.md or docs/superomni/plans/plan-*.md found"
+git status --short
+git log origin/main..HEAD --oneline
+git stash list
 ```
 
-For **each acceptance criterion** in docs/superomni/specs/spec-*.md or docs/superomni/plans/plan-*.md:
+Confirm:
+- [ ] On correct branch, no uncommitted changes
+- [ ] All tests pass (check CI or run locally)
+- [ ] No open P0 blockers
 
-| Criterion | Met? | Evidence |
-|-----------|------|----------|
-| [criterion from spec] | ✓/✗ | [specific proof: test output, observable behavior, or code reference] |
+## Phase 2: Release Section
 
-**If no docs/superomni/specs/spec-*.md exists:**
-- State what user goal this change fulfills
-- List observable outcomes that prove the goal is met
-
-**Gate:** Cannot report DONE if any P0 acceptance criterion is unmet.
-
-### 1. Functional Verification
-
-- [ ] Does it do what the spec/plan/ticket says it should do?
-- [ ] Run the actual code and observe the actual output
-- [ ] Test the happy path: does it work for the normal case?
-- [ ] Test edge cases: empty input, max values, null/nil?
-- [ ] Test error conditions: does it fail gracefully?
+### Version Bump
 
 ```bash
-# Run tests
-npm test 2>&1 | tail -20
-# or
-pytest -v 2>&1 | tail -20
-# or
-go test ./... 2>&1 | tail -20
+# Check current version
+cat package.json 2>/dev/null | grep '"version"'
+cat VERSION 2>/dev/null
 ```
 
-### 2. Test Verification
+Determine next version (semver: MAJOR.MINOR.PATCH).
 
-- [ ] Are there tests? (If new code was written, tests are **mandatory** — this is a hard gate)
-- [ ] Do all tests pass?
-- [ ] Do tests verify behavior (not just implementation)?
-- [ ] Are tests independent (can run in any order)?
-- [ ] Was TDD followed? (test written before implementation)
+### Changelog
 
-**Hard gate for new code:** If new source code was written and no tests exist for it, report BLOCKED — do not advance to DONE until tests are added. The only valid exception is a documented reason (pure UI layout, throw-away prototype).
-
-```bash
-# Step 1: List source files changed (exclude tests and docs)
-git diff HEAD --name-only | grep -vE "(test|spec|\.md$|\.txt$)" | head -10
-
-# Step 2: List test files changed
-git diff HEAD --name-only | grep -E "(test|spec|_test\.|\.test\.)" | head -10
-
-# Step 3: Check if any source file has a corresponding test file
-# For each changed source file, search for a test file by base name
-for f in $(git diff HEAD --name-only | grep -vE "(test|spec|\.md$)"); do
-  base=$(basename "$f" | sed 's/\..*//')
-  found=$(find . -name "*${base}*test*" -o -name "*${base}*spec*" -o \
-          -name "test_*${base}*" 2>/dev/null | head -1)
-  if [ -z "$found" ]; then
-    echo "MISSING TESTS: $f (no test file found for '$base')"
-  else
-    echo "HAS TESTS: $f → $found"
-  fi
-done
-```
-
-### 3. Regression Verification
-
-- [ ] Do existing tests still pass?
-- [ ] Did you break anything adjacent?
-
-```bash
-# Run full test suite (not just new tests)
-npm test 2>&1 | grep -E "(PASS|FAIL|Error)" | head -20
-```
-
-### 4. Completeness Verification
-
-- [ ] Are all acceptance criteria from the spec/plan met?
-- [ ] Are error paths handled?
-- [ ] Is there appropriate logging for debuggability?
-- [ ] Are edge cases covered?
-- [ ] Is the code readable without requiring comments to explain "what"?
-
-### 5. No Regressions Checklist
-
-- [ ] Reviewed the diff: `git diff HEAD`
-- [ ] No unintended files changed
-- [ ] No debug code left in (console.log, print, debugger)
-- [ ] No TODO left unresolved that blocks the task
-
-```bash
-# Quick diff review
-git diff HEAD --stat
-git diff HEAD | grep "console.log\|debugger\|TODO\|FIXME\|print(" | head -10
-```
-
-### 6. Blast Radius Check
-
-- [ ] How many files were changed? (`git diff HEAD --stat | tail -1`)
-- [ ] If >5 files: was this flagged to the user?
-- [ ] Any unexpected files in the diff?
-
-## Verification Report
-
-After completing the checklist:
-
-```
-VERIFICATION REPORT
-════════════════════════════════════════
-Task:              [what was being implemented/fixed]
-Tests run:         [N tests, N passing, N failing]
-
-Goal Alignment:
-  Spec/plan used:  [docs/superomni/specs/spec-*.md | docs/superomni/plans/plan-*.md | user request]
-  ✓/✗ [acceptance criterion 1] — [evidence]
-  ✓/✗ [acceptance criterion 2] — [evidence]
-  User goal achieved: YES | PARTIAL | NO
-
-Acceptance criteria:
-  ✓ [criterion 1]
-  ✓ [criterion 2]
-  ✗ [criterion 3] — FAILED (explain why)
-Files changed:     [N files]
-Regressions:       [none | list any]
-Evidence:          [test output snippet or observed behavior]
-
-Status: DONE | DONE_WITH_CONCERNS | BLOCKED
-Concerns (if any):
-  - [concern 1 with recommendation]
-════════════════════════════════════════
-```
-
-## Save Evaluation Report
-
-After completing verification, save the report as a persistent Markdown document:
-
-```bash
-EVAL_DIR="docs/superomni/evaluations"
-mkdir -p "$EVAL_DIR"
-BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "main")
-TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)
-EVAL_FILE="$EVAL_DIR/evaluation-${BRANCH}-${TIMESTAMP}.md"
-```
-
-Write the full VERIFICATION REPORT block (including all checklist results, test output, and goal alignment table) to `$EVAL_FILE` in this format:
+Update `CHANGELOG.md`:
 
 ```markdown
-# Verification Evaluation: [branch]
+## [vX.Y.Z] — YYYY-MM-DD
+
+### Added
+- [New features]
+
+### Fixed
+- [Bug fixes]
+
+### Changed
+- [Behavior changes]
+```
+
+```bash
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+[ -n "$LAST_TAG" ] && git log "${LAST_TAG}..HEAD" --oneline
+```
+
+### Tag & Publish
+
+```bash
+VERSION="v$(cat package.json | grep '"version"' | cut -d'"' -f4)"
+git tag -a "${VERSION}" -m "Release ${VERSION}"
+git push origin HEAD && git push origin "${VERSION}"
+gh release create "${VERSION}" --title "Release ${VERSION}" --latest 2>/dev/null || true
+```
+
+### Verify Deployment
+
+```bash
+gh release view "${VERSION}" 2>/dev/null || echo "No GitHub release (OK if not using gh)"
+```
+
+## Phase 3: Retrospective Section
+
+### Tacit Gap Mining
+
+```bash
+# Recurring review comments
+for review in docs/superomni/reviews/review-*.md; do
+  [ -f "$review" ] && grep -h "^- " "$review" 2>/dev/null
+done | sort | uniq -c | sort -rn | head -10
+
+# Session deviations
+for exec in docs/superomni/executions/execution-*.md; do
+  [ -f "$exec" ] && grep -h -A1 "CONCERN\|DEVIATION\|override" "$exec" 2>/dev/null
+done | head -10
+```
+
+### Sprint Evidence
+
+```bash
+SINCE="7 days ago"
+git log --oneline --since="${SINCE}" 2>/dev/null | head -20
+find docs/superomni -name "*.md" -newer docs/superomni/plans/plan-*.md 2>/dev/null | head -10
+```
+
+### Retrospective Analysis
+
+Answer these with evidence:
+- What went well? (cite specific steps or artifacts)
+- What slowed us down? (cite blockers or deviations)
+- What process rule should change? (cite root cause)
+- What tacit knowledge was surfaced? (D1-D4 categories)
+
+## Phase 4: Write Combined Artifact
+
+```bash
+_REL_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_REL_SESSION="<kebab-case-from-context>"
+_REL_DATE=$(date +%Y%m%d)
+mkdir -p docs/superomni/releases
+_REL_FILE="docs/superomni/releases/release-${_REL_BRANCH}-${_REL_SESSION}-${_REL_DATE}.md"
+```
+
+Write `$_REL_FILE` with this structure:
+
+```markdown
+# Release: [session] — [version]
 
 **Date:** [date]
 **Branch:** [branch]
-**Task:** [what was being verified]
 
-## Checklist Results
+## Release
 
-| Check | Result | Notes |
-|-------|--------|-------|
-| Functional verification | ✓/✗ | |
-| Test verification | ✓/✗ | |
-| Regression verification | ✓/✗ | |
-| Completeness | ✓/✗ | |
-| No regressions | ✓/✗ | |
-| Blast radius | ✓/✗ | |
+### Version
+[vX.Y.Z]
 
-## Goal Alignment
+### What Shipped
+[bullet points from changelog]
 
-Spec/plan used: [docs/superomni/specs/spec-*.md | docs/superomni/plans/plan-*.md | user request]
+### Deployment Evidence
+[tag created, release URL, health check result]
 
-| Criterion | Met? | Evidence |
-|-----------|------|----------|
-| [criterion 1] | ✓/✗ | [proof] |
+### Rollback Plan
+[how to revert if needed]
 
-## Evidence
+## Retrospective
 
-[Test output snippet or observed behavior]
+### What Went Well
+- [item with evidence]
 
-## Verdict
+### What Slowed Us Down
+- [item with evidence]
 
-[Paste full VERIFICATION REPORT block here]
+### Process Changes
+- [proposed rule change or Iron Law update]
 
-**Status:** DONE | DONE_WITH_CONCERNS | BLOCKED
+### Tacit Knowledge Captured
+- [D1/D2/D3/D4 gap → proposed rule]
+
+### Next Sprint Suggestions
+- [actionable item]
 ```
 
-```bash
-echo "Evaluation saved to $EVAL_FILE"
+## Phase 5: Report
+
 ```
+RELEASE COMPLETE
+════════════════════════════════════════
+Version:      [vX.Y.Z]
+Artifact:     [release file path]
+## Release:   [populated ✓]
+## Retro:     [populated ✓]
 
-This file is the permanent task evaluation record. It feeds into `self-improvement` and future sprint retrospectives.
-
-## When Verification Fails
-
-If any check fails:
-
-1. **P0 failure** (tests fail, criteria not met): report BLOCKED or go fix it
-2. **P1 failure** (edge case missing, partial coverage): report DONE_WITH_CONCERNS with specific notes
-3. **Ambiguous** (can't tell if it's working): report NEEDS_CONTEXT with specific question
+Status: DONE | DONE_WITH_CONCERNS
+Concerns:
+  - [any post-release concerns]
+════════════════════════════════════════
+```

@@ -177,7 +177,12 @@ Please review the spec above.
 ```
 
 **Wait for user response.** This is the ONLY human gate in the entire pipeline.
-- If approved → report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → SHIP → REFLECT) will execute automatically without further user input.
+- If approved → write approval marker file, report DONE and auto-advance to PLAN (`writing-plans`). All subsequent stages (PLAN → REVIEW → BUILD → VERIFY → RELEASE) will execute automatically without further user input.
+  ```bash
+  # Write approval marker (enables vibe stage detection to advance past THINK)
+  _SPEC_BASE=$(basename "$_SPEC_FILE" .md)
+  touch "docs/superomni/specs/.approved-${_SPEC_BASE}"
+  ```
 - If rejected → revise the spec based on feedback and re-present for review.
 
 Report status: **DONE** — spec written, reviewed, and approved by user. Path: [spec file path]

@@ -10,20 +10,10 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ## Preamble
 
 ### Environment Detection
-```bash
-mkdir -p ~/.omni-skills/sessions
-_PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
-_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-_TEL_START=$(date +%s)
-echo "Branch: $_BRANCH | PROACTIVE: $_PROACTIVE"
-```
+
+On session start, read: branch from `git branch --show-current`, proactive config from `bin/config get proactive` (default `true`), session timestamp from `~/.omni-skills/sessions/current-session-ts`.
 
 ### PROACTIVE Mode
-
-Check proactive configuration:
-```bash
-_PROACTIVE=$(~/.claude/skills/superomni/bin/config get proactive 2>/dev/null || echo "true")
-```
 
 **Legacy mode (single value):**
 If `proactive=true`: auto-invoke skills. If `proactive=false`: ask first.
@@ -60,9 +50,9 @@ Report status using one of these at the end of every skill session:
 
 ### Auto-Advance Rule
 
-Pipeline stage order: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
+Pipeline stage order: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
 
-**THINK has exactly one human gate: spec review approval.** `brainstorm` runs without manual gate. After `spec-[branch]-[session]-[date].md` is generated, STOP for user spec approval. Once approved, all subsequent stages (PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT) auto-advance on DONE.
+**THINK has exactly one human gate: spec review approval.** `brainstorm` runs without manual gate. After `spec-[branch]-[session]-[date].md` is generated, STOP for user spec approval. Once approved, all subsequent stages (PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE) auto-advance on DONE.
 
 | Status | At THINK stage (after spec generation) | At all other stages |
 |--------|----------------------------------------|-------------------|
@@ -80,31 +70,7 @@ When auto-advancing:
 ### Session Continuity
 
 When the user sends a **follow-up message after a completed session**, before doing anything else:
-1. Scan for **current-session** context (only artifacts modified after session start):
-   ```bash
-   _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
-   # List recent artifacts, filtering by session timestamp
-   for f in docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md; do
-     [ -f "$f" ] || continue
-     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
-     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && echo "$f"
-   done
-   git log --oneline -3 2>/dev/null
-   ```
-   To find the latest current-session spec or plan:
-   ```bash
-   _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
-   _LATEST_SPEC=""
-   _LATEST_PLAN=""
-   for f in $(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort); do
-     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
-     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && _LATEST_SPEC="$f"
-   done
-   for f in $(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort); do
-     fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
-     [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null && _LATEST_PLAN="$f"
-   done
-   ```
+1. Read `~/.omni-skills/sessions/current-session-ts` to get session start timestamp. Find artifacts in `docs/superomni/specs/`, `docs/superomni/plans/` newer than that timestamp using `find -newer`. Check `git log --oneline -3`.
 2. If current-session context exists → re-engage the skill framework. Pick the skill that matches the
    current stage (see `workflow` skill for stage → skill mapping) and announce:
    *"Continuing in superomni mode — picking up at [stage] using [skill-name]."*
@@ -124,13 +90,7 @@ When asking the user a question, match the confirmation requirement to the compl
 
 **Rule: never add a redundant confirmation layer on top of a single-choice or text-input answer.**
 
-**Custom Input Option Rule:** Whenever you present a predefined list of choices (A/B/C, numbered options, etc.), always append a final "Other" option that lets the user describe their own idea:
-
-```
-  [last letter/number + 1]) Other — describe your own idea: ___________
-```
-
-When the user selects "Other" and provides their custom text, treat that text as the chosen option and proceed exactly as you would for any other selection. If the custom text is ambiguous, ask one clarifying question before proceeding.
+**Custom Input Option Rule:** Always append `Other — describe your own idea: ___` to predefined choice lists. Treat custom text as the chosen option; ask one clarifying question only if ambiguous.
 
 ### Context Window Management
 Load context progressively — only what is needed for the current phase:
@@ -160,15 +120,7 @@ Agent failures are harness signals — not reasons to retry the same approach:
 It is always OK to stop and say "this is too hard for me." Escalation is expected, not penalized.
 
 ### Performance Checkpoint
-After completing any skill session, run a 3-question self-check before writing the final status:
-
-1. **Process** — Did I follow all defined phases? If any were skipped, state why.
-2. **Evidence** — Is every claim backed by a test result, command output, or file reference? If not, gather the missing evidence now.
-3. **Scope** — Did I stay within the task boundary? If I touched files outside the original scope, flag them explicitly.
-
-If any answer is NO, address it before reporting DONE. If it cannot be addressed, report DONE_WITH_CONCERNS and name the gap.
-
-For a full performance evaluation spanning the entire sprint, use the `self-improvement` skill.
+Before reporting final status, answer: (1) **Process** — all phases followed? (2) **Evidence** — every claim backed by output or file reference? (3) **Scope** — stayed within task boundary? If any NO, address it or report DONE_WITH_CONCERNS. For full sprint evaluation, use `self-improvement`.
 
 ### TACIT-DENSE Detection (Tacit Knowledge Density Check)
 
@@ -176,44 +128,20 @@ Before executing substantive decisions, check if any falls into these high-tacit
 These are NOT about operational danger (that's the `careful` skill) — they're about whether the Agent
 has enough tacit knowledge to judge correctly.
 
-**D1 - Domain Expertise Decision**
-  Trigger: Requires judgment in a specialized domain (security, compliance, legal, medical, financial)
-  Examples: choosing encryption algorithm, deciding data retention policy, HIPAA compliance choice
-  Action: State "TACIT-DENSE [D1]", present options with trade-offs, wait for user selection
+| Category | Trigger | Action |
+|----------|---------|--------|
+| **D1** Domain Expertise | Security, compliance, legal, financial judgment | State `TACIT-DENSE [D1]`, present trade-offs, wait for user |
+| **D2** User-Facing UX | UI copy, interaction flow, error messaging | Draft with explicit review markers |
+| **D3** Team Culture | Workflow, naming conventions, file organization | Check `style-profiles/` first; ask if none |
+| **D4** Novel Pattern | Fewer than 3 precedents in project history | Reduce autonomy, add checkpoints before executing |
 
-**D2 - User-Facing Experience Decision**
-  Trigger: Substantive choices about UI copy, interaction flow, error messaging, onboarding
-  Examples: writing onboarding guidance text, choosing error message tone, designing empty states
-  Action: Provide draft with explicit markers on parts needing user review
+When TACIT-DENSE detected, output: `TACIT-DENSE [D#]: [category] — [question] — My default: [recommendation]`
 
-**D3 - Team Culture & Convention Decision**
-  Trigger: Major choices about team workflow, naming conventions, documentation style, file organization
-  Examples: naming convention for new module, choosing between monorepo approaches, doc format
-  Action: Check docs/superomni/style-profiles/ first; if no profile, ask user
-
-**D4 - Novel Pattern Decision**
-  Trigger: Task type has fewer than 3 precedents in project execution history
-  Examples: first-time integration of a new framework, first use of a new deployment target
-  Action: Reduce autonomy — add intermediate checkpoints, present approach before executing
-
-**Output format when TACIT-DENSE detected:**
-```
-TACIT-DENSE [D1/D2/D3/D4]: This is a [category] decision requiring your judgment.
-Question: [single most important question]
-My default recommendation: [recommendation + rationale]
-Please confirm or share your preference.
-```
-
-**Relationship with careful skill:** careful handles "can we undo this?" (operational risk).
-TACIT-DENSE handles "can we judge this correctly?" (knowledge risk). They are complementary.
+**Relationship with careful skill:** careful = "can we undo this?" (operational). TACIT-DENSE = "can we judge this correctly?" (knowledge). Complementary.
 
 ### Telemetry (Local Only)
-```bash
-_TEL_END=$(date +%s)
-_TEL_DUR=$(( _TEL_END - _TEL_START ))
-~/.claude/skills/superomni/bin/analytics-log "SKILL_NAME" "$_TEL_DUR" "OUTCOME" 2>/dev/null || true
-```
-Nothing is sent to external servers. Data is stored only in `~/.omni-skills/analytics/`.
+
+At session end, log skill name, duration, and outcome to `~/.omni-skills/analytics/` via `bin/analytics-log`. Nothing is sent to external servers.
 
 ### Plan Mode Fallback
 
@@ -263,26 +191,24 @@ Scan for existing artifacts to determine where the project is in the sprint pipe
 _SESSION_TS=$(cat ~/.omni-skills/sessions/current-session-ts 2>/dev/null || echo "0")
 _SESSION_ID=$(cat ~/.omni-skills/sessions/current-session-id 2>/dev/null || echo "")
 
-# Helper: filter files modified AFTER session start
-_session_files() {
-  local pattern="$1"
-  for f in $pattern; do
-    [ -f "$f" ] || continue
-    local fts=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo "0")
-    if [ "$fts" -ge "$_SESSION_TS" ] 2>/dev/null; then
-      echo "$f"
-    fi
-  done
-}
+# Helper: create a reference file with session-start mtime (cross-platform: Git Bash / Linux / macOS)
+_ref=$(mktemp 2>/dev/null || echo "/tmp/_omni_ref_$$")
+touch -d "@${_SESSION_TS}" "$_ref" 2>/dev/null || \
+  touch -t "$(date -d "@${_SESSION_TS}" +%Y%m%d%H%M.%S 2>/dev/null || \
+              date -r "${_SESSION_TS}" +%Y%m%d%H%M.%S 2>/dev/null || echo "$(date +%Y%m%d%H%M.%S)")" \
+  "$_ref" 2>/dev/null || touch "$_ref"
 
-# Detect all 7 artifact types in current session
-_HAS_SPEC=$(_session_files "docs/superomni/specs/spec-*.md" | sort | tail -1)
-_HAS_PLAN=$(_session_files "docs/superomni/plans/plan-*.md" | sort | tail -1)
-_HAS_REVIEW=$(_session_files "docs/superomni/reviews/review-*.md" | head -1)
-_HAS_EXECUTIONS=$(_session_files "docs/superomni/executions/*.md" | head -1)
-_HAS_EVALUATION=$(_session_files "docs/superomni/evaluations/evaluation-*.md" | head -1)
-_HAS_PROD_READINESS=$(_session_files "docs/superomni/production-readiness/*.md" | head -1)
-_HAS_IMPROVEMENTS=$(_session_files "docs/superomni/improvements/*.md" | head -1)
+# Detect all artifact types in current session using find -newer (no stat dependency)
+_HAS_SPEC=$(find docs/superomni/specs -name "spec-*.md" -newer "$_ref" 2>/dev/null | sort | tail -1)
+_HAS_SPEC_APPROVAL=$(find docs/superomni/specs -name ".approved-spec-*" -newer "$_ref" 2>/dev/null | head -1)
+# Also check non-session approval files (approval persists across sessions)
+[ -z "$_HAS_SPEC_APPROVAL" ] && _HAS_SPEC_APPROVAL=$(ls docs/superomni/specs/.approved-spec-* 2>/dev/null | head -1)
+_HAS_PLAN=$(find docs/superomni/plans -name "plan-*.md" -newer "$_ref" 2>/dev/null | sort | tail -1)
+_HAS_REVIEW=$(find docs/superomni/reviews -name "review-*.md" -newer "$_ref" 2>/dev/null | head -1)
+_HAS_EXECUTIONS=$(find docs/superomni/executions -name "*.md" -newer "$_ref" 2>/dev/null | head -1)
+_HAS_EVALUATION=$(find docs/superomni/evaluations -name "evaluation-*.md" -newer "$_ref" 2>/dev/null | head -1)
+_HAS_RELEASE=$(find docs/superomni/releases -name "release-*.md" -newer "$_ref" 2>/dev/null | head -1)
+rm -f "$_ref" 2>/dev/null
 
 # Cross-session fallback: if no current-session artifacts exist but
 # last-session-artifacts.txt shows incomplete work, detect from disk
@@ -295,8 +221,7 @@ if [ -z "$_HAS_SPEC" ] && [ -z "$_HAS_PLAN" ]; then
     _HAS_REVIEW=$(ls docs/superomni/reviews/review-*.md 2>/dev/null | head -1)
     _HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
     _HAS_EVALUATION=$(ls docs/superomni/evaluations/evaluation-*.md 2>/dev/null | head -1)
-    _HAS_PROD_READINESS=$(ls docs/superomni/production-readiness/*.md 2>/dev/null | head -1)
-    _HAS_IMPROVEMENTS=$(ls docs/superomni/improvements/*.md 2>/dev/null | head -1)
+    _HAS_RELEASE=$(ls docs/superomni/releases/release-*.md 2>/dev/null | head -1)
     _CROSS_SESSION=true
   fi
 fi
@@ -321,12 +246,12 @@ Use the following priority-ordered rules (first match wins):
 | Priority | Condition | Stage | Skill |
 |----------|-----------|-------|-------|
 | 1 | No artifacts at all | THINK | `brainstorm` |
-| 2 | `spec-*.md` exists, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
-| 3 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
-| 4 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
-| 5 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `security-audit`, `production-readiness` - auto-advance |
-| 6 | Verified | SHIP | `ship`, `finishing-branch` - auto-advance |
-| 7 | Shipped | REFLECT | `self-improvement` -> `retro` - auto-advance |
+| 2 | `spec-*.md` exists but no `.approved-spec-*` marker | THINK | `brainstorm` (spec awaiting approval) |
+| 3 | `spec-*.md` + `.approved-spec-*` exist, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
+| 4 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
+| 5 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
+| 6 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `security-audit`, `production-readiness` - auto-advance |
+| 7 | Verified | RELEASE | `release` skill - auto-advance |
 
 Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must contain the same session identifier.
 
@@ -345,13 +270,12 @@ THINK has exactly one human gate: spec review approval.
 _verify_stage_artifact() {
   local from_stage="$1"
   case "$from_stage" in
-    THINK)   [ -n "$_HAS_SPEC" ] ;;
+    THINK)   [ -n "$_HAS_SPEC" ] && [ -n "$_HAS_SPEC_APPROVAL" ] ;;
     PLAN)    [ -n "$_HAS_PLAN" ] ;;
     REVIEW)  [ -n "$_HAS_REVIEW" ] ;;
     BUILD)   [ -n "$_HAS_EXECUTIONS" ] ;;
     VERIFY)  [ -n "$_HAS_EVALUATION" ] ;;
-    SHIP)    [ -n "$_HAS_PROD_READINESS" ] || true ;;  # optional
-    REFLECT) [ -n "$_HAS_IMPROVEMENTS" ] ;;
+    RELEASE) [ -n "$_HAS_RELEASE" ] ;;
   esac
 }
 
@@ -369,13 +293,12 @@ Before advancing, verify at least one stage artifact exists for the current stag
 
 | Stage | Required artifact(s) |
 |-------|-----------------------|
-| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` |
+| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` + `docs/superomni/specs/.approved-spec-[branch]-[session]-[date]` |
 | PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
 | REVIEW | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
 | BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
-| VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` (and `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md` when deploying) |
-| SHIP | Release evidence recorded in `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
-| REFLECT | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+| VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` |
+| RELEASE | `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain `## Release` and `## Retrospective`) |
 
 If a required artifact is missing, do not advance. Report `DONE_WITH_CONCERNS` with the missing artifact path.
 
@@ -430,9 +353,9 @@ Suggested next step -> [skill-name]: [reason based on detected stage]
 Run stage detection from Phase 1 and display:
 
 ```
-Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
+Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
 Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Artifacts: spec-*.md [Y/N] | .approved-spec-* [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | releases [N]
 Next -> [skill-name]: [reason]
 ```
 
@@ -447,10 +370,8 @@ WARNING: This will remove all superomni artifacts:
   - docs/superomni/executions/
   - docs/superomni/reviews/
   - docs/superomni/subagents/
-  - docs/superomni/production-readiness/
-
 Self-improvement history will be preserved:
-  - docs/superomni/improvements/
+  - docs/superomni/releases/
   - docs/superomni/evaluations/
   - docs/superomni/harness-audits/
 

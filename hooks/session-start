@@ -76,6 +76,7 @@ fi
 
 echo "superomni v0.5.7 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE} | session=${_SESSION_ID:0:8}"
 
+
 # ── Log session start ────────────────────────────────────────────────────────
 echo "{\"event\":\"session_start\",\"project\":\"${_PROJECT}\",\"branch\":\"${_BRANCH}\",\"platform\":\"${_PLATFORM}\",\"session\":\"${_SESSION_ID}\",\"epoch\":\"${_SESSION_EPOCH}\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \
   >> "${STATE_DIR}/sessions/sessions.jsonl" 2>/dev/null || true

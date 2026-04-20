@@ -2,6 +2,8 @@
 
 > **Plan Lean, Execute Complete** — A fused AI coding skill framework for Claude Code, Codex, Gemini CLI, and GitHub Copilot.
 
+Current stable version: 0.5.8
+
 superomni combines the best ideas from [obra/superpowers](https://github.com/obra/superpowers) (methodology-driven AI skill framework) and [garrytan/gstack](https://github.com/garrytan/gstack) (engineering completeness principles) into a unified, opinionated system for AI-assisted software development.
 
 ---
@@ -158,14 +160,12 @@ Open your project in your AI CLI. Skills activate automatically.
 |-------|------------|------------|
 | `test-driven-development` | Writing code | Tests + implementation |
 | `verification` | Before claiming done | Verification report |
-| `code-review` | Reviewing code/PRs | Structured review |
+| `code-review` | Canonical review skill (giving/receiving/security modes) | Structured review |
 | `plan-review` | Before executing a plan (includes auto mode via `/autoplan`) | Reviewed plan |
 | `subagent-development` | Complex parallel tasks (includes wave planning) | Multi-agent output |
-| `receiving-code-review` | Responding to review feedback | Updated code + reply |
-| `security-audit` | Security vulnerability audit | Threat model + fixes |
 | `qa` | Quality assurance pass | QA report |
 | `careful` | High-risk/destructive operations | Safety checklist |
-| `self-improvement` | Post-task performance evaluation | Improvement report + 3 actions |
+| `self-improvement` | Canonical reflection skill (process/retro/harness scopes) | Improvement report + 3 actions |
 | `production-readiness` | Pre-deploy gate | Readiness report |
 | `harness-engineering` | Audit and improve the agent harness | Health score + improvement backlog |
 
@@ -179,7 +179,6 @@ Open your project in your AI CLI. Skills activate automatically.
 | `git-worktrees` | Multiple branches | Worktree setup |
 | `finishing-branch` | Merging a branch | Clean PR |
 | `investigate` | Exploring unfamiliar code | Investigation report |
-| `retro` | Standalone weekly review | Retrospective report |
 | `ship` | Standalone release workflow | Release + changelog |
 | `writing-skills` | Creating new skills | New skill file |
 | `workflow` | Sprint pipeline orchestration | Workflow plan + status |
@@ -324,12 +323,9 @@ superomni/
 │   ├── git-worktrees/
 │   ├── finishing-branch/
 │   ├── investigate/
-│   ├── retro/                ← Weekly engineering retrospective
 │   ├── release/              ← RELEASE stage — ship + retrospective combined
 │   ├── ship/                 ← Standalone release workflow
 │   ├── writing-skills/       ← Meta: create new skills
-│   ├── receiving-code-review/ ← Respond to review feedback
-│   ├── security-audit/       ← Security vulnerability audit
 │   ├── qa/                   ← Quality assurance
 │   ├── careful/              ← Safety guardrails
 │   ├── workflow/             ← Sprint pipeline orchestration

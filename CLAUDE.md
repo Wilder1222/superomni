@@ -28,10 +28,8 @@ Philosophy: **Plan Lean, Execute Complete**
 | systematic-debugging | Any bug/error | P0 |
 | test-driven-development | Writing code | P1 |
 | verification | "verify", "done", "complete" | P1 |
-| code-review | "review", "PR ready" | P1 |
+| code-review | "review", "PR ready", "address review", "security audit" (modes: giving/receiving/security) | P1 |
 | plan-review | "review plan", "autoplan", "auto review" | P1 |
-| receiving-code-review | "review feedback", "address review" | P1 |
-| security-audit | "security audit", "threat model" | P1 |
 | qa | "qa", "quality assurance" | P1 |
 | careful | "careful", destructive operations | P1 |
 | workflow | "workflow", "sprint", "what's next" | P1 |
@@ -45,7 +43,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
 | document-release | "update docs", "sync docs" (optional post-ship) | P3 |
 | production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |
-| self-improvement | "self-improve", "evaluate performance", "reflect on execution", "how did we do", "improve process" | P1 |
+| self-improvement | Reflection skill (process/retro/harness scopes) | P1 |
 | harness-engineering | "harness", "harness audit", "improve harness", "agent environment", "evaluation gates", "feedback loop" | P1 |
 | style-capture | "/style-capture", project init | P1 |
 

@@ -1,12 +1,13 @@
 ---
 name: self-improvement
 description: |
-  Post-task performance evaluation. Applies first-principles reflection to evaluate
-  how well the current session's workflow, agents, and skills performed.
-  Produces a structured improvement report saved to docs/superomni/improvements/.
+  Canonical reflection skill for post-task and post-sprint review.
+  Applies first-principles reflection across process quality and delivery history.
+  Produces improvement reports in docs/superomni/improvements/ and can generate retrospective evidence.
   Triggers: "self-improve", "evaluate performance", "reflect on execution",
   "how did we do", "what could be better", "evaluate this sprint",
-  "improve process", "first principles review".
+  "improve process", "first principles review",
+  "/retro", "weekly retro", "what did we ship", "engineering retrospective".
 allowed-tools: [Bash, Read, Write, Glob]
 ---
 
@@ -15,6 +16,37 @@ allowed-tools: [Bash, Read, Write, Glob]
 # Self-Improvement — First-Principles Performance Review
 
 **Goal:** Close the feedback loop on every sprint by systematically evaluating process adherence, agent behavior, and skill effectiveness — then produce concrete improvement actions for the next session.
+
+## Consolidated Modes
+
+`self-improvement` is the canonical reflection skill with three scopes:
+
+- `process` (default): workflow/skill/agent execution quality.
+- `retro`: delivery-focused retrospective based on commits and output artifacts.
+- `harness`: harness and gate effectiveness quality.
+
+## Retro Scope (Merged from retro)
+
+When running with `retro` scope, include these delivery metrics before Phase 1 analysis:
+
+```bash
+# Default retrospective window
+SINCE="7 days ago"
+
+AUTHOR_EMAIL=$(git config user.email)
+git log --oneline --since="${SINCE}" --author="${AUTHOR_EMAIL}" 2>/dev/null | head -100
+git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" --pretty=tformat: --numstat 2>/dev/null | head -200
+```
+
+Generate an additional artifact:
+
+- `docs/superomni/retros/retro-[branch]-[session]-[date].md`
+
+Retro output must include:
+
+1. Commit count and active-day cadence.
+2. Net LOC and major files touched.
+3. Ship-of-period highlight and a delivery risk note.
 
 ## Iron Law
 

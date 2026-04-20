@@ -27,7 +27,7 @@ docs/superomni/
 ├── evaluations/            ← verification output
 ├── improvements/           ← self-improvement output
 ├── harness-audits/         ← harness-engineering output
-└── retros/                 ← retro output
+└── retros/                 ← self-improvement (`retro` scope) output
 ```
 
 ## Per-Skill Contracts
@@ -179,7 +179,7 @@ Spec/plan used: [docs/superomni/specs/spec-*.md | docs/superomni/plans/plan-*.md
 
 ---
 
-### `code-review` → `receiving-code-review`
+### `code-review` (giving) → `code-review` (receiving)
 
 **Produces:** `docs/superomni/reviews/review-[branch]-[session]-[date].md`
 
@@ -199,7 +199,7 @@ Required sections:
 ## Verdict: APPROVE | REQUEST_CHANGES | NEEDS_DISCUSSION
 ```
 
-**Consumed by:** `receiving-code-review` reads review file to triage and address comments
+**Consumed by:** `code-review` in `receiving` mode reads review file to triage and address comments
 
 ---
 
@@ -229,11 +229,11 @@ Required sections:
 
 ---
 
-### `retro` → `self-improvement`
+### `self-improvement` (`retro` scope) → `self-improvement` (process scope)
 
 **Produces:** `docs/superomni/retros/retro-[branch]-[session]-[date].md` (commit metrics, streak, ship of week)
 
-**Consumed by:** `self-improvement` reads retro data as evidence for the process evaluation
+**Consumed by:** `self-improvement` process evaluation reads retro data as evidence
 
 ---
 

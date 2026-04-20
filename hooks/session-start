@@ -74,7 +74,7 @@ if [ -d "${SKILLS_DIR}/skills" ]; then
   _SKILLS_COUNT=$(find "${SKILLS_DIR}/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 fi
 
-echo "superomni v0.5.7 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE} | session=${_SESSION_ID:0:8}"
+echo "superomni v0.5.8 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | PROACTIVE=${_PROACTIVE} | session=${_SESSION_ID:0:8}"
 
 
 # ── Log session start ────────────────────────────────────────────────────────
@@ -90,4 +90,4 @@ if [ -f "${USING_SKILLS}" ]; then
 fi
 
 echo ""
-echo "Skills loaded. Type /brainstorm, /write-plan, /review, /ship, /investigate, /workflow, or /retro to begin."
+echo "Skills loaded. Type /brainstorm, /write-plan, /review, /ship, /investigate, /workflow, or /self-improve to begin."

@@ -139,7 +139,7 @@
 **How:**
   1. 找到 Auto-Advance Rule 引用的流水线字符串（`THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT`）
   2. 替换为 `THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE`
-  3. 检查 Skills 表格中的 `ship` 和 `self-improvement`/`retro` 条目是否需要更新描述
+  3. 检查 Skills 表格中的 `ship` 和 `self-improvement`（`retro` scope）条目是否需要更新描述
   4. 在 Document Output Convention 表格中：新增 `releases/` 目录行，标记 `release-[branch]-[session]-[date].md`
 **Verification:** `grep -n "SHIP\|REFLECT" CLAUDE.md` 无旧流水线引用  
 **Estimated effort:** S

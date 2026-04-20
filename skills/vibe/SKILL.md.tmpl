@@ -103,7 +103,7 @@ Use the following priority-ordered rules (first match wins):
 | 3 | `spec-*.md` + `.approved-spec-*` exist, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
 | 4 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
 | 5 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
-| 6 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `security-audit`, `production-readiness` - auto-advance |
+| 6 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `code-review` (`security` mode), `production-readiness` - auto-advance |
 | 7 | Verified | RELEASE | `release` skill - auto-advance |
 
 Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must contain the same session identifier.
@@ -191,7 +191,7 @@ Present the available commands only when auto-advance does not apply:
 | /production-readiness | Pre-deploy readiness check |
 | /investigate | Exploratory investigation |
 | /self-improve | Post-task performance evaluation |
-| /retro | Engineering retrospective |
+| /self-improve --scope retro | Engineering retrospective |
 | /workflow | See the full sprint pipeline |
 | /ship | Release workflow |
 | /front-design | Unified frontend optimization with automatic mode detection |

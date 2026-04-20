@@ -65,16 +65,16 @@ Add to Step Execution Protocol:
 | code-review | VERIFY → review | Good — already detects UI changes |
 | qa | VERIFY → tests | Good |
 | verification | VERIFY → checklist | Good |
-| security-audit | VERIFY → security | Good |
+| code-review (security mode) | VERIFY → security | Good |
 | production-readiness | VERIFY → deploy gate | Good |
 | careful | Safety guardrail | Good |
 | subagent-development | Parallel execution | Good |
 | ship | SHIP → release | Good |
 | finishing-branch | SHIP → merge | Good |
 | self-improvement | REFLECT → evaluation | Good |
-| retro | REFLECT → retrospective | Good |
+| self-improvement (retro scope) | REFLECT → retrospective | Good |
 | workflow | Reference/orchestration | Good — needs frontend-design in BUILD |
-| receiving-code-review | Review response | Good |
+| code-review (receiving mode) | Review response | Good |
 | harness-engineering | Harness audit | Good |
 | writing-skills | Skill creation meta | Good |
 | agent-management | Agent lifecycle | Good |

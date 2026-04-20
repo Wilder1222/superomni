@@ -275,7 +275,7 @@ grep -r "rollback\|revert\|undo" . --include="*.md" -l 2>/dev/null | head -5
 
 Confirm security review has been done (or is not required).
 
-- [ ] **Security audit** run? (use `security-audit` skill if not done)
+- [ ] **Security review** run? (use `code-review` in `security` mode if not done)
 - [ ] **No new attack surface** — no new endpoints, inputs, or permissions without review?
 - [ ] **Dependencies clean** — no new CVEs in added dependencies?
 - [ ] **Secrets management** — no hardcoded credentials, all secrets via env/vault?

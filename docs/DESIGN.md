@@ -90,15 +90,15 @@ This resolves the tension without discarding either philosophy.
 
 The distinction is in the _starting state_, not the methods.
 
-### Decision 6: retro → Generalized from gstack
+### Decision 6: retro capability → merged into self-improvement
 
 **Problem:** gstack's `/retro` is tightly coupled to gstack infrastructure (`~/.gstack/`, gstack-specific session tracking).
 
-**Decision:** Reimplement retro using generic git primitives only:
+**Decision:** Reimplement retrospective capability using generic git primitives only and merge into `self-improvement`:
 - Git log analysis (works in any git project)
 - Session detection from commit timestamps (45-min gap threshold)
 - No dependency on gstack-specific state
-- Save reports to `.context/retros/` (project-local, git-ignoreable)
+- Save reports to `docs/superomni/retros/` (project artifact contract)
 
 ### Decision 7: Multi-Platform Support Strategy
 
@@ -120,7 +120,7 @@ The distinction is in the _starting state_, not the methods.
 1. Checklists are stored as data (markdown tables or YAML) within skill directories
 2. Skill logic references checklists but doesn't hardcode them
 3. New checklists can be added without modifying skill protocol
-4. `receiving-code-review` uses checklists to systematically address review feedback
+4. `code-review` receiving mode uses checklists to systematically address review feedback
 
 ### Decision 9: Workflow/Sprint Pipeline (Inter-Skill Orchestration)
 
@@ -289,13 +289,13 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 
 ### Adapted from gstack
 - **plan-review**: gstack 3-stage pipeline, Codex dependency removed, subagent protocol instead
-- **retro**: gstack retro, generalized to pure git (no gstack-specific infrastructure)
+- **self-improvement (retro scope)**: gstack retro capability, generalized to pure git (no gstack-specific infrastructure)
 - **investigate**: gstack investigate, scoped to complement systematic-debugging
 - **ship**: gstack ship, generalized release workflow
 
 ### New in v0.2.0
-- **receiving-code-review**: Structured protocol for responding to review feedback
-- **security-audit**: OWASP/STRIDE-informed security vulnerability audit
+- **code-review (receiving mode)**: Structured protocol for responding to review feedback
+- **code-review (security mode)**: OWASP/STRIDE-informed security vulnerability audit flow
 - **qa**: Quality assurance pass with structured checklists
 - **careful**: Safety guardrails for destructive/high-risk operations
 - **workflow**: Sprint pipeline orchestration across skills
@@ -369,11 +369,11 @@ The `designer` agent adds the missing design review dimension to the framework �
 | 28 skills is a lot — cognitive overload | PROACTIVE mode focuses agent; `workflow` skill sequences skills; skills reference each other; consolidation reduced count from 31 to 28 |
 | `.tmpl` build step adds complexity | Pre-built `.md` files committed; build only needed for dev |
 | investigate + systematic-debugging overlap | Clear separation: no error → investigate; has error → debug |
-| retro requires git history | Gracefully handles shallow clones with `git fetch` |
+| self-improvement retro scope requires git history | Gracefully handles shallow clones with `git fetch` |
 | gstack Dual Voices removed | Noted as future upgrade; consensus optional with Codex config |
 | Multi-platform support fragmentation | Platform detection is isolated to setup/hooks; skills stay platform-agnostic |
 | workflow skill over-orchestration | workflow suggests, doesn't force; individual skills remain independently usable |
-| security-audit false sense of security | Clearly documented as AI-assisted, not a replacement for professional security review |
+| code-review security mode false sense of security | Clearly documented as AI-assisted, not a replacement for professional security review |
 
 ---
 

@@ -120,7 +120,7 @@ Harnesses accumulate entropy over time: stale docs, drifted constraints, dead co
 │  │      executing-plans, systematic-debugging           │     │
 │  │  P1: verification, code-review, self-improvement,   │     │
 │  │      production-readiness, harness-engineering       │     │
-│  │  P2: investigate, retro, ship, git-worktrees, ...   │     │
+│  │  P2: investigate, ship, git-worktrees, ...          │     │
 │  └─────────────────────────────────────────────────────┘     │
 │                                                              │
 │  ┌─────────────────────────────────────────────────────┐     │

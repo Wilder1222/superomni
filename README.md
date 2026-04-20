@@ -16,6 +16,14 @@ The framework is built on one core philosophy:
 
 Plan only what you need. But what you decide to build — build it fully.
 
+### Sprint Pipeline
+
+```
+THINK → PLAN → REVIEW → BUILD → VERIFY → RELEASE
+```
+
+One human gate: spec approval at THINK. Everything after auto-advances on DONE. The `RELEASE` stage combines ship + retrospective into a single artifact.
+
 ---
 
 ## Quick Start
@@ -98,11 +106,14 @@ superomni upgrade                                 # Upgrade global install
 Open your project in your AI CLI. Skills activate automatically.
 
 **Claude Code** — use slash commands:
-- `/vibe` — activate the full framework
+- `/vibe` — activate the full framework, auto-detect pipeline stage
 - `/brainstorm` — design a feature from scratch
 - `/write-plan` — turn an idea into an executable plan
 - `/execute-plan` — run the plan step by step
 - `/review` — structured code review
+- `/release` — ship + retrospective in one combined step
+- `/front-design` — frontend design optimization
+- `/style-capture` — capture code style preferences
 
 **Codex / Copilot / Gemini** — use trigger phrases:
 - "brainstorm this feature" — activates brainstorm skill
@@ -146,11 +157,14 @@ Open your project in your AI CLI. Skills activate automatically.
 
 | Skill | When to Use | Key Output |
 |-------|------------|------------|
+| `release` | End of sprint — ship + retrospective | `docs/superomni/releases/release-*.md` |
+| `frontend-design` | Building UI/pages | Production-grade frontend |
+| `style-capture` | Capture code style preferences | Style profile |
 | `git-worktrees` | Multiple branches | Worktree setup |
 | `finishing-branch` | Merging a branch | Clean PR |
 | `investigate` | Exploring unfamiliar code | Investigation report |
-| `retro` | Weekly review | Retrospective report |
-| `ship` | Releasing software | Release + changelog |
+| `retro` | Standalone weekly review | Retrospective report |
+| `ship` | Standalone release workflow | Release + changelog |
 | `writing-skills` | Creating new skills | New skill file |
 | `workflow` | Sprint pipeline orchestration | Workflow plan + status |
 | `office-hours` | Product discovery before building | Validated idea + decision |
@@ -300,7 +314,8 @@ superomni/
 │   ├── finishing-branch/
 │   ├── investigate/
 │   ├── retro/                ← Weekly engineering retrospective
-│   ├── ship/                 ← Release workflow
+│   ├── release/              ← RELEASE stage — ship + retrospective combined
+│   ├── ship/                 ← Standalone release workflow
 │   ├── writing-skills/       ← Meta: create new skills
 │   ├── receiving-code-review/ ← Respond to review feedback
 │   ├── security-audit/       ← Security vulnerability audit
@@ -308,6 +323,8 @@ superomni/
 │   ├── careful/              ← Safety guardrails
 │   ├── workflow/             ← Sprint pipeline orchestration
 │   ├── self-improvement/     ← Post-task performance evaluation
+│   ├── frontend-design/      ← Production-grade frontend design
+│   ├── style-capture/        ← Capture code style preferences
 │   ├── harness-engineering/  ← Agent harness audit and optimization
 │   └── agent-management/     ← Install, create, and manage agents
 │
@@ -322,12 +339,17 @@ superomni/
 │   ├── ceo-advisor.md        ← Product strategy and scope validation
 │   └── designer.md           ← UX review and AI slop detection
 │
-├── commands/                 ← Slash command definitions
+├── commands/                 ← Slash command definitions (11 commands)
 │   ├── vibe.md               ← /vibe — activate full framework + guided workflow
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md
 │   ├── review.md
+│   ├── release.md            ← /release — ship + retrospective combined
+│   ├── front-design.md       ← /front-design — frontend design optimization
+│   ├── style-capture.md      ← /style-capture — capture code style
+│   ├── office-hours.md
+│   ├── document-release.md
 │   └── harness-audit.md      ← /harness-audit — audit agent harness health
 │
 ├── lib/
@@ -351,6 +373,7 @@ superomni/
 │   │   ├── subagents/        ← Sub-agent sessions
 │   │   ├── improvements/     ← Self-improvement reports
 │   │   ├── evaluations/      ← Verification evaluations
+│   │   ├── releases/         ← RELEASE stage artifacts
 │   │   └── harness-audits/   ← Harness audit reports
 │   ├── AGENTS.md             ← Agent library reference
 │   ├── DESIGN.md             ← Architectural design

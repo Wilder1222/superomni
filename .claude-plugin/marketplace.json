@@ -1,7 +1,7 @@
 {
     "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
     "name": "superomni",
-    "version": "0.5.6",
+    "version": "0.5.7",
     "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code.",
     "owner": {
         "name": "Wilder1222"
@@ -10,7 +10,7 @@
         {
             "name": "superomni",
             "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code. Provides /vibe, /brainstorm, /write-plan, /execute-plan, and /review commands.",
-            "version": "0.5.6",
+            "version": "0.5.7",
             "author": {
                 "name": "Wilder1222"
             },

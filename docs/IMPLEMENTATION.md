@@ -14,7 +14,7 @@ superomni/
 │   ├── marketplace.json      ← Marketplace manifest (required by Claude Code)
 │   └── plugin.json           ← Plugin manifest (skills, commands, hooks)
 ├── hooks/                    ← Claude Code session hooks
-├── skills/                   ← Skill definitions (28 skills)
+├── skills/                   ← Skill definitions (29 skills)
 ├── agents/                   ← Agent specifications
 ├── commands/                 ← Slash command docs
 ├── lib/                      ← Build tools and shared assets

@@ -16,7 +16,8 @@ Activate the full **superomni** skill framework and launch the default guided wo
 2. Detects current stage by scanning `docs/superomni/` artifacts
 3. Applies a single human gate in THINK (spec approval)
 4. Runs PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE in auto wave mode on DONE
-5. Falls back to guided menu only when stage is ambiguous or user asks `/vibe` with no context
+5. After a full RELEASE completion, can offer optional self-iteration loop mode
+6. Falls back to guided menu only when stage is ambiguous or user asks `/vibe` with no context
 
 ## Core Workflow Pipeline
 
@@ -53,6 +54,8 @@ If the stage artifact is missing, do not auto-advance.
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step and produce execution evidence |
 | `/review` | Structured code review and review artifact generation |
+| `/release` | Combined release + retrospective workflow |
+| `/loop` | Start bounded self-iteration toward a goal (default 3 iterations, max 5) |
 
 ## First-Time Setup
 

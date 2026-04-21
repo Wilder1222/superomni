@@ -1,0 +1,159 @@
+---
+name: loop
+description: |
+  Goal-driven self-iteration mode. Runs bounded optimization loops where each
+  iteration reads previous loop output before executing the next cycle.
+  Triggers: "/loop", "loop this", "self-iterate", "auto-iterate".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Loop - Goal-Driven Self-Iteration
+
+**Goal:** Execute bounded iterative improvement cycles toward a user-specified goal, using previous iteration output as mandatory input for the next cycle.
+
+## Iron Laws
+
+1. **No memoryless loops.** Iteration N must read iteration N-1 state before acting.
+2. **Hard cap of 5 iterations.** Never run more than 5 cycles.
+3. **Stop on convergence.** If the target is effectively met, end early and summarize.
+
+## Usage
+
+```bash
+/loop
+/loop [goal]
+/loop [iterations] [goal]
+```
+
+Input behavior:
+- Default iterations: `3`
+- Maximum iterations: `5`
+- If requested iterations > 5: cap to 5 and continue
+- If goal is missing: ask user for a clear goal statement before starting
+
+## Trigger Paths
+
+1. Manual command: `/loop`
+2. Post-vibe gate: after a full workflow cycle reaches RELEASE, vibe may ask whether to start loop mode
+
+## Phase 1: Initialize Loop Session
+
+```bash
+mkdir -p docs/superomni/loops
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_SESSION="<auto-generate-kebab-case-from-context>"
+_DATE=$(date +%Y%m%d)
+_MAX_ITER="<user-input-or-default-3>"
+```
+
+Normalize iteration bounds:
+- If `_MAX_ITER` is empty -> `3`
+- If `_MAX_ITER` < 1 -> `1`
+- If `_MAX_ITER` > 5 -> `5`
+
+Capture loop goal:
+- Use explicit user goal from command arguments when present
+- Otherwise prompt user for a single clear target outcome
+
+## Phase 2: Iteration Contract
+
+For each iteration `i` in `1.._MAX_ITER`:
+
+1. Resolve previous artifact path:
+   - Iteration 1: use latest workflow evidence (`evaluation`, `improvement`, `release`, `execution`) as baseline
+   - Iteration >1: require previous loop state file
+2. Read previous output before making any new plan
+3. Derive next optimization actions from the prior output
+4. Execute improvement actions
+5. Evaluate progress against goal
+6. Persist current iteration state
+
+Iteration state artifact path:
+
+```bash
+_STATE_FILE="docs/superomni/loops/loop-state-${_BRANCH}-${_SESSION}-iter-${i}-${_DATE}.md"
+```
+
+Required state sections:
+
+```markdown
+# Loop State: Iteration [i]
+
+**Goal:** [loop goal]
+**Iteration:** [i]/[max]
+**Input artifact:** [path of previous iteration state or baseline artifact]
+
+## Previous Findings
+[what was learned from previous result]
+
+## Actions This Iteration
+- [action 1]
+- [action 2]
+
+## Outcomes
+- [observable progress]
+
+## Convergence Check
+- Goal reached? YES/NO
+- Continue? YES/NO
+```
+
+## Phase 3: Convergence and Early Stop
+
+Stop loop when any condition is true:
+
+1. Goal criteria are effectively satisfied
+2. Additional iteration is not expected to produce meaningful improvement
+3. User explicitly requests stop
+4. Iteration reaches `_MAX_ITER`
+
+If convergence happens before `_MAX_ITER`, terminate early and mark reason.
+
+## Phase 4: Final Summary Artifact
+
+Write final summary:
+
+```bash
+_SUMMARY_FILE="docs/superomni/loops/loop-summary-${_BRANCH}-${_SESSION}-${_DATE}.md"
+```
+
+Summary format:
+
+```markdown
+# Loop Summary: [session]
+
+**Goal:** [loop goal]
+**Iterations completed:** [n]/[max]
+**Stop reason:** CONVERGED | MAX_ITER_REACHED | USER_STOP | NO_MEANINGFUL_GAIN
+
+## Iteration Log
+| Iteration | Input Artifact | Key Actions | Result |
+|-----------|----------------|-------------|--------|
+| 1 | ... | ... | ... |
+
+## Final Assessment
+- Goal status: [met / partial / unmet]
+- Remaining gaps: [if any]
+- Recommended next steps: [if any]
+```
+
+## Phase 5: Hand-off
+
+If goal is not fully met, provide focused next-step recommendations.
+If goal is met, report completion and close loop mode.
+
+## Report
+
+```
+LOOP REPORT
+════════════════════════════════════════
+Goal:               [goal]
+Iterations run:     [n/max]
+Early stop:         [yes/no]
+Stop reason:        [reason]
+Final summary:      [docs/superomni/loops/loop-summary-...]
+Status:             DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+════════════════════════════════════════
+```

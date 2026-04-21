@@ -50,6 +50,10 @@
         {
             "name": "release",
             "file": "commands/release.md"
+        },
+        {
+            "name": "loop",
+            "file": "commands/loop.md"
         }
     ],
     "hooks": {

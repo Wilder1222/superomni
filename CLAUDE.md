@@ -38,6 +38,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | git-worktrees | Parallel work | P2 |
 | finishing-branch | "finish branch", "merge" | P2 |
 | investigate | "investigate", "explore" | P2 |
+| loop | "/loop", "self-iterate", "auto-iterate" | P2 |
 | release | "release", "ship and reflect", "end sprint" | P2 |
 | writing-skills | "create skill", "install skill", "list skills" | P2 |
 | agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
@@ -56,9 +57,11 @@ Philosophy: **Plan Lean, Execute Complete**
 | `/write-plan` | Turn a spec into an executable plan |
 | `/execute-plan` | Run the plan step by step |
 | `/review` | Structured code review |
+| `/release` | Combined release + retrospective workflow |
 | `/style-capture` | Capture code style preferences from examples |
 | `/harness-audit` | Audit the agent harness health and produce improvement backlog |
 | `/front-design` | Unified frontend optimization command with automatic mode detection and application |
+| `/loop` | Start bounded self-iteration toward a user-defined goal (default 3, max 5) |
 
 ## Configuration
 
@@ -88,6 +91,7 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 | Production readiness | `docs/superomni/production-readiness/` | `production-readiness-[branch]-[session]-[date].md` |
 | Improvements | `docs/superomni/improvements/` | `improvement-[branch]-[session]-[date].md` |
 | Releases | `docs/superomni/releases/` | `release-[branch]-[session]-[date].md` |
+| Loops | `docs/superomni/loops/` | `loop-state-[branch]-[session]-iter-[n]-[date].md`, `loop-summary-[branch]-[session]-[date].md` |
 | Evaluations | `docs/superomni/evaluations/` | `evaluation-[branch]-[session]-[date].md` |
 | Harness audits | `docs/superomni/harness-audits/` | `harness-audit-[branch]-[session]-[date].md` |
 | Retros | `docs/superomni/retros/` | `retro-[branch]-[session]-[date].md` |

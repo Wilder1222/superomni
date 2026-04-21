@@ -342,7 +342,9 @@ Present the available commands only when auto-advance does not apply:
 | /self-improve --scope retro | Engineering retrospective |
 | /workflow | See the full sprint pipeline |
 | /ship | Release workflow |
+| /release | Combined release + retrospective workflow |
 | /front-design | Unified frontend optimization with automatic mode detection |
+| /loop | Start bounded self-iteration toward a goal (default 3, max 5) |
 
 Suggested next step -> [skill-name]: [reason based on detected stage]
 ```
@@ -390,6 +392,28 @@ echo "Reset complete. Starting fresh from THINK stage."
 Then re-run Phase 1-2.
 
 ## Phase 4: Delegate to Skill
+
+When a full pipeline run reaches RELEASE and status is `DONE`, optionally ask once whether to start self-iteration:
+
+```
+RELEASE complete.
+Start self-iteration loop toward a specific goal?
+- Default iterations: 3
+- Maximum iterations: 5
+
+Reply with:
+  YES [goal]
+  YES [iterations] [goal]
+  NO
+```
+
+Rules:
+- If iterations are omitted, use 3
+- If iterations exceed 5, cap at 5
+- If user chooses YES, invoke the `loop` skill immediately with normalized arguments
+- If user chooses NO, continue normal completion flow
+
+Then delegate as follows:
 
 1. If the user provided arguments -> invoke the detected skill with those arguments
 2. If no arguments -> wait for user input

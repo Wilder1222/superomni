@@ -131,6 +131,7 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 | Sub-agent sessions | `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
 | Production readiness | `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md` |
 | Improvements | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+| Loops | `docs/superomni/loops/loop-state-[branch]-[session]-iter-[n]-[date].md`, `docs/superomni/loops/loop-summary-[branch]-[session]-[date].md` |
 | Evaluations | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` |
 | Harness audits | `docs/superomni/harness-audits/harness-audit-[branch]-[session]-[date].md` |
 
@@ -176,6 +177,7 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Deploying/releasing software | `ship` |
 | Creating a new skill | `writing-skills` |
 | Exploratory investigation | `investigate` |
+| Goal-driven bounded self-iteration | `loop` |
 | Responding to review feedback | `code-review` (`receiving` mode) |
 | Auditing for security vulnerabilities | `code-review` (`security` mode) |
 | Quality assurance and testing | `qa` |

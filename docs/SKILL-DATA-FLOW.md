@@ -26,6 +26,7 @@ docs/superomni/
 ├── production-readiness/  ← production-readiness output
 ├── evaluations/            ← verification output
 ├── improvements/           ← self-improvement output
+├── loops/                  ← loop output
 ├── harness-audits/         ← harness-engineering output
 └── retros/                 ← self-improvement (`retro` scope) output
 ```
@@ -234,6 +235,59 @@ Required sections:
 **Produces:** `docs/superomni/retros/retro-[branch]-[session]-[date].md` (commit metrics, streak, ship of week)
 
 **Consumed by:** `self-improvement` process evaluation reads retro data as evidence
+
+---
+
+### `loop` → `loop` (next iteration) and `workflow`
+
+**Produces:**
+
+- `docs/superomni/loops/loop-state-[branch]-[session]-iter-[n]-[date].md`
+- `docs/superomni/loops/loop-summary-[branch]-[session]-[date].md`
+
+Required sections for each loop state file:
+```markdown
+# Loop State: Iteration [n]
+
+**Goal:** [goal statement]
+**Iteration:** [n]/[max]
+**Input artifact:** [prior loop-state path or baseline artifact]
+
+## Previous Findings
+[what was learned from previous iteration]
+
+## Actions This Iteration
+- [action]
+
+## Outcomes
+- [result]
+
+## Convergence Check
+- Goal reached? YES/NO
+- Continue? YES/NO
+```
+
+Required sections for loop summary:
+```markdown
+# Loop Summary: [session]
+
+**Goal:** [goal statement]
+**Iterations completed:** [n]/[max]
+**Stop reason:** CONVERGED | MAX_ITER_REACHED | USER_STOP | NO_MEANINGFUL_GAIN
+
+## Iteration Log
+| Iteration | Input Artifact | Key Actions | Result |
+|-----------|----------------|-------------|--------|
+
+## Final Assessment
+- Goal status: [met / partial / unmet]
+- Remaining gaps: [if any]
+- Recommended next steps: [if any]
+```
+
+**Consumed by:**
+- Next loop iteration reads the latest `loop-state-*.md` before planning
+- Workflow and users read `loop-summary-*.md` as final iterative result
 
 ---
 

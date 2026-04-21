@@ -132,6 +132,7 @@ Open your project in your AI CLI. Skills activate automatically.
 - `/release` — ship + retrospective in one combined step
 - `/front-design` — frontend design optimization
 - `/style-capture` — capture code style preferences
+- `/loop` — run bounded self-iteration toward a user-defined goal
 
 **Codex / Copilot / Gemini** — use trigger phrases:
 - "brainstorm this feature" — activates brainstorm skill
@@ -174,6 +175,7 @@ Open your project in your AI CLI. Skills activate automatically.
 | Skill | When to Use | Key Output |
 |-------|------------|------------|
 | `release` | End of sprint — ship + retrospective | `docs/superomni/releases/release-*.md` |
+| `loop` | Goal-driven iterative self-optimization | `docs/superomni/loops/loop-summary-*.md` |
 | `frontend-design` | Building UI/pages | Production-grade frontend |
 | `style-capture` | Capture code style preferences | Style profile |
 | `git-worktrees` | Multiple branches | Worktree setup |
@@ -323,6 +325,7 @@ superomni/
 │   ├── git-worktrees/
 │   ├── finishing-branch/
 │   ├── investigate/
+│   ├── loop/                 ← Goal-driven bounded self-iteration
 │   ├── release/              ← RELEASE stage — ship + retrospective combined
 │   ├── ship/                 ← Standalone release workflow
 │   ├── writing-skills/       ← Meta: create new skills
@@ -346,12 +349,13 @@ superomni/
 │   ├── ceo-advisor.md        ← Product strategy and scope validation
 │   └── designer.md           ← UX review and AI slop detection
 │
-├── commands/                 ← Slash command definitions (11 commands)
+├── commands/                 ← Slash command definitions (12 commands)
 │   ├── vibe.md               ← /vibe — activate full framework + guided workflow
 │   ├── brainstorm.md
 │   ├── write-plan.md
 │   ├── execute-plan.md
 │   ├── review.md
+│   ├── loop.md               ← /loop — bounded self-iteration toward a goal
 │   ├── release.md            ← /release — ship + retrospective combined
 │   ├── front-design.md       ← /front-design — frontend design optimization
 │   ├── style-capture.md      ← /style-capture — capture code style
@@ -379,6 +383,7 @@ superomni/
 │   │   ├── reviews/          ← Code reviews
 │   │   ├── subagents/        ← Sub-agent sessions
 │   │   ├── improvements/     ← Self-improvement reports
+│   │   ├── loops/            ← Iterative loop state and final summaries
 │   │   ├── evaluations/      ← Verification evaluations
 │   │   ├── releases/         ← RELEASE stage artifacts
 │   │   └── harness-audits/   ← Harness audit reports

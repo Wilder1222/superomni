@@ -9,7 +9,7 @@
     "plugins": [
         {
             "name": "superomni",
-            "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code. Provides /vibe, /brainstorm, /write-plan, /execute-plan, and /review commands.",
+            "description": "Plan Lean, Execute Complete — A fused AI coding skill framework for Claude Code. Provides /vibe, /brainstorm, /write-plan, /execute-plan, /review, /release, and /loop commands.",
             "version": "0.5.8",
             "author": {
                 "name": "Wilder1222"

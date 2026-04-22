@@ -13,6 +13,8 @@ If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills th
 user explicitly invokes. If you would have auto-invoked, say:
 *"I think [skill-name] might help here — want me to run it?"* and wait.
 
+**Exception — `/vibe` command:** When the user explicitly invokes `/vibe`, PROACTIVE mode is bypassed. The complete pipeline workflow MUST be triggered unconditionally. See `vibe/SKILL.md` Iron Law.
+
 **5-Level Trust Matrix (when configured):**
 
 Before executing any decision, classify its tacit knowledge intensity:

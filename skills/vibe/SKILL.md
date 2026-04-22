@@ -22,6 +22,8 @@ If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills th
 user explicitly invokes. If you would have auto-invoked, say:
 *"I think [skill-name] might help here — want me to run it?"* and wait.
 
+**Exception — `/vibe` command:** When the user explicitly invokes `/vibe`, PROACTIVE mode is bypassed. The complete pipeline workflow MUST be triggered unconditionally. See `vibe/SKILL.md` Iron Law.
+
 **5-Level Trust Matrix (when configured):**
 
 Before executing any decision, classify its tacit knowledge intensity:
@@ -156,7 +158,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Vibe - Framework Entry Point
 
 **Goal:** Activate the superomni skill framework, detect the current pipeline stage, and route to the right skill.
@@ -172,6 +173,23 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 ## Iron Law: One Entry Point, Full Pipeline
 
 `/vibe` is the single unified entry point. It never executes work itself - it detects the current stage and delegates to the appropriate skill.
+
+## Iron Law: /vibe Always Triggers the Complete Workflow
+
+**Invoking `/vibe` is an unconditional commitment to running the complete pipeline.** No exceptions.
+
+1. `/vibe` ALWAYS triggers the full THINK → PLAN → REVIEW → BUILD → VERIFY → RELEASE pipeline starting from the detected stage.
+2. **PROACTIVE mode does NOT suppress the workflow** when `/vibe` is invoked — the user's explicit use of `/vibe` IS the activation trigger. Even if `proactive=false`, `/vibe` still auto-advances through pipeline stages.
+3. **Task difficulty / complexity does NOT shorten the workflow.** The pipeline runs in full regardless of whether the task appears simple or trivial.
+4. **If the agent is about to skip any pipeline stage, abbreviate the workflow, or stop before RELEASE**, it MUST ask the user first:
+
+   > "⚠️ Full pipeline requires completing [stage(s)]. Do you want to:
+   > A) Run the complete workflow (recommended)
+   > B) Skip to [specific stage] — [brief reason]
+   >
+   > Please choose A or B."
+
+   The agent MUST wait for user response before proceeding. It MUST NOT silently skip stages.
 
 ## Planning Route
 
@@ -258,12 +276,15 @@ Session matching for REVIEW detection: extract `[session]` from the plan filenam
 
 ### Auto-Advance Rule (Wave Mode)
 
+**PROACTIVE mode override for `/vibe`:** When the user explicitly invokes `/vibe`, the auto-advance behavior is ALWAYS active — regardless of the `proactive` config setting. `proactive=false` only suppresses unprompted skill suggestions, not user-initiated `/vibe` workflows.
+
 THINK has exactly one human gate: spec review approval.
 
 - At THINK: `brainstorm` can run without manual gate; once `spec-[branch]-[session]-[date].md` is generated, STOP for user spec approval.
 - THINK stage with DONE (spec approved): auto-invoke `writing-plans`.
 - All non-THINK stages with DONE: **verify artifact exists first**, then auto-invoke next stage. Print: `[STAGE] DONE -> advancing to [NEXT-STAGE] ([skill-name])`
 - Any stage with DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT: STOP and wait for user.
+- **Any stage where the agent considers stopping early or skipping stages**: STOP and ask the user (see Iron Law above).
 
 **Artifact verification before auto-advance** (run this check before invoking the next skill):
 
@@ -325,7 +346,9 @@ Since a new session has no artifacts yet, this will naturally route to `brainsto
 
 ## Phase 2: Show Guided Menu
 
-Present the available commands only when auto-advance does not apply:
+Present the available commands only when auto-advance does not apply (i.e., the stage is ambiguous or multiple options exist). **After showing the menu, immediately invoke the suggested skill** — do not wait indefinitely. The menu is informational context, not a blocking gate.
+
+**Rule: Phase 2 MUST always conclude with a skill invocation.** If the user doesn't respond within the same turn, default to the "Suggested next step" skill and proceed.
 
 ```
 | Command | What it does |
@@ -391,10 +414,16 @@ Then re-run Phase 1-2.
 
 ## Phase 4: Delegate to Skill
 
-1. If the user provided arguments -> invoke the detected skill with those arguments
-2. If no arguments -> wait for user input
-3. When the user chooses a command or describes what they want to do -> invoke the matching skill
+**Rule: `/vibe` ALWAYS invokes a skill. It never ends with "waiting for user input."**
+
+1. If the user provided arguments → invoke the detected skill with those arguments as context.
+2. If no arguments → **auto-invoke the skill for the detected stage immediately.** Do NOT wait for user input. The user's invocation of `/vibe` is the trigger.
+3. If stage is ambiguous (multiple plausible stages) → show the guided menu from Phase 2, then immediately invoke the chosen skill when the user responds.
+
+**If you find yourself about to stop without invoking a skill**, that is a workflow violation. Either:
+- Invoke the correct pipeline skill, OR
+- Ask the user: "I was about to stop without triggering the full workflow. Do you want me to proceed with [skill-name] for [stage]? (Y/N)"
 
 Important: `/vibe` never executes implementation work directly. It always delegates to the appropriate skill.
 
-Report status: DONE - framework activated, stage detected, user guided to next skill.
+Report status: DONE - framework activated, stage detected, delegated to [skill-name] for [stage].

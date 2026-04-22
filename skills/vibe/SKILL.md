@@ -11,36 +11,7 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 
 ### Environment Detection
 
-On session start, read: branch from `git branch --show-current`, proactive config from `bin/config get proactive` (default `true`), session timestamp from `~/.omni-skills/sessions/current-session-ts`.
-
-### PROACTIVE Mode
-
-**Legacy mode (single value):**
-If `proactive=true`: auto-invoke skills. If `proactive=false`: ask first.
-
-If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the
-user explicitly invokes. If you would have auto-invoked, say:
-*"I think [skill-name] might help here — want me to run it?"* and wait.
-
-**Exception — `/vibe` command:** When the user explicitly invokes `/vibe`, PROACTIVE mode is bypassed. The complete pipeline workflow MUST be triggered unconditionally. See `vibe/SKILL.md` Iron Law.
-
-**5-Level Trust Matrix (when configured):**
-
-Before executing any decision, classify its tacit knowledge intensity:
-
-| Decision Type | Config Key | Default | When to Use |
-|--------------|------------|---------|-------------|
-| Mechanical | proactive.mechanical | true | Iron Law applies, Gate Check is deterministic |
-| Structural | proactive.structural | true | Architecture, interface, module boundaries |
-| Stylistic | proactive.stylistic | ask | Naming, formatting, UI layout, comment style |
-| Strategic | proactive.strategic | ask | Approach selection, architecture trade-offs |
-| Destructive | proactive.destructive | false | Delete, overwrite, irreversible operations |
-
-Classification rules:
-- If a style profile exists (`docs/superomni/style-profiles/`), stylistic decisions
-  that match the profile can be treated as mechanical
-- Strategic decisions ALWAYS surface to user unless `proactive.strategic=true`
-- Destructive decisions ALWAYS confirm (integrates with `careful` Skill) regardless of config
+On session start, read: branch from `git branch --show-current`, session timestamp from `~/.omni-skills/sessions/current-session-ts`.
 
 ### Completion Status Protocol
 Report status using one of these at the end of every skill session:
@@ -179,9 +150,8 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 **Invoking `/vibe` is an unconditional commitment to running the complete pipeline.** No exceptions.
 
 1. `/vibe` ALWAYS triggers the full THINK → PLAN → REVIEW → BUILD → VERIFY → RELEASE pipeline starting from the detected stage.
-2. **PROACTIVE mode does NOT suppress the workflow** when `/vibe` is invoked — the user's explicit use of `/vibe` IS the activation trigger. Even if `proactive=false`, `/vibe` still auto-advances through pipeline stages.
-3. **Task difficulty / complexity does NOT shorten the workflow.** The pipeline runs in full regardless of whether the task appears simple or trivial.
-4. **If the agent is about to skip any pipeline stage, abbreviate the workflow, or stop before RELEASE**, it MUST ask the user first:
+2. **Task difficulty / complexity does NOT shorten the workflow.** The pipeline runs in full regardless of whether the task appears simple or trivial.
+3. **If the agent is about to skip any pipeline stage, abbreviate the workflow, or stop before RELEASE**, it MUST ask the user first:
 
    > "⚠️ Full pipeline requires completing [stage(s)]. Do you want to:
    > A) Run the complete workflow (recommended)
@@ -275,8 +245,6 @@ Use the following priority-ordered rules (first match wins):
 Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must contain the same session identifier.
 
 ### Auto-Advance Rule (Wave Mode)
-
-**PROACTIVE mode override for `/vibe`:** When the user explicitly invokes `/vibe`, the auto-advance behavior is ALWAYS active — regardless of the `proactive` config setting. `proactive=false` only suppresses unprompted skill suggestions, not user-initiated `/vibe` workflows.
 
 THINK has exactly one human gate: spec review approval.
 

@@ -211,9 +211,9 @@ The `{{PREAMBLE}}` token in `.tmpl` files is replaced by the full content of `pr
 
 ### What Preamble Contains
 
-1. **Environment Detection** — detects PROACTIVE mode, branch, starts telemetry timer
-2. **PROACTIVE Mode** — instructions for how to behave based on config
-3. **Completion Status Protocol** — DONE/DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT
+1. **Environment Detection** — detects branch, starts telemetry timer
+2. **Completion Status Protocol** — DONE/DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT
+3. **Auto-Advance Rule** — pipeline stage progression rules
 4. **Escalation Policy** — when to stop and escalate
 5. **Telemetry** — writes skill usage to `~/.omni-skills/analytics/usage.jsonl`
 
@@ -234,7 +234,6 @@ bash lib/gen-skill-docs.sh
 
 ```
 # ~/.omni-skills/config
-proactive=true
 telemetry=true
 ```
 
@@ -244,10 +243,10 @@ Simple `key=value` format, one per line. No sections, no nesting.
 
 ```bash
 # Read a value
-bin/config get proactive       # → "true" or "false" or "null"
+bin/config get telemetry       # → "true" or "false" or "null"
 
 # Write a value
-bin/config set proactive false  # → "✓ Set proactive=false"
+bin/config set telemetry false  # → "✓ Set telemetry=false"
 
 # List all
 bin/config list                 # → config file contents
@@ -257,7 +256,6 @@ bin/config list                 # → config file contents
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `proactive` | `true` | Auto-trigger skills on detected conditions |
 | `telemetry` | `true` | Write usage events to `~/.omni-skills/analytics/` |
 
 ---
@@ -308,7 +306,7 @@ JSONL (one JSON object per line). Each object:
 
 It:
 1. Creates state directories
-2. Detects environment (PROACTIVE mode, branch, project)
+2. Detects environment (branch, project)
 3. Logs the session start event
 4. Injects `skills/using-skills/SKILL.md` into the agent context
 5. Prints a welcome banner
@@ -372,9 +370,9 @@ There is no automated test suite currently. Testing is done manually:
 2. **Config test:**
    ```bash
    bin/config list
-   bin/config set proactive false
-   bin/config get proactive   # should output "false"
-   bin/config set proactive true
+   bin/config set telemetry false
+   bin/config get telemetry   # should output "false"
+   bin/config set telemetry true
    ```
 
 3. **Build test:**

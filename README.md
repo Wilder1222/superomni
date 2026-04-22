@@ -255,12 +255,6 @@ All `npx` installation methods are **fully automatic** — platform detection, s
 # Check current config
 bin/config list
 
-# Disable auto-skill triggers (manual mode)
-bin/config set proactive false
-
-# Re-enable auto triggers
-bin/config set proactive true
-
 # Disable local telemetry
 bin/config set telemetry false
 ```
@@ -292,11 +286,6 @@ Every skill session ends with one of:
 | `DONE_WITH_CONCERNS` | Complete, but issues noted. |
 | `BLOCKED` | Cannot proceed. State what blocks you. |
 | `NEEDS_CONTEXT` | Missing info. State exactly what you need. |
-
-### PROACTIVE Mode
-
-- `proactive=true` (default): Skills auto-activate when triggers are detected
-- `proactive=false`: Skills only run when explicitly invoked. Agent says: *"I think [skill] might help — want me to run it?"*
 
 ---
 
@@ -462,7 +451,7 @@ This project fuses:
 - [obra/superpowers](https://github.com/obra/superpowers) — MIT License — methodology-driven skill framework
 - [garrytan/gstack](https://github.com/garrytan/gstack) — MIT License — engineering completeness principles
 
-Original contributions: Plan Lean/Execute Complete philosophy, 3-stage plan review pipeline, Scope Lock + Debug Report fusion, PROACTIVE mode toggle, retro skill generalization.
+Original contributions: Plan Lean/Execute Complete philosophy, 3-stage plan review pipeline, Scope Lock + Debug Report fusion, retro skill generalization.
 
 ## License
 

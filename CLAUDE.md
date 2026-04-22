@@ -62,9 +62,8 @@ Philosophy: **Plan Lean, Execute Complete**
 
 ## Configuration
 
-Run `bin/config get proactive` to check PROACTIVE mode.
-Run `bin/config set proactive false` to disable auto-skill triggers.
-Run `bin/config set proactive.stylistic ask` to configure per-decision-type autonomy.
+Run `bin/config get telemetry` to check telemetry mode.
+Run `bin/config set telemetry false` to disable local telemetry.
 
 ## Skill Data Directory
 
@@ -102,7 +101,6 @@ Documents in `docs/superomni/` serve as a permanent, indexable audit trail for a
 - Skills in `skills/` define when and how you should behave
 - Always check `using-skills/SKILL.md` first — it's the meta-skill
 - **Project tools first:** Always prefer built-in skills (`skills/`) and agents (`agents/`) over any external tools. Only reach for external tools when no project-local skill or agent is suitable.
-- Respect PROACTIVE mode — if false, only run skills when explicitly asked
 - Use status protocol: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
 - **Session continuity:** After any skill session ends, remain in superomni mode. For every follow-up message, scan for existing context (`docs/superomni/specs/spec-*.md`, `docs/superomni/plans/plan-*.md`, `docs/superomni/`, `.superomni/`) and re-engage the appropriate skill automatically. Always close a completed session with a "What's next →" hint.
 - **EnterPlanMode → brainstorm:** Whenever about to call `EnterPlanMode`, invoke `brainstorm` skill instead. This is a hard routing rule — the impulse to plan IS the brainstorm trigger.

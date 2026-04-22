@@ -87,4 +87,4 @@ This project fuses the best ideas from:
 - [obra/superpowers](https://github.com/obra/superpowers) — methodology-driven AI skill framework (MIT License)
 - [garrytan/gstack](https://github.com/garrytan/gstack) — engineering completeness and decision principles (MIT License)
 
-The **Plan Lean, Execute Complete** synthesis, the 6 Decision Principles integration, the Scope Lock + Debug Report fusion, and the PROACTIVE mode toggle are original contributions of this project.
+The **Plan Lean, Execute Complete** synthesis, the 6 Decision Principles integration, and the Scope Lock + Debug Report fusion are original contributions of this project.

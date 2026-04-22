@@ -30,9 +30,8 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 **Invoking `/vibe` is an unconditional commitment to running the complete pipeline.** No exceptions.
 
 1. `/vibe` ALWAYS triggers the full THINK → PLAN → REVIEW → BUILD → VERIFY → RELEASE pipeline starting from the detected stage.
-2. **PROACTIVE mode does NOT suppress the workflow** when `/vibe` is invoked — the user's explicit use of `/vibe` IS the activation trigger. Even if `proactive=false`, `/vibe` still auto-advances through pipeline stages.
-3. **Task difficulty / complexity does NOT shorten the workflow.** The pipeline runs in full regardless of whether the task appears simple or trivial.
-4. **If the agent is about to skip any pipeline stage, abbreviate the workflow, or stop before RELEASE**, it MUST ask the user first:
+2. **Task difficulty / complexity does NOT shorten the workflow.** The pipeline runs in full regardless of whether the task appears simple or trivial.
+3. **If the agent is about to skip any pipeline stage, abbreviate the workflow, or stop before RELEASE**, it MUST ask the user first:
 
    > "⚠️ Full pipeline requires completing [stage(s)]. Do you want to:
    > A) Run the complete workflow (recommended)
@@ -126,8 +125,6 @@ Use the following priority-ordered rules (first match wins):
 Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must contain the same session identifier.
 
 ### Auto-Advance Rule (Wave Mode)
-
-**PROACTIVE mode override for `/vibe`:** When the user explicitly invokes `/vibe`, the auto-advance behavior is ALWAYS active — regardless of the `proactive` config setting. `proactive=false` only suppresses unprompted skill suggestions, not user-initiated `/vibe` workflows.
 
 THINK has exactly one human gate: spec review approval.
 

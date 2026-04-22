@@ -9,16 +9,8 @@
 # Config file: ~/.omni-skills/config
 # Format: key=value (one per line)
 #
-# PROACTIVE 5-Level Trust Matrix:
-#   proactive.mechanical=true    — Iron Laws, deterministic gates -> auto
-#   proactive.structural=true    — Architecture, interfaces -> auto
-#   proactive.stylistic=ask      — Naming, formatting, UI choices -> ask user
-#   proactive.strategic=ask      — Approach selection, trade-offs -> ask user
-#   proactive.destructive=false  — Delete, overwrite, irreversible -> always confirm
-#
-# Legacy: proactive=true means all=true except destructive=false
-# Legacy: proactive=false means all=false
-# Dotted keys work as-is (grep "^key=" matching supports dots in key names)
+# Supported keys:
+#   telemetry=true   — Write usage events to ~/.omni-skills/analytics/
 
 set -e
 
@@ -29,7 +21,6 @@ CONFIG_FILE="${CONFIG_DIR}/config"
 mkdir -p "${CONFIG_DIR}"
 if [ ! -f "${CONFIG_FILE}" ]; then
   cat > "${CONFIG_FILE}" << 'EOF'
-proactive=true
 telemetry=true
 EOF
 fi

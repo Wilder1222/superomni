@@ -34,17 +34,7 @@ This resolves the tension without discarding either philosophy.
 
 ## 2. Design Decisions
 
-### Decision 1: Skill Trigger Mode → PROACTIVE Toggle
-
-**Problem:** superpowers forces skills at every session start. gstack requires manual invocation. Which is right?
-
-**Decision:** Both are right for different users and contexts. Implement PROACTIVE mode with a toggle:
-- `proactive=true` (default): Skills auto-activate on trigger phrases (superpowers style)
-- `proactive=false`: Agent suggests skills but doesn't run them automatically (gstack style)
-
-**Implementation:** `bin/config get/set proactive` → affects preamble behavior in all skills.
-
-### Decision 2: Template System → `.tmpl` + `{{PREAMBLE}}`
+### Decision 1: Template System → `.tmpl` + `{{PREAMBLE}}`
 
 **Problem:** superpowers uses raw `.md` files (no build step, simple). gstack uses `.tmpl` with macros (consistent shared context, requires build). Which is right?
 
@@ -55,7 +45,7 @@ This resolves the tension without discarding either philosophy.
 
 **Implementation:** `lib/gen-skill-docs.sh` — pure bash, no dependencies.
 
-### Decision 3: Debugging → Fused (superpowers 4-phase + gstack Scope Lock)
+### Decision 2: Debugging → Fused (superpowers 4-phase + gstack Scope Lock)
 
 **Problem:** Both projects have debugging protocols. superpowers has root-cause tracing and 3 supporting docs. gstack has Scope Lock, Pattern Table, and Debug Report format. Which is canonical?
 
@@ -68,7 +58,7 @@ This resolves the tension without discarding either philosophy.
 
 **Implementation:** `skills/systematic-debugging/` — 4 files total.
 
-### Decision 4: Plan Review → 3-Stage Pipeline (simplified gstack)
+### Decision 3: Plan Review → 3-Stage Pipeline (simplified gstack)
 
 **Problem:** superpowers has a lightweight plan reviewer. gstack has CEO/Design/Eng 3-stage pipeline with 6 principles + autoplan automation + Dual Voices (Claude + Codex). Which to use?
 
@@ -80,7 +70,7 @@ This resolves the tension without discarding either philosophy.
 
 **Implementation:** `skills/plan-review/` — full 3-stage with Decision Audit Trail and Final Gate.
 
-### Decision 5: investigate vs systematic-debugging
+### Decision 4: investigate vs systematic-debugging
 
 **Problem:** Both projects have investigation/debugging skills. Significant overlap risk.
 
@@ -90,7 +80,7 @@ This resolves the tension without discarding either philosophy.
 
 The distinction is in the _starting state_, not the methods.
 
-### Decision 6: retro capability → merged into self-improvement
+### Decision 5: retro capability → merged into self-improvement
 
 **Problem:** gstack's `/retro` is tightly coupled to gstack infrastructure (`~/.gstack/`, gstack-specific session tracking).
 
@@ -100,7 +90,7 @@ The distinction is in the _starting state_, not the methods.
 - No dependency on gstack-specific state
 - Save reports to `docs/superomni/retros/` (project artifact contract)
 
-### Decision 7: Multi-Platform Support Strategy
+### Decision 6: Multi-Platform Support Strategy
 
 **Problem:** superomni was originally built for Claude Code only. Users want to use it with Cursor, Codex, Gemini CLI, and OpenCode.
 
@@ -112,7 +102,7 @@ The distinction is in the _starting state_, not the methods.
 
 **Implementation:** Platform detection in `setup` and `hooks/session-start`.
 
-### Decision 8: Review Checklists (Data vs Logic Separation)
+### Decision 7: Review Checklists (Data vs Logic Separation)
 
 **Problem:** Code review and QA skills need structured checklists. Embedding checklists in skill logic makes them hard to maintain.
 
@@ -122,7 +112,7 @@ The distinction is in the _starting state_, not the methods.
 3. New checklists can be added without modifying skill protocol
 4. `code-review` receiving mode uses checklists to systematically address review feedback
 
-### Decision 9: Workflow/Sprint Pipeline (Inter-Skill Orchestration)
+### Decision 8: Workflow/Sprint Pipeline (Inter-Skill Orchestration)
 
 **Problem:** Individual skills work well in isolation, but real development follows a pipeline: plan → implement → test → review → ship. No skill orchestrates this.
 
@@ -143,7 +133,7 @@ Claude Code session starts
     ↓
 hooks/session-start executes
     ↓
-Environment detected (PROACTIVE mode, branch, project)
+Environment detected (branch, project)
     ↓
 skills/using-skills/SKILL.md injected into context
     ↓
@@ -157,7 +147,7 @@ User or agent trigger condition detected
     ↓
 Relevant SKILL.md loaded
     ↓
-Preamble executed (env detection, PROACTIVE check, telemetry start)
+Preamble executed (env detection, telemetry start)
     ↓
 Skill phases executed in order
     ↓
@@ -224,7 +214,7 @@ Any skill that modifies files checks and reports blast radius (number of files t
 
 ```
 ~/.omni-skills/
-├── config              ← key=value pairs (proactive, telemetry)
+├── config              ← key=value pairs (telemetry)
 ├── .current-slug       ← cached project slug
 ├── sessions/
 │   └── sessions.jsonl  ← session start events
@@ -304,9 +294,9 @@ The preamble contains shell code and special characters (`$`, `\`). Standard `se
 
 ### New (original to superomni)
 - **ETHOS.md**: Plan Lean / Execute Complete synthesis
-- **lib/preamble.md**: PROACTIVE mode toggle, unified status protocol
+- **lib/preamble.md**: unified status protocol, auto-advance rules
 - **using-skills**: new meta-skill (superpowers has using-superpowers but more limited)
-- **bin/config**: config management with PROACTIVE toggle
+- **bin/config**: config management (telemetry)
 - **hooks/session-start**: fused env detection + skill injection
 
 ---
@@ -366,7 +356,7 @@ The `designer` agent adds the missing design review dimension to the framework �
 
 | Risk | Mitigation |
 |------|-----------|
-| 28 skills is a lot — cognitive overload | PROACTIVE mode focuses agent; `workflow` skill sequences skills; skills reference each other; consolidation reduced count from 31 to 28 |
+| 28 skills is a lot — cognitive overload | `workflow` skill sequences skills; skills reference each other; consolidation reduced count from 31 to 28 |
 | `.tmpl` build step adds complexity | Pre-built `.md` files committed; build only needed for dev |
 | investigate + systematic-debugging overlap | Clear separation: no error → investigate; has error → debug |
 | self-improvement retro scope requires git history | Gracefully handles shallow clones with `git fetch` |
@@ -379,7 +369,7 @@ The `designer` agent adds the missing design review dimension to the framework �
 
 ## 9. Design Decisions: v0.4.0 — Harness Engineering
 
-### Decision 5: Harness Engineering as a First-Class Skill
+### Decision 4: Harness Engineering as a First-Class Skill
 
 **Problem:** As superomni grows, the framework itself accumulates entropy: bloated preamble, misaligned tool sets, missing evaluation gates, weak feedback loops. There was no systematic way to maintain the harness.
 
@@ -387,7 +377,7 @@ The `designer` agent adds the missing design review dimension to the framework �
 
 **Implementation:** `skills/harness-engineering/` with 8-phase audit, Harness Health Score (N/25), and prioritized improvement backlog output to `docs/superomni/harness-audits/`.
 
-### Decision 6: Evaluator as a Dedicated Agent
+### Decision 5: Evaluator as a Dedicated Agent
 
 **Problem:** The framework had evaluation concepts (verification skill, code-reviewer agent) but no dedicated evaluation persona that could be invoked at any quality gate — independent of the skill that produced the output.
 
@@ -395,7 +385,7 @@ The `designer` agent adds the missing design review dimension to the framework �
 
 **Implementation:** `agents/evaluator.md` with APPROVED / APPROVED_WITH_NOTES / CHANGES_REQUIRED / EVALUATION_INCOMPLETE verdicts.
 
-### Decision 7: Wave Evaluation Gates in Executing-Plans
+### Decision 6: Wave Evaluation Gates in Executing-Plans
 
 **Problem:** The `executing-plans` skill executed waves in parallel but had no gate between waves — wave N+1 could begin before wave N's outputs were verified.
 

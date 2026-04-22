@@ -2,34 +2,7 @@
 
 ### Environment Detection
 
-On session start, read: branch from `git branch --show-current`, proactive config from `bin/config get proactive` (default `true`), session timestamp from `~/.omni-skills/sessions/current-session-ts`.
-
-### PROACTIVE Mode
-
-**Legacy mode (single value):**
-If `proactive=true`: auto-invoke skills. If `proactive=false`: ask first.
-
-If `PROACTIVE` is `false`: do NOT proactively suggest skills. Only run skills the
-user explicitly invokes. If you would have auto-invoked, say:
-*"I think [skill-name] might help here — want me to run it?"* and wait.
-
-**5-Level Trust Matrix (when configured):**
-
-Before executing any decision, classify its tacit knowledge intensity:
-
-| Decision Type | Config Key | Default | When to Use |
-|--------------|------------|---------|-------------|
-| Mechanical | proactive.mechanical | true | Iron Law applies, Gate Check is deterministic |
-| Structural | proactive.structural | true | Architecture, interface, module boundaries |
-| Stylistic | proactive.stylistic | ask | Naming, formatting, UI layout, comment style |
-| Strategic | proactive.strategic | ask | Approach selection, architecture trade-offs |
-| Destructive | proactive.destructive | false | Delete, overwrite, irreversible operations |
-
-Classification rules:
-- If a style profile exists (`docs/superomni/style-profiles/`), stylistic decisions
-  that match the profile can be treated as mechanical
-- Strategic decisions ALWAYS surface to user unless `proactive.strategic=true`
-- Destructive decisions ALWAYS confirm (integrates with `careful` Skill) regardless of config
+On session start, read: branch from `git branch --show-current`, session timestamp from `~/.omni-skills/sessions/current-session-ts`.
 
 ### Completion Status Protocol
 Report status using one of these at the end of every skill session:

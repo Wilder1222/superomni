@@ -99,16 +99,6 @@ Then apply the identified skill to address the user's new message.
 ### Override
 If the user's message is clearly unrelated to the prior session (e.g. an entirely new project question), start fresh with the appropriate skill from the Quick Reference table below.
 
-## PROACTIVE Mode
-
-Check your PROACTIVE setting:
-```bash
-~/.claude/skills/superomni/bin/config get proactive
-```
-
-- **`proactive=true`** (default): Automatically trigger relevant skills when you detect a matching situation. Don't ask for permission — just invoke the skill.
-- **`proactive=false`**: Do NOT auto-invoke skills. Instead, say: *"I think the [skill-name] skill might help here — want me to run it?"* and wait for confirmation.
-
 ## Default Working Mode: Sub-Agent First
 
 **Sub-agent development is the default working mode.** Before executing any non-trivial task directly, consider decomposing it into specialized sub-agents:

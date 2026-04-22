@@ -106,7 +106,7 @@ validate_tmpl() {
     # We check for preamble content presence rather than {{PREAMBLE}} absence,
     # because skills like writing-skills intentionally show {{PREAMBLE}} in
     # code-block examples to teach users how to author new skills.
-    if ! grep -q 'PROACTIVE Mode' "$md"; then
+    if ! grep -q 'Completion Status Protocol' "$md"; then
       fail "$rel_md: SKILL.md does not contain expanded preamble content — run 'bash lib/gen-skill-docs.sh'"
     else
       pass "SKILL.md built and expanded"

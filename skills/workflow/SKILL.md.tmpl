@@ -16,10 +16,10 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ## The Pipeline
 
 ```
-THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
-  |        |       |        |       |       |       |
-  v        v       v        v       v       v       v
-spec-*   plan-*  approved  code   green  release  retro
+THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
+  |        |       |        |       |       |
+  v        v       v        v       v       v
+spec-*   plan-*  approved  code   green  release+retro
 ```
 
 THINK has exactly one human gate: spec review approval.
@@ -105,30 +105,19 @@ Output:
 - `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md`
 - `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md` when deploying
 
-## Stage 6: SHIP - Release
+## Stage 6: RELEASE - Ship and Retrospective
 
-Skills: `ship`, `finishing-branch`, `careful`
+Skills: `release` (combines ship + retrospective in one step), `finishing-branch`, `careful`
 
 Input: verified and ready code from Stage 5.
 
 Process:
-1. Prepare branch for merge
-2. Execute release workflow
-3. Keep `careful` active for production-impacting operations
+1. Prepare branch for merge (`finishing-branch`, `careful` for risky ops)
+2. Version bump, changelog update, tag and publish
+3. Write `## Release` section of release artifact (deployment evidence, rollback plan)
+4. Write `## Retrospective` section of release artifact (tacit gap mining, what went well/slow, process changes)
 
-Output: merge/deploy/tag evidence recorded in `docs/superomni/executions/execution-[branch]-[session]-[date].md`
-
-## Stage 7: REFLECT - Evaluate and Retro
-
-Skills: `self-improvement` (default + `retro` scope)
-
-Input: completed feature journey.
-
-Process:
-1. Run self-improvement to produce concrete improvement actions
-2. Run self-improvement with retro scope to analyze delivery pattern and lessons
-
-Output: `docs/superomni/improvements/improvement-[branch]-[session]-[date].md`
+Output: `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain both `## Release` and `## Retrospective` sections)
 
 ## Stage Artifact Gates (Auto-Advance Preconditions)
 
@@ -138,20 +127,19 @@ Wave auto-advance requires stage artifact evidence:
 |-------|----------------|
 | THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` approved by user |
 | PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
-| REVIEW | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
+| REVIEW | `docs/superomni/reviews/plan-review-[branch]-[session]-[date].md` |
 | BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
 | VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` (+ production readiness report when deploying) |
-| SHIP | Release evidence present in `docs/superomni/executions/execution-[branch]-[session]-[date].md` |
-| REFLECT | `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` |
+| RELEASE | `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain `## Release` and `## Retrospective`) |
 
 Missing artifact => do not auto-advance. Report `DONE_WITH_CONCERNS` and request artifact completion.
 
 ## Report
 
 ```
-Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> SHIP -> REFLECT
+Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
 Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | improvements [N]
+Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | releases [N]
 Next -> [skill-name]: [reason]
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
 ```

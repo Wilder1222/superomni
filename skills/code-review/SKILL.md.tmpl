@@ -49,6 +49,8 @@ Questions to answer before reviewing:
 - What spec/ticket does this implement?
 - What is the blast radius of this change?
 
+**Dispatch the `code-reviewer` agent** with the diff and relevant source files as input. The agent will perform a full P0/P1/P2 layered review (correctness, security, tests, quality, blast radius, architecture) applying the 6 Decision Principles. Incorporate the CODE REVIEW block it returns as the primary review output.
+
 ## Review Layers (in priority order)
 
 ### Layer 1: Correctness (P0 — blocks merge)
@@ -192,14 +194,15 @@ Ready for re-review: YES | NO
 
 ## Mode: Security (Merged)
 
-For security-focused reviews, extend normal review with:
+For security-focused reviews, **dispatch the `security-auditor` agent** with the diff and relevant source files as input. The agent will run its full OWASP Top 10 / STRIDE audit process and return a SECURITY AUDIT REPORT block. Incorporate its findings directly into the review output.
 
+The security-auditor agent covers:
 1. Attack surface map (entry points, auth boundaries, sensitive data paths).
 2. OWASP Top 10 checklist pass.
 3. STRIDE-oriented threat notes for high-risk flows.
 4. Explicit exploitability statement for each finding.
 
-Security finding format:
+Security finding format (from agent output):
 
 ```
 SECURITY FINDING [ID]
@@ -218,7 +221,7 @@ After completing the review, save the full review output as a Markdown document:
 ```bash
 _REVIEW_DATE=$(date +%Y%m%d-%H%M%S)
 _REVIEW_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_REVIEW_FILE="review-${_REVIEW_BRANCH}-${_REVIEW_DATE}.md"
+_REVIEW_FILE="code-review-${_REVIEW_BRANCH}-${_REVIEW_DATE}.md"
 mkdir -p docs/superomni/reviews
 cat > "docs/superomni/reviews/${_REVIEW_FILE}" << EOF
 # Code Review: ${_REVIEW_BRANCH}
@@ -232,4 +235,4 @@ EOF
 echo "Review saved to docs/superomni/reviews/${_REVIEW_FILE}"
 ```
 
-Write the full CODE REVIEW block (formatted as Markdown) to `docs/superomni/reviews/review-[branch]-[session]-[date].md`. This file serves as the permanent record of the review for the user to revisit.
+Write the full CODE REVIEW block (formatted as Markdown) to `docs/superomni/reviews/code-review-[branch]-[session]-[date].md`. This file serves as the permanent record of the review for the user to revisit.

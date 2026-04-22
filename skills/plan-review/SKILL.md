@@ -175,6 +175,8 @@ AUTO-DECISION LOG ([Phase])
 
 ## Phase 1: Strategy Review (CEO Lens)
 
+**Dispatch the `ceo-advisor` agent** with the plan document as input. The agent will run its full process (problem extraction, scope review, strategic questions) and return a CEO ADVISOR REVIEW block. Incorporate its findings into the strategy section below.
+
 Questions:
 1. **Premise validity** — are assumptions stated or just assumed?
 2. **Scope calibration** — right amount of work? Not too much, not too little?
@@ -190,6 +192,7 @@ STRATEGY REVIEW
   Alternatives: [considered | not documented]
   DRY:      [reuses existing | reinvents wheel]
   Risks:    [list top 3]
+  ceo-advisor: [Mode chosen: EXPANSION | SELECTIVE EXPANSION | HOLD SCOPE | REDUCTION]
 ```
 
 **Auto-resolve:** Verify premises against the spec and existing codebase. If premises are valid, proceed silently. If premises are questionable, log the concern and apply Principle 6 (bias toward action) to proceed.
@@ -218,6 +221,8 @@ DESIGN REVIEW (if applicable)
 
 ## Phase 3: Engineering Review
 
+**Dispatch the `architect` agent** with the plan document and any relevant source files as input. The agent will run its full architecture review process (layer audit, coupling check, tech choices, scalability) and return an ARCHITECTURE REVIEW block. Incorporate its P0/P1 findings below.
+
 Check:
 - [ ] **Architecture soundness** — appropriate layers, minimal coupling?
 - [ ] **Test coverage plan** — what will be tested, at what level?
@@ -229,7 +234,7 @@ Check:
 
 ```
 ENGINEERING REVIEW
-  Architecture: [sound | concerns: ...]
+  Architecture: [sound | concerns: ...]  (from architect agent)
   Test plan:    [comprehensive | gaps: ...]
   Performance:  [no risks | risks: ...]
   Security:     [clean | concerns: ...]
@@ -308,7 +313,7 @@ if [ -z "$_REVIEW_SESSION" ]; then
 fi
 
 mkdir -p docs/superomni/reviews
-_REVIEW_FILE="docs/superomni/reviews/review-${_REVIEW_BRANCH}-${_REVIEW_SESSION}-${_REVIEW_DATE}.md"
+_REVIEW_FILE="docs/superomni/reviews/plan-review-${_REVIEW_BRANCH}-${_REVIEW_SESSION}-${_REVIEW_DATE}.md"
 ```
 
 Write the full `PLAN REVIEW COMPLETE` report block to `$_REVIEW_FILE` and include all decision logs.

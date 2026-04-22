@@ -382,4 +382,9 @@ echo "Execution results saved to docs/superomni/executions/${_EXEC_FILE}"
 
 Write the full execution log (wave plan, all step outcomes + the final PLAN EXECUTION COMPLETE block, formatted as Markdown) to `docs/superomni/executions/execution-[branch]-[session]-[date].md`. This file serves as the permanent record of the execution run for the user to revisit.
 
-Then trigger the `verification` skill.
+Then trigger the complete VERIFY sequence in order:
+1. `code-review` skill (giving mode) — structured code review of all changes
+2. `qa` skill — test gap filling, edge case exploration
+3. `verification` skill — evidence-based acceptance criteria check
+
+Do NOT skip any step. Each skill must report DONE before the next is triggered. If any step reports BLOCKED or DONE_WITH_CONCERNS, stop and surface to user before continuing.

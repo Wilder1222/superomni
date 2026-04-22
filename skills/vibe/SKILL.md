@@ -218,7 +218,7 @@ fi
 # Session matching: extract session from plan filename for review detection
 if [ -n "$_HAS_PLAN" ]; then
   _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
-  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
+  _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/plan-review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
   _PLAN_OPEN=$(grep -c '^\- \[ \]' "$_HAS_PLAN" 2>/dev/null || echo "0")
   _PLAN_DONE=$(grep -c '^\- \[x\]' "$_HAS_PLAN" 2>/dev/null || echo "0")
 fi
@@ -239,10 +239,10 @@ Use the following priority-ordered rules (first match wins):
 | 3 | `spec-*.md` + `.approved-spec-*` exist, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
 | 4 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
 | 5 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
-| 6 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `code-review` (`security` mode), `production-readiness` - auto-advance |
+| 6 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `code-review` (`security` mode), `production-readiness` (required when change involves server-side code, a versioned release, DB migrations, or new external dependencies) - auto-advance |
 | 7 | Verified | RELEASE | `release` skill - auto-advance |
 
-Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must contain the same session identifier.
+Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must be a `plan-review-*.md` file containing the same session identifier.
 
 ### Auto-Advance Rule (Wave Mode)
 
@@ -285,7 +285,7 @@ Before advancing, verify at least one stage artifact exists for the current stag
 |-------|-----------------------|
 | THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` + `docs/superomni/specs/.approved-spec-[branch]-[session]-[date]` |
 | PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
-| REVIEW | `docs/superomni/reviews/review-[branch]-[session]-[date].md` |
+| REVIEW | `docs/superomni/reviews/plan-review-[branch]-[session]-[date].md` |
 | BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
 | VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` |
 | RELEASE | `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain `## Release` and `## Retrospective`) |
@@ -332,7 +332,7 @@ Present the available commands only when auto-advance does not apply (i.e., the 
 | /self-improve | Post-task performance evaluation |
 | /self-improve --scope retro | Engineering retrospective |
 | /workflow | See the full sprint pipeline |
-| /ship | Release workflow |
+| /release | Ship and retrospective in one step |
 | /front-design | Unified frontend optimization with automatic mode detection |
 
 Suggested next step -> [skill-name]: [reason based on detected stage]
@@ -347,7 +347,7 @@ Run stage detection from Phase 1 and display:
 ```
 Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
 Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | .approved-spec-* [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | releases [N]
+Artifacts: spec-*.md [Y/N] | .approved-spec-* [Y/N] | plan-*.md [Y/N] | plan-review-*.md [Y/N] | executions [N] | code-reviews [N] | releases [N]
 Next -> [skill-name]: [reason]
 ```
 

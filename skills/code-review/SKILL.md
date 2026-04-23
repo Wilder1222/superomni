@@ -145,7 +145,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Code Review
 
 **Goal:** Provide structured, actionable code review feedback that improves quality without blocking momentum.
@@ -356,18 +355,17 @@ After completing the review, save the full review output as a Markdown document:
 ```bash
 _REVIEW_DATE=$(date +%Y%m%d-%H%M%S)
 _REVIEW_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_REVIEW_FILE="code-review-${_REVIEW_BRANCH}-${_REVIEW_DATE}.md"
+
+# Extract session from the matching plan file (mirrors plan-review convention)
+_PLAN_FILE=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
+if [ -n "$_PLAN_FILE" ]; then
+  _PLAN_BASE=$(basename "$_PLAN_FILE" .md)
+  _REVIEW_SESSION=$(echo "$_PLAN_BASE" | sed -E "s/^plan-${_REVIEW_BRANCH}-//" | sed -E 's/-[0-9]{8}$//')
+fi
+[ -z "$_REVIEW_SESSION" ] && _REVIEW_SESSION="code-review"
+
+_REVIEW_FILE="code-review-${_REVIEW_BRANCH}-${_REVIEW_SESSION}-${_REVIEW_DATE}.md"
 mkdir -p docs/superomni/reviews
-cat > "docs/superomni/reviews/${_REVIEW_FILE}" << EOF
-# Code Review: ${_REVIEW_BRANCH}
-
-**Date:** ${_REVIEW_DATE}
-**Reviewer:** superomni
-**Branch:** ${_REVIEW_BRANCH}
-
-[Paste the full review output here]
-EOF
-echo "Review saved to docs/superomni/reviews/${_REVIEW_FILE}"
 ```
 
-Write the full CODE REVIEW block (formatted as Markdown) to `docs/superomni/reviews/code-review-[branch]-[session]-[date].md`. This file serves as the permanent record of the review for the user to revisit.
+Write the full CODE REVIEW block (formatted as Markdown) to `docs/superomni/reviews/${_REVIEW_FILE}`. This file serves as the permanent record of the review for the user to revisit.

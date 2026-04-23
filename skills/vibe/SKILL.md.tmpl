@@ -73,7 +73,7 @@ _HAS_SPEC_APPROVAL=$(find docs/superomni/specs -name ".approved-spec-*" -newer "
 # Also check non-session approval files (approval persists across sessions)
 [ -z "$_HAS_SPEC_APPROVAL" ] && _HAS_SPEC_APPROVAL=$(ls docs/superomni/specs/.approved-spec-* 2>/dev/null | head -1)
 _HAS_PLAN=$(find docs/superomni/plans -name "plan-*.md" -newer "$_ref" 2>/dev/null | sort | tail -1)
-_HAS_REVIEW=$(find docs/superomni/reviews -name "review-*.md" -newer "$_ref" 2>/dev/null | head -1)
+_HAS_REVIEW=$(find docs/superomni/reviews -name "plan-review-*.md" -newer "$_ref" 2>/dev/null | head -1)
 _HAS_EXECUTIONS=$(find docs/superomni/executions -name "*.md" -newer "$_ref" 2>/dev/null | head -1)
 _HAS_EVALUATION=$(find docs/superomni/evaluations -name "evaluation-*.md" -newer "$_ref" 2>/dev/null | head -1)
 _HAS_RELEASE=$(find docs/superomni/releases -name "release-*.md" -newer "$_ref" 2>/dev/null | head -1)
@@ -87,7 +87,7 @@ if [ -z "$_HAS_SPEC" ] && [ -z "$_HAS_PLAN" ]; then
     # Last session had artifacts — detect from disk regardless of mtime
     _HAS_SPEC=$(ls docs/superomni/specs/spec-*.md 2>/dev/null | sort | tail -1)
     _HAS_PLAN=$(ls docs/superomni/plans/plan-*.md 2>/dev/null | sort | tail -1)
-    _HAS_REVIEW=$(ls docs/superomni/reviews/review-*.md 2>/dev/null | head -1)
+    _HAS_REVIEW=$(ls docs/superomni/reviews/plan-review-*.md 2>/dev/null | head -1)
     _HAS_EXECUTIONS=$(ls docs/superomni/executions/*.md 2>/dev/null | head -1)
     _HAS_EVALUATION=$(ls docs/superomni/evaluations/evaluation-*.md 2>/dev/null | head -1)
     _HAS_RELEASE=$(ls docs/superomni/releases/release-*.md 2>/dev/null | head -1)
@@ -96,6 +96,7 @@ if [ -z "$_HAS_SPEC" ] && [ -z "$_HAS_PLAN" ]; then
 fi
 
 # Session matching: extract session from plan filename for review detection
+_HAS_MATCHING_REVIEW=""
 if [ -n "$_HAS_PLAN" ]; then
   _PLAN_SESSION=$(basename "$_HAS_PLAN" .md | sed 's/plan-[^-]*-//' | sed 's/-[0-9]*$//')
   _HAS_MATCHING_REVIEW=$(ls docs/superomni/reviews/plan-review-*-${_PLAN_SESSION}-*.md 2>/dev/null | head -1)
@@ -142,7 +143,7 @@ _verify_stage_artifact() {
   case "$from_stage" in
     THINK)   [ -n "$_HAS_SPEC" ] && [ -n "$_HAS_SPEC_APPROVAL" ] ;;
     PLAN)    [ -n "$_HAS_PLAN" ] ;;
-    REVIEW)  [ -n "$_HAS_REVIEW" ] ;;
+    REVIEW)  [ -n "$_HAS_MATCHING_REVIEW" ] ;;
     BUILD)   [ -n "$_HAS_EXECUTIONS" ] ;;
     VERIFY)  [ -n "$_HAS_EVALUATION" ] ;;
     RELEASE) [ -n "$_HAS_RELEASE" ] ;;
@@ -273,5 +274,40 @@ Then re-run Phase 1-2.
 - Ask the user: "I was about to stop without triggering the full workflow. Do you want me to proceed with [skill-name] for [stage]? (Y/N)"
 
 Important: `/vibe` never executes implementation work directly. It always delegates to the appropriate skill.
+
+### Stage Dispatch Brief
+
+Before invoking any skill, always print the following brief for the stage being entered. This gives the user full visibility into what is about to run.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ Entering [STAGE] stage
+  Skill  : [skill-name]
+  Agents : [comma-separated agent list, or "none"]
+  Output : [artifact that will be created]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Stage reference table:
+
+| Stage   | Skill              | Agents                                    | Output artifact |
+|---------|--------------------|-------------------------------------------|-----------------|
+| THINK   | `brainstorm`       | none                                      | `docs/superomni/specs/spec-*.md` |
+| PLAN    | `writing-plans`    | `planner`                                 | `docs/superomni/plans/plan-*.md` |
+| REVIEW  | `plan-review`      | `ceo-advisor`, `architect` (+ `designer` if UI) | `docs/superomni/reviews/plan-review-*.md` |
+| BUILD   | `executing-plans` / `subagent-development` | depends on steps (+ `frontend-design` if UI) | `docs/superomni/executions/execution-*.md` |
+| VERIFY  | `code-review` → `qa` → `verification` | `code-reviewer` (+ `security-auditor` if security mode) | `docs/superomni/evaluations/evaluation-*.md` |
+| RELEASE | `release`          | none                                      | `docs/superomni/releases/release-*.md` |
+
+Example output when entering REVIEW stage:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ Entering REVIEW stage
+  Skill  : plan-review
+  Agents : ceo-advisor, architect
+  Output : docs/superomni/reviews/plan-review-[branch]-[session]-[date].md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
 Report status: DONE - framework activated, stage detected, delegated to [skill-name] for [stage].

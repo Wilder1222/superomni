@@ -11,7 +11,7 @@
 
 ## Project Identity
 
-This is the **superomni** AI skill framework — a fusion of obra/superpowers and garrytan/gstack.
+This is the **superomni** AI skill framework.
 
 Philosophy: **Plan Lean, Execute Complete**
 

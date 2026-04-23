@@ -333,7 +333,7 @@ If verdict is NOT_READY:
 1. List all blockers with specific remediation steps
 2. Assign an owner to each blocker
 3. Re-run this checklist after blockers are resolved
-4. Do NOT proceed to `ship` until verdict is READY or READY_WITH_CONCERNS
+4. Do NOT proceed to `release` until verdict is READY or READY_WITH_CONCERNS
 
 ## Save Production Readiness Document
 

@@ -40,7 +40,11 @@ git log --since="${SINCE}" --author="${AUTHOR_EMAIL}" --pretty=tformat: --numsta
 
 Generate an additional artifact:
 
-- `docs/superomni/retros/retro-[branch]-[session]-[date].md`
+> **Deprecated in v0.5.8.** Retrospective data is now written inside the release artifact
+> (`docs/superomni/releases/release-*.md`, `## Retrospective` section) by the `release` skill.
+> When running in `retro` scope, write retro content into the release artifact if it exists,
+> or into `docs/superomni/improvements/improvement-[branch]-[session]-[date].md` as a section.
+> Do NOT create standalone `docs/superomni/retros/` files.
 
 Retro output must include:
 
@@ -156,7 +160,7 @@ Answer each question with **YES / PARTIAL / NO + reason**:
 ### Workflow Adherence
 | Question | Answer | Evidence |
 |----------|--------|----------|
-| Did each major task follow the THINK→PLAN→REVIEW→BUILD→VERIFY→SHIP→REFLECT cycle? | | |
+| Did each major task follow the THINK→PLAN→REVIEW→BUILD→VERIFY→RELEASE cycle? | | |
 | Was a spec or plan artifact created before implementation? | | |
 | Were skills invoked for their intended triggers (not bypassed)? | | |
 | Did the session end with a status report (DONE/BLOCKED/etc.)? | | |
@@ -294,7 +298,7 @@ Tacit gaps file: [path or "not generated"]
 
 | Question | Answer | Evidence |
 |----------|--------|----------|
-| THINK→PLAN→REVIEW→BUILD→VERIFY→SHIP→REFLECT followed | YES/PARTIAL/NO | |
+| THINK→PLAN→REVIEW→BUILD→VERIFY→RELEASE followed | YES/PARTIAL/NO | |
 | Spec/plan created before implementation | YES/PARTIAL/NO | |
 | Skills used for intended triggers | YES/PARTIAL/NO | |
 | Session ended with status report | YES/PARTIAL/NO | |

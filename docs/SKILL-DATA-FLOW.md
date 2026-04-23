@@ -20,15 +20,18 @@ All workflow artifacts go in `docs/superomni/` (single source of truth):
 docs/superomni/
 ├── specs/spec-[branch]-[session]-[date].md  ← brainstorm output
 ├── plans/plan-[branch]-[session]-[date].md  ← writing-plans output
-├── reviews/               ← plan-review and code-review output
+├── reviews/               ← plan-review output: plan-review-[branch]-[session]-[date].md
+│                             code-review output: code-review-[branch]-[session]-[date].md
 ├── executions/            ← executing-plans output
 ├── subagents/             ← subagent-development session records
 ├── production-readiness/  ← production-readiness output
-├── evaluations/            ← verification output
-├── improvements/           ← self-improvement output
-├── harness-audits/         ← harness-engineering output
-└── retros/                 ← self-improvement (`retro` scope) output
+├── evaluations/           ← verification output
+├── improvements/          ← self-improvement output
+└── harness-audits/        ← harness-engineering output
 ```
+
+> **Note:** `retros/` was removed in v0.5.8. The retrospective is now written as `## Retrospective`
+> inside `docs/superomni/releases/release-[branch]-[session]-[date].md` by the `release` skill.
 
 ## Per-Skill Contracts
 
@@ -203,7 +206,7 @@ Required sections:
 
 ---
 
-### `production-readiness` → `ship`
+### `production-readiness` → `release`
 
 **Produces:** `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md`
 
@@ -225,15 +228,46 @@ Required sections:
 ## Verdict: READY | READY_WITH_CONCERNS | NOT_READY
 ```
 
-**Consumed by:** `ship` reads the readiness report before proceeding
+**Consumed by:** `release` reads the readiness report before proceeding
 
 ---
 
-### `self-improvement` (`retro` scope) → `self-improvement` (process scope)
+### `subagent-development` → `verification`
 
-**Produces:** `docs/superomni/retros/retro-[branch]-[session]-[date].md` (commit metrics, streak, ship of week)
+**Produces:** `docs/superomni/subagents/subagent-[branch]-[session]-[date].md`
 
-**Consumed by:** `self-improvement` process evaluation reads retro data as evidence
+Required sections:
+```markdown
+# Sub-Agent Session: [branch]
+
+**Date:** [date]
+**Branch:** [branch]
+**Task:** [what was implemented]
+
+## Agents Dispatched
+
+| Wave | Agent | Scope | Status |
+|------|-------|-------|--------|
+| 1 | [agent name] | [scope] | ✓ DONE / ✗ BLOCKED |
+
+## Outputs
+
+- Files changed: [list]
+- Tests passing: [output summary]
+
+## Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+```
+
+**Consumed by:** `vibe` stage detection counts `subagent-*.md` as BUILD-stage completion evidence
+(equivalent to `execution-*.md` produced by `executing-plans`)
+
+---
+
+### `self-improvement` (`retro` scope)
+
+> **Deprecated in v0.5.8.** Retrospective is now written as `## Retrospective` inside
+> `docs/superomni/releases/release-[branch]-[session]-[date].md` by the `release` skill.
+> Do not create standalone `retros/` files — write retro content in the release artifact instead.
 
 ---
 
@@ -259,7 +293,7 @@ Required sections:
 
 | Question | Answer | Evidence |
 |----------|--------|----------|
-| THINK→PLAN→REVIEW→BUILD→VERIFY→SHIP→REFLECT followed | YES/PARTIAL/NO | |
+| THINK→PLAN→REVIEW→BUILD→VERIFY→RELEASE followed | YES/PARTIAL/NO | |
 | Spec/plan created before implementation | YES/PARTIAL/NO | |
 | Skills used for intended triggers | YES/PARTIAL/NO | |
 | Session ended with status report | YES/PARTIAL/NO | |

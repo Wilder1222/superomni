@@ -4,7 +4,7 @@
 
 Current stable version: 0.5.8
 
-superomni combines the best ideas from [obra/superpowers](https://github.com/obra/superpowers) (methodology-driven AI skill framework) and [garrytan/gstack](https://github.com/garrytan/gstack) (engineering completeness principles) into a unified, opinionated system for AI-assisted software development.
+superomni is an opinionated AI coding skill framework for Claude Code, Codex, Gemini CLI, and GitHub Copilot.
 
 ---
 
@@ -388,7 +388,7 @@ superomni/
 - [`docs/DESIGN.md`](docs/DESIGN.md) — Architectural design and fusion strategy
 - [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) — Implementation details and development guide
 - [`docs/AGENTS.md`](docs/AGENTS.md) — Agent library reference
-- [`docs/COMPARISON.md`](docs/COMPARISON.md) — Detailed comparison: superomni vs superpowers vs gstack
+- [`docs/COMPARISON.md`](docs/COMPARISON.md) — Detailed comparison of framework approaches
 
 ---
 
@@ -444,14 +444,6 @@ Or manually:
 4. Add to `CLAUDE.md` skills table
 
 ---
-
-## Attribution
-
-This project fuses:
-- [obra/superpowers](https://github.com/obra/superpowers) — MIT License — methodology-driven skill framework
-- [garrytan/gstack](https://github.com/garrytan/gstack) — MIT License — engineering completeness principles
-
-Original contributions: Plan Lean/Execute Complete philosophy, 3-stage plan review pipeline, Scope Lock + Debug Report fusion, retro skill generalization.
 
 ## License
 

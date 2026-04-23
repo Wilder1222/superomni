@@ -95,6 +95,20 @@ It is always OK to stop and say "this is too hard for me." Escalation is expecte
 ### Performance Checkpoint
 Before reporting final status, answer: (1) **Process** — all phases followed? (2) **Evidence** — every claim backed by output or file reference? (3) **Scope** — stayed within task boundary? If any NO, address it or report DONE_WITH_CONCERNS. For full sprint evaluation, use `self-improvement`.
 
+### Anti-Sycophancy Rules
+
+Never say these — they are sycophantic filler that delays real analysis:
+- "That's an interesting approach" → Take a position instead
+- "There are many ways to think about this" → Pick one, state what evidence would change your mind
+- "You might want to consider..." → Say "This is wrong because..." or "This works because..."
+- "That could work" → Say whether it WILL work based on evidence
+- "I can see why you'd think that" → If they're wrong, say so and why
+
+Always do:
+- Take a position on every significant question. State the position AND what evidence would change it.
+- If the user's approach has a flaw, name the flaw directly before suggesting alternatives.
+- Calibrated acknowledgment only: if an answer is specific and evidence-based, name what was good and pivot to the next hard question.
+
 ### TACIT-DENSE Detection (Tacit Knowledge Density Check)
 
 Before executing substantive decisions, check if any falls into these high-tacit-density categories.
@@ -191,23 +205,35 @@ Confirmation rule: each answer (text input or single-choice) is an immediate con
 
 ## Phase 2: Solution Space Exploration
 
+**Mandatory Alternatives Rule:**
+At least 2 of the 3 options MUST include:
+- One **"Minimal Viable"** approach — fewest files, smallest diff, ships fastest
+- One **"Ideal Architecture"** approach — best long-term trajectory, most elegant
+
+Each option must include: Name, 1-sentence summary, Effort (S/M/L), Pros (2), Cons (2), Reuses (existing code leveraged).
+
+**RECOMMENDATION:** State which option you recommend and the one-line reason. The user chooses.
+
 Generate 3 candidate approaches, then always offer an "Other" option for the user's own idea:
 
 ```
 Option A: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
+  Pros: [pro 1], [pro 2]
+  Cons: [con 1], [con 2]
   Effort: [S/M/L]
+  Reuses: [existing code or infra leveraged]
 
 Option B: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
+  Pros: [pro 1], [pro 2]
+  Cons: [con 1], [con 2]
   Effort: [S/M/L]
+  Reuses: [existing code or infra leveraged]
 
 Option C: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
+  Pros: [pro 1], [pro 2]
+  Cons: [con 1], [con 2]
   Effort: [S/M/L]
+  Reuses: [existing code or infra leveraged]
 
 Option D (Other): describe your own approach — ___________
 ```
@@ -268,9 +294,24 @@ Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this struc
 - [Any unresolved taste decisions requiring user input]
 ```
 
-## Phase 5: Spec Review
+## Phase 5: Spec Self-Review (Inline)
 
-Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
+Before presenting to user, run this inline check (no sub-agent needed):
+
+**Placeholder scan** — any TBD, TODO, [placeholder], "similar to X", undefined references?
+  → If yes: fill them in before proceeding
+
+**Scope check** — does Proposed Solution match Goals exactly?
+  → Over-scoped: move extras to Non-Goals
+  → Under-scoped: add missing requirements to Goals
+
+**Internal consistency** — do Acceptance Criteria actually test the Proposed Solution?
+  → Any criterion that can't be traced to the solution → revise or remove
+
+**Ambiguity check** — is each Acceptance Criterion yes/no testable?
+  → Vague criteria ("works correctly", "performs well") → make measurable
+
+If all 4 checks pass → proceed to Phase 6. If any fail → fix in spec and re-check.
 
 ## Phase 6: Human Gate — Spec Approval
 

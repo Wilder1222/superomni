@@ -257,7 +257,7 @@ Agent 2 ([type]) — [task name]
 
 When the sub-agent reports back, handle each status as follows:
 
-- **DONE** → proceed to Per-Task Review Protocol (Phase 1 below)
+- **DONE** → proceed to the Per-Task Review Protocol (see below)
 - **DONE_WITH_CONCERNS** → read concerns first:
   - Correctness or scope concerns → address before entering review
   - Observational concerns only → record them, proceed to review

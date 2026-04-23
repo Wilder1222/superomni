@@ -71,23 +71,36 @@ Confirmation rule: each answer (text input or single-choice) is an immediate con
 
 ## Phase 2: Solution Space Exploration
 
+**Mandatory Alternatives Rule:**
+The 3 options MUST collectively include both:
+- One **"Minimal Viable"** approach — fewest files, smallest diff, ships fastest
+- One **"Ideal Architecture"** approach — best long-term trajectory, most elegant
+
+These two can be any 2 of the 3 options (A, B, or C); the third slot is flexible.
+Each option must include: Name, 1-sentence summary, Effort (S/M/L), Pros (2), Cons (2), Reuses (existing code leveraged).
+
+**RECOMMENDATION:** State which option you recommend and the one-line reason. The user chooses.
+
 Generate 3 candidate approaches, then always offer an "Other" option for the user's own idea:
 
 ```
 Option A: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
+  Pros: [pro 1], [pro 2]
+  Cons: [con 1], [con 2]
   Effort: [S/M/L]
+  Reuses: [existing code or infra leveraged]
 
 Option B: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
+  Pros: [pro 1], [pro 2]
+  Cons: [con 1], [con 2]
   Effort: [S/M/L]
+  Reuses: [existing code or infra leveraged]
 
 Option C: [name] — [1-sentence description]
-  Pro: ...
-  Con: ...
+  Pros: [pro 1], [pro 2]
+  Cons: [con 1], [con 2]
   Effort: [S/M/L]
+  Reuses: [existing code or infra leveraged]
 
 Option D (Other): describe your own approach — ___________
 ```
@@ -148,9 +161,24 @@ Produce `docs/superomni/specs/spec-[branch]-[session]-[date].md` with this struc
 - [Any unresolved taste decisions requiring user input]
 ```
 
-## Phase 5: Spec Review
+## Phase 5: Spec Self-Review (Inline)
 
-Pass the spec to `spec-document-reviewer-prompt.md` for structured review.
+Before presenting to user, run this inline check (no sub-agent needed):
+
+**Placeholder scan** — any TBD, TODO, [placeholder], "similar to X", undefined references?
+  → If yes: fill them in before proceeding
+
+**Scope check** — does Proposed Solution match Goals exactly?
+  → Over-scoped: move extras to Non-Goals
+  → Under-scoped: add missing requirements to Goals
+
+**Internal consistency** — do Acceptance Criteria actually test the Proposed Solution?
+  → Any criterion that can't be traced to the solution → revise or remove
+
+**Ambiguity check** — is each Acceptance Criterion yes/no testable?
+  → Vague criteria ("works correctly", "performs well") → make measurable
+
+If all 4 checks pass → proceed to Phase 6. If any fail → fix in spec and re-check.
 
 ## Phase 6: Human Gate — Spec Approval
 

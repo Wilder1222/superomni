@@ -3,7 +3,7 @@
 # Injected at the start of every session.
 # Loads the superomni skill framework into context.
 
-set -e
+set -euo pipefail
 
 SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STATE_DIR="${HOME}/.omni-skills"
@@ -59,8 +59,10 @@ fi
 _PLATFORM="unknown"
 if [ -n "${CLAUDE_CODE_VERSION:-}" ] || [ -n "${CLAUDE_CODE:-}" ]; then
   _PLATFORM="Claude Code"
-elif [ -n "${CURSOR_SESSION_ID:-}" ] || [ -n "${CURSOR_TRACE_ID:-}" ]; then
+elif [ -n "${CURSOR_SESSION_ID:-}" ] || [ -n "${CURSOR_TRACE_ID:-}" ] || [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
   _PLATFORM="Cursor"
+elif [ -n "${COPILOT_CLI:-}" ]; then
+  _PLATFORM="Copilot"
 elif [ -n "${CODEX_ENV:-}" ] || { [ -n "${OPENAI_API_KEY:-}" ] && command -v codex &>/dev/null; }; then
   _PLATFORM="Codex"
 elif [ -n "${GEMINI_API_KEY:-}" ] || [ -n "${GOOGLE_AI_STUDIO:-}" ]; then

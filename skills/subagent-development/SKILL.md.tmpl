@@ -121,11 +121,52 @@ Agent 2 ([type]) — [task name]
 
 ### Step 5: Validate Output
 
-When the sub-agent reports back:
+When the sub-agent reports back, handle each status as follows:
+
+- **DONE** → proceed to the Per-Task Review Protocol (see below)
+- **DONE_WITH_CONCERNS** → read concerns first:
+  - Correctness or scope concerns → address before entering review
+  - Observational concerns only → record them, proceed to review
+- **NEEDS_CONTEXT** → provide the missing information and re-dispatch (keep same model)
+- **BLOCKED** → diagnose the cause before retrying:
+  - Context gap → supplement context and re-dispatch (same model)
+  - Reasoning limit → upgrade to a stronger model and re-dispatch
+  - Task too large → split into smaller sub-tasks and re-dispatch
+  - Plan is wrong → escalate to user
+  - ⛔ Do NOT retry with the same model and same inputs unchanged
+
+Structural checks (apply regardless of status):
 - [ ] Output matches the defined contract
 - [ ] No out-of-scope changes were made
-- [ ] Reported status is DONE or DONE_WITH_CONCERNS (not BLOCKED)
 - [ ] Evidence is provided for all claims
+
+## Per-Task Review Protocol
+
+Apply this two-phase gate **after every Implementer sub-agent** reports DONE (or DONE_WITH_CONCERNS cleared):
+
+### Phase 1 — Spec Compliance Review (required first)
+
+Use `spec-reviewer-prompt.md` to verify the implementation matches the spec — no over-implementation, no under-implementation.
+
+```
+SPEC COMPLIANCE CHECK
+  Pass criteria: Spec APPROVED or APPROVED_WITH_NOTES (no P0 blockers)
+  If APPROVED → proceed to Phase 2
+  If NEEDS_REVISION → return to the same Implementer agent with the specific P0 issues; re-review after fix
+```
+
+⛔ Do NOT start Phase 2 until Phase 1 reaches APPROVED status.
+
+### Phase 2 — Code Quality Review (only after Phase 1 passes)
+
+Use `code-quality-reviewer-prompt.md` to assess code quality, test coverage, and security.
+
+```
+CODE QUALITY CHECK
+  Pass criteria: APPROVED or APPROVED_WITH_NOTES (no P0 issues)
+  If APPROVED → mark task complete, proceed to next wave or integration
+  If CHANGES_REQUESTED → return to the same Implementer agent with P0 items; re-review after fix
+```
 
 ### Step 6: Integrate Results and Proceed to Next Wave
 
@@ -242,6 +283,22 @@ git diff HEAD --stat
 For critical decisions, run two agents with the same task and compare outputs:
 - If they agree → proceed
 - If they disagree → surface disagreement to user as TASTE decision
+
+## Model Selection Strategy
+
+Match model cost to task complexity. Signals:
+
+| Signal | Model tier |
+|--------|-----------|
+| 1–2 files, complete spec, no ambiguity | Lightweight / fast model |
+| Multi-file, integration concerns, pattern matching | Standard model |
+| Architecture decisions, broad codebase understanding, review tasks | Strongest model |
+
+Rules:
+- Default to the **cheapest model that can reliably complete the task**.
+- Upgrade when a sub-agent reports BLOCKED due to reasoning limits (not context gaps).
+- Never downgrade mid-task; finish the task at the assigned tier.
+- For Spec Compliance Review and Code Quality Review agents: use standard model minimum.
 
 ## Save Sub-Agent Session Document
 

@@ -1,0 +1,201 @@
+---
+name: refactoring
+description: |
+  Systematic code refactoring with safety gates.
+  Improves code structure without changing behavior.
+  Dispatches refactoring-agent for execution.
+  Triggers: "refactor", "clean up code", "reduce tech debt", "improve code quality",
+  "extract method", "rename", "make this cleaner".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Refactoring
+
+**Goal:** Improve the structure and readability of existing code without changing its observable behavior, using systematic refactoring patterns with safety gates at every step.
+
+## Iron Law: Green Before You Refactor
+
+**Never start refactoring if tests are failing.** Refactoring broken code creates two problems from one. Run the full test suite first and get it green, then refactor.
+
+### Good Example (Safe Refactoring)
+
+```
+Refactoring: extract calculateTax() from 45-line processOrder() function
+BEFORE: npm test → 47 passing, 0 failing
+Refactor: extract 12 lines into calculateTax(), update all call sites
+AFTER:  npm test → 47 passing, 0 failing
+Result: DONE — behavior preserved, code cleaner
+```
+
+### Bad Example (AVOID)
+
+```
+Refactoring: "clean up the order processing module"
+BEFORE: (didn't run tests)
+Refactored: moved logic, renamed variables, fixed a bug I noticed
+AFTER:  npm test → 44 passing, 3 failing
+[VIOLATED: Mixed refactoring with bug fix; no baseline established]
+```
+
+---
+
+## Phase 1: Scope Definition
+
+Identify what needs refactoring and why:
+
+```bash
+# Review the code to be refactored
+git diff main...HEAD --stat 2>/dev/null | head -20
+git log --oneline -5
+
+# Find complexity hotspots
+find . -name "*.js" -o -name "*.ts" -o -name "*.py" | \
+  xargs wc -l 2>/dev/null | sort -rn | head -15
+
+# Find code smells
+grep -rn "TODO\|FIXME\|HACK\|SMELL\|DUPLICATE" \
+  --include="*.js" --include="*.ts" --include="*.py" . \
+  | grep -v "node_modules\|.git" | head -15
+```
+
+Define scope:
+```
+REFACTORING SCOPE
+────────────────────────────────────────
+Target files:    [list of files to refactor]
+Reason:          [why this code needs improvement]
+Boundaries:      [what files/modules are out of scope]
+Behavior contract: [what must remain unchanged]
+────────────────────────────────────────
+```
+
+## Phase 2: Safety Baseline
+
+**This phase is a hard gate — do not proceed until tests pass.**
+
+```bash
+# Run the full test suite and save results
+npm test 2>&1 | tee /tmp/refactor-baseline.txt
+# or:  pytest -v 2>&1 | tee /tmp/refactor-baseline.txt
+# or:  go test ./... 2>&1 | tee /tmp/refactor-baseline.txt
+
+# Extract the test count
+grep -cE "pass|PASS|✓|ok " /tmp/refactor-baseline.txt 2>/dev/null || \
+  tail -5 /tmp/refactor-baseline.txt
+```
+
+Record:
+```
+SAFETY BASELINE
+────────────────────────────────────────
+Tests passing:   [N]
+Tests failing:   [N]  ← must be 0 to proceed
+Test command:    [npm test | pytest | go test | etc.]
+Baseline saved:  /tmp/refactor-baseline.txt
+────────────────────────────────────────
+```
+
+**Gate:** If `Tests failing > 0` → report BLOCKED. Do not proceed.
+
+## Phase 3: Smell Detection
+
+Identify refactoring targets using the standard smell catalog:
+
+| Smell | Detection | Refactoring |
+|-------|----------|-------------|
+| Long function | > 30 lines with multiple concerns | Extract method |
+| Duplicate code | Same logic in 2+ places | Extract and DRY |
+| Magic numbers/strings | `if (code === 42)` | Extract named constant |
+| God object | Class handling too many responsibilities | Extract class |
+| Deep nesting | > 3 levels of if/for/try | Guard clauses, early returns |
+| Long parameter list | > 4 parameters | Introduce parameter object |
+| Feature envy | Method uses another class's data more than its own | Move method |
+| Data clump | 3+ params always passed together | Extract into type/struct |
+| Dead code | Unused variables, functions, imports | Delete safely |
+| Inconsistent naming | Mixed conventions in same module | Systematic rename |
+
+Produce:
+```
+SMELL INVENTORY
+────────────────────────────────────────
+[file:line] — [smell name] — [priority: P0|P1|P2]
+[file:line] — [smell name] — [priority: P0|P1|P2]
+────────────────────────────────────────
+Total smells found: [N]
+```
+
+## Phase 4: Dispatch `refactoring-agent`
+
+**Dispatch the `refactoring-agent`** with:
+- The smell inventory from Phase 3
+- The target files and their current content
+- The safety baseline (test command + passing count)
+- Explicit constraints: "do NOT change behavior, do NOT mix bug fixes"
+
+The agent will:
+1. Execute refactorings from lowest to highest risk
+2. Run tests after each change step
+3. Return a REFACTORING REPORT with before/after test counts and diff summary
+
+**Handoff:**
+- `DONE` → proceed to Phase 5 verification
+- `DONE_WITH_CONCERNS` → review concerns, proceed if only style-level (not behavior-level)
+- `BLOCKED` → test failure during refactoring — agent will have reverted; review what went wrong
+
+## Phase 5: Verification
+
+After the agent completes:
+
+```bash
+# Re-run the full test suite
+npm test 2>&1 | tee /tmp/refactor-after.txt
+
+# Compare to baseline
+echo "Before: $(grep -cE 'pass|PASS|✓' /tmp/refactor-baseline.txt 2>/dev/null) passing"
+echo "After:  $(grep -cE 'pass|PASS|✓' /tmp/refactor-after.txt 2>/dev/null) passing"
+
+# Confirm the diff is structural, not behavioral
+git diff HEAD | grep "^[+-]" | grep -v "^---\|^+++" | \
+  grep -vE "^[+-][[:space:]]*$" | head -30
+```
+
+Verification checklist:
+- [ ] Test count matches baseline (no tests added or removed)
+- [ ] All tests still pass
+- [ ] Diff shows structural changes only (no logic changes)
+- [ ] No new files outside the defined scope were touched
+
+## Phase 6: Refactoring Report
+
+```
+REFACTORING COMPLETE
+════════════════════════════════════════
+Target:         [files/modules refactored]
+Smells fixed:   [N of N found]
+
+Changes:
+  [file] — [smell] → [refactoring applied]
+  [file] — [smell] → [refactoring applied]
+
+Tests:          [N] before → [N] after (must be equal)
+Behavior:       PRESERVED | CHANGES_NEEDED
+Code delta:     [shorter by N lines | flatter by N indentation levels]
+
+Skipped (out of scope or too risky):
+  [file] — [reason]
+
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+════════════════════════════════════════
+```
+
+## Save Refactoring Artifact
+
+```bash
+mkdir -p docs/superomni/executions
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d)
+_REF_FILE="docs/superomni/executions/refactoring-${_BRANCH}-${_DATE}.md"
+echo "Refactoring record saved to ${_REF_FILE}"
+```

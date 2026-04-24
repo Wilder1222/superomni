@@ -1,12 +1,10 @@
 ---
-name: document-release
+name: dependency-audit
 description: |
-  Post-ship documentation update. Cross-references the diff, updates README,
-  ARCHITECTURE, CONTRIBUTING, CLAUDE.md to match what shipped. Polishes
-  CHANGELOG voice, cleans up TODOs, optionally bumps VERSION.
-  Triggers: "update docs", "sync documentation", "post-ship docs",
-  "update the readme", "document what shipped".
-  Proactively suggest after a PR is merged or code is shipped.
+  Dependency security, license, and freshness audit.
+  Dispatches dependency-auditor agent to scan all package managers.
+  Triggers: "dependency audit", "check dependencies", "npm audit", "security scan",
+  "check for vulnerabilities", "outdated packages", "license check".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -146,138 +144,173 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-# /document-release — Post-Ship Documentation Update
+# Dependency Audit
 
-**Goal:** After shipping, ensure all documentation matches what was actually built. Catch stale READMEs, outdated architecture docs, and missing CHANGELOG entries.
+**Goal:** Systematically audit all project dependencies for security vulnerabilities, license compliance, and staleness — then produce an actionable remediation plan.
 
-## Iron Law: Never Mark Docs Done Without Diff Cross-Reference
+## Iron Law: No P0 CVEs Before Deploy
 
-Always read the actual diff before updating docs. Docs written from memory drift from reality.
+A dependency with a known critical CVE and an available fix is a P0 blocker. No exceptions. The deployment gate is `VERDICT: APPROVED` from the dependency-auditor report.
 
-## Phase 1: Gather What Shipped
+### Good Example (Proper Audit Gate)
+
+```
+Production Readiness check includes dependency audit
+dependency-auditor finds: express@4.17.1 — CVE-2022-24999 (critical) — fix: express@4.18.2
+Action: npm update express@4.18.2 → re-audit → APPROVED
+Deploy proceeds
+```
+
+### Bad Example (AVOID)
+
+```
+"Audit passed last month, skip for now"
+[VIOLATED: CVEs are disclosed daily — audit must happen before every deploy]
+```
+
+---
+
+## Phase 1: Package Manager Discovery
+
+Identify all dependency manifests in the project:
 
 ```bash
-# What changed since last release/tag
-git log --oneline $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~20")..HEAD 2>/dev/null | head -30
-git diff $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~20")..HEAD --stat 2>/dev/null | tail -20
+# Find all package manifests
+echo "=== npm/node ==="
+find . -name "package.json" -not -path "*/node_modules/*" | head -5
 
-# Or last N commits
-git log --oneline -20
+echo "=== python ==="
+find . \( -name "requirements*.txt" -o -name "Pipfile" -o -name "pyproject.toml" \) \
+  -not -path "*/.git/*" | head -5
+
+echo "=== go ==="
+find . -name "go.mod" -not -path "*/.git/*" | head -3
+
+echo "=== ruby ==="
+find . -name "Gemfile" -not -path "*/.git/*" | head -3
+
+echo "=== rust ==="
+find . -name "Cargo.toml" -not -path "*/.git/*" | head -3
+
+echo "=== java ==="
+find . \( -name "pom.xml" -o -name "build.gradle" \) -not -path "*/.git/*" | head -3
 ```
 
-Build a mental model of what actually shipped:
-- New features added
-- APIs changed (added, removed, modified)
-- Configuration changes
-- Dependencies added/removed
-- Breaking changes
-
-## Phase 2: Audit Existing Docs
-
-Find all documentation files:
-```bash
-find . -name "README.md" -o -name "CHANGELOG.md" -o -name "ARCHITECTURE.md" \
-       -o -name "CONTRIBUTING.md" -o -name "CLAUDE.md" -o -name "AGENTS.md" \
-       -o -name "docs/*.md" 2>/dev/null | grep -v node_modules | grep -v .git
+Record what was found:
+```
+PACKAGE MANAGERS FOUND
+────────────────────────────────────────
+npm:    [manifest files found | none]
+pip:    [manifest files found | none]
+go:     [manifest files found | none]
+ruby:   [manifest files found | none]
+rust:   [manifest files found | none]
+java:   [manifest files found | none]
+────────────────────────────────────────
 ```
 
-**Dispatch the `doc-writer` agent** with:
-- The diff summary from Phase 1 (what shipped)
-- The list of documentation files found
-- Any existing README.md / ARCHITECTURE.md content (so the agent can match voice/style)
-- Explicit instructions on which doc type needs updating: README / CHANGELOG / ARCHITECTURE / CONTRIBUTING
+## Phase 2: Dispatch `dependency-auditor` Agent
 
-The agent returns a DOC WRITER REPORT with files written/updated. Incorporate its output and review each changed file for accuracy before committing.
+**Dispatch the `dependency-auditor` agent** with:
+- The list of all package manifests found in Phase 1
+- The production context (are we pre-deploy or routine audit?)
+- Any known false positives to skip (if documented)
 
-For each doc, check:
-- [ ] Does it reflect what shipped?
-- [ ] Are installation instructions current?
-- [ ] Are API examples accurate?
-- [ ] Are feature lists complete?
-- [ ] Are any sections obviously stale?
+The agent will:
+1. Run security scans across all package managers
+2. Run license audit on all dependencies
+3. Check freshness (major versions behind)
+4. Produce a DEPENDENCY AUDIT REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED`
 
-## Phase 3: Update README
+**Handoff:**
+- `APPROVED` → proceed to Phase 3 summary
+- `APPROVED_WITH_NOTES` → note P1/P2 findings for next sprint backlog
+- `CHANGES_REQUIRED` → P0 CVEs found; apply remediation commands before re-auditing
+- `BLOCKED` → package manager tools not available; install tools and retry
 
-Check the README for:
-1. **Feature list** — add new features, remove removed ones
-2. **Installation** — verify all install commands still work
-3. **Usage examples** — update for any API changes
-4. **Configuration** — new config options documented?
-5. **Quick start** — still accurate end-to-end?
+## Phase 3: Triage Findings
 
-Edit directly: do not add "Updated on [date]" noise.
+For each finding returned by the agent:
 
-## Phase 4: Update CHANGELOG
+### Security Triage
 
-If a CHANGELOG exists, add an entry for the current version:
+| Severity | Action | Timeline |
+|----------|--------|----------|
+| P0 Critical (CVSS ≥ 9.0) | Block deploy; fix immediately | Before any deployment |
+| P1 High (CVSS 7-8.9) | Fix before next release | Within current sprint |
+| P2 Medium (CVSS 4-6.9) | Fix if easy; backlog if not | Within next 2 sprints |
+| P3 Low (CVSS < 4) | Backlog | Opportunistic |
 
-```markdown
-## [VERSION] — YYYY-MM-DD
+### License Triage
 
-### Added
-- [Feature] — [one-line description]
+| License type | Action |
+|-------------|--------|
+| GPL/AGPL in production | Legal review required before deploy |
+| Unknown license | Legal review required |
+| LGPL (dynamic link only) | Usually OK — confirm with legal |
+| MIT/Apache/BSD/ISC | No action needed |
 
-### Changed
-- [What changed] — [why]
+## Phase 4: Apply P0 Remediation
 
-### Fixed
-- [Bug fixed] — [impact]
-
-### Removed
-- [What was removed] — [migration path if breaking]
-```
-
-Voice guidelines:
-- Past tense ("Added X", not "Adds X")
-- Lead with the user value, not the technical change
-- Breaking changes get their own callout: `⚠️ BREAKING:`
-
-## Phase 5: Update Architecture/Design Docs
-
-If ARCHITECTURE.md, DESIGN.md, or docs/ exist:
-1. Update component/module descriptions for anything that changed
-2. Update data flow diagrams if data flows changed
-3. Flag sections that are now stale but need more research to update
-
-## Phase 6: Clean Up TODOs
+For each P0 finding, apply the exact remediation command from the agent's report:
 
 ```bash
-# Find all TODOs in docs
-grep -r "TODO\|FIXME\|HACK\|XXX" --include="*.md" . | grep -v node_modules | grep -v .git
+# Example npm remediations (agent will provide actual commands)
+# npm update vulnerable-package@safe-version
+# npm audit fix --force  (only if agent recommends)
+
+# Verify fix applied
+npm audit 2>&1 | grep -E "critical|high" | head -10
 ```
 
-For each TODO:
-- If the thing was shipped → remove the TODO
-- If still valid → leave it
-- If no longer relevant → remove it
-
-## Phase 7: VERSION Bump (Optional)
-
-Ask the user if they want to bump the version:
-
+After applying remediations, re-run the test suite:
 ```bash
-# Check current version
-cat package.json 2>/dev/null | grep '"version"' | head -1
-cat VERSION 2>/dev/null
+npm test 2>&1 | tail -10
 ```
 
-If yes, bump according to what shipped:
-- New features, backward compatible → MINOR
-- Bug fixes only → PATCH
-- Breaking changes → MAJOR
+If tests fail after upgrade → the dependency has a breaking change. Escalate to user.
 
-## Output Format
+## Phase 5: Audit Report
 
 ```
-DOCUMENT RELEASE COMPLETE
+DEPENDENCY AUDIT COMPLETE
 ════════════════════════════════════════
-Files updated:   [N]
-  ✓ README.md       [summary of changes]
-  ✓ CHANGELOG.md    [entry added for vX.Y.Z]
-  ✓ [other files]
-TODOs cleared:   [N]
-VERSION:         [old] → [new] (or: unchanged)
+Scope:          [package managers audited]
+Date:           [YYYY-MM-DD]
+
+Security:
+  P0 Critical: [N] — [fixed | outstanding]
+  P1 High:     [N]
+  P2 Medium:   [N]
+  P3 Low:      [N]
+
+License:
+  Copyleft risk:   [N packages — names]
+  Unknown:         [N packages — names]
+
+Freshness:
+  Major versions behind: [N packages]
+
+Verdict:        APPROVED | APPROVED_WITH_NOTES | CHANGES_REQUIRED
+
+Remediation applied:
+  [package@version] — [CVE fixed]
+
+Backlog items (P1/P2):
+  [package] — [finding] — fix by [sprint/date]
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
 ```
+
+## Save Audit Artifact
+
+```bash
+mkdir -p docs/superomni/evaluations
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d)
+_AUDIT_FILE="docs/superomni/evaluations/dependency-audit-${_BRANCH}-${_DATE}.md"
+echo "Dependency audit saved to ${_AUDIT_FILE}"
+```
+
+Write the full DEPENDENCY AUDIT COMPLETE report block to `$_AUDIT_FILE`.

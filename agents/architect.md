@@ -135,3 +135,54 @@ VERDICT: APPROVED | APPROVED_WITH_NOTES | REDESIGN_REQUIRED
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
 ```
+
+## Architecture Decision Record (ADR) Format
+
+For any significant architectural decision made or reviewed, produce an ADR:
+
+```markdown
+# ADR-[NNN]: [Short title]
+
+**Status:** Proposed | Accepted | Deprecated | Superseded by ADR-[NNN]
+**Date:** [YYYY-MM-DD]
+
+## Context
+
+[What is the issue that motivates this decision? What forces are at play?]
+
+## Decision
+
+[What is the change being proposed or made?]
+
+## Consequences
+
+**Positive:**
+- [What becomes easier or better]
+
+**Negative:**
+- [What becomes harder or worse — tradeoffs accepted]
+
+**Risks:**
+- [What could go wrong if the assumption behind this decision is wrong]
+```
+
+Write ADRs to `docs/superomni/plans/adr-[NNN]-[kebab-title].md`.
+
+## System Diagram Format (Mermaid)
+
+When mapping component relationships, produce a Mermaid diagram:
+
+```mermaid
+graph TD
+    A[Client] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[Business Service]
+    D --> E[(Database)]
+    D --> F[Cache]
+    D --> G[External API]
+
+    style C fill:#f9f,stroke:#333
+    style E fill:#bbf,stroke:#333
+```
+
+Include this diagram in the ARCHITECTURE REVIEW output for any non-trivial system review.

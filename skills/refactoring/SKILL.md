@@ -1,12 +1,11 @@
 ---
-name: document-release
+name: refactoring
 description: |
-  Post-ship documentation update. Cross-references the diff, updates README,
-  ARCHITECTURE, CONTRIBUTING, CLAUDE.md to match what shipped. Polishes
-  CHANGELOG voice, cleans up TODOs, optionally bumps VERSION.
-  Triggers: "update docs", "sync documentation", "post-ship docs",
-  "update the readme", "document what shipped".
-  Proactively suggest after a PR is merged or code is shipped.
+  Systematic code refactoring with safety gates.
+  Improves code structure without changing behavior.
+  Dispatches refactoring-agent for execution.
+  Triggers: "refactor", "clean up code", "reduce tech debt", "improve code quality",
+  "extract method", "rename", "make this cleaner".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -146,138 +145,191 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-# /document-release — Post-Ship Documentation Update
+# Refactoring
 
-**Goal:** After shipping, ensure all documentation matches what was actually built. Catch stale READMEs, outdated architecture docs, and missing CHANGELOG entries.
+**Goal:** Improve the structure and readability of existing code without changing its observable behavior, using systematic refactoring patterns with safety gates at every step.
 
-## Iron Law: Never Mark Docs Done Without Diff Cross-Reference
+## Iron Law: Green Before You Refactor
 
-Always read the actual diff before updating docs. Docs written from memory drift from reality.
+**Never start refactoring if tests are failing.** Refactoring broken code creates two problems from one. Run the full test suite first and get it green, then refactor.
 
-## Phase 1: Gather What Shipped
+### Good Example (Safe Refactoring)
+
+```
+Refactoring: extract calculateTax() from 45-line processOrder() function
+BEFORE: npm test → 47 passing, 0 failing
+Refactor: extract 12 lines into calculateTax(), update all call sites
+AFTER:  npm test → 47 passing, 0 failing
+Result: DONE — behavior preserved, code cleaner
+```
+
+### Bad Example (AVOID)
+
+```
+Refactoring: "clean up the order processing module"
+BEFORE: (didn't run tests)
+Refactored: moved logic, renamed variables, fixed a bug I noticed
+AFTER:  npm test → 44 passing, 3 failing
+[VIOLATED: Mixed refactoring with bug fix; no baseline established]
+```
+
+---
+
+## Phase 1: Scope Definition
+
+Identify what needs refactoring and why:
 
 ```bash
-# What changed since last release/tag
-git log --oneline $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~20")..HEAD 2>/dev/null | head -30
-git diff $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~20")..HEAD --stat 2>/dev/null | tail -20
+# Review the code to be refactored
+git diff main...HEAD --stat 2>/dev/null | head -20
+git log --oneline -5
 
-# Or last N commits
-git log --oneline -20
+# Find complexity hotspots
+find . -name "*.js" -o -name "*.ts" -o -name "*.py" | \
+  xargs wc -l 2>/dev/null | sort -rn | head -15
+
+# Find code smells
+grep -rn "TODO\|FIXME\|HACK\|SMELL\|DUPLICATE" \
+  --include="*.js" --include="*.ts" --include="*.py" . \
+  | grep -v "node_modules\|.git" | head -15
 ```
 
-Build a mental model of what actually shipped:
-- New features added
-- APIs changed (added, removed, modified)
-- Configuration changes
-- Dependencies added/removed
-- Breaking changes
-
-## Phase 2: Audit Existing Docs
-
-Find all documentation files:
-```bash
-find . -name "README.md" -o -name "CHANGELOG.md" -o -name "ARCHITECTURE.md" \
-       -o -name "CONTRIBUTING.md" -o -name "CLAUDE.md" -o -name "AGENTS.md" \
-       -o -name "docs/*.md" 2>/dev/null | grep -v node_modules | grep -v .git
+Define scope:
+```
+REFACTORING SCOPE
+────────────────────────────────────────
+Target files:    [list of files to refactor]
+Reason:          [why this code needs improvement]
+Boundaries:      [what files/modules are out of scope]
+Behavior contract: [what must remain unchanged]
+────────────────────────────────────────
 ```
 
-**Dispatch the `doc-writer` agent** with:
-- The diff summary from Phase 1 (what shipped)
-- The list of documentation files found
-- Any existing README.md / ARCHITECTURE.md content (so the agent can match voice/style)
-- Explicit instructions on which doc type needs updating: README / CHANGELOG / ARCHITECTURE / CONTRIBUTING
+## Phase 2: Safety Baseline
 
-The agent returns a DOC WRITER REPORT with files written/updated. Incorporate its output and review each changed file for accuracy before committing.
-
-For each doc, check:
-- [ ] Does it reflect what shipped?
-- [ ] Are installation instructions current?
-- [ ] Are API examples accurate?
-- [ ] Are feature lists complete?
-- [ ] Are any sections obviously stale?
-
-## Phase 3: Update README
-
-Check the README for:
-1. **Feature list** — add new features, remove removed ones
-2. **Installation** — verify all install commands still work
-3. **Usage examples** — update for any API changes
-4. **Configuration** — new config options documented?
-5. **Quick start** — still accurate end-to-end?
-
-Edit directly: do not add "Updated on [date]" noise.
-
-## Phase 4: Update CHANGELOG
-
-If a CHANGELOG exists, add an entry for the current version:
-
-```markdown
-## [VERSION] — YYYY-MM-DD
-
-### Added
-- [Feature] — [one-line description]
-
-### Changed
-- [What changed] — [why]
-
-### Fixed
-- [Bug fixed] — [impact]
-
-### Removed
-- [What was removed] — [migration path if breaking]
-```
-
-Voice guidelines:
-- Past tense ("Added X", not "Adds X")
-- Lead with the user value, not the technical change
-- Breaking changes get their own callout: `⚠️ BREAKING:`
-
-## Phase 5: Update Architecture/Design Docs
-
-If ARCHITECTURE.md, DESIGN.md, or docs/ exist:
-1. Update component/module descriptions for anything that changed
-2. Update data flow diagrams if data flows changed
-3. Flag sections that are now stale but need more research to update
-
-## Phase 6: Clean Up TODOs
+**This phase is a hard gate — do not proceed until tests pass.**
 
 ```bash
-# Find all TODOs in docs
-grep -r "TODO\|FIXME\|HACK\|XXX" --include="*.md" . | grep -v node_modules | grep -v .git
+# Run the full test suite and save results
+npm test 2>&1 | tee /tmp/refactor-baseline.txt
+# or:  pytest -v 2>&1 | tee /tmp/refactor-baseline.txt
+# or:  go test ./... 2>&1 | tee /tmp/refactor-baseline.txt
+
+# Extract the test count
+grep -cE "pass|PASS|✓|ok " /tmp/refactor-baseline.txt 2>/dev/null || \
+  tail -5 /tmp/refactor-baseline.txt
 ```
 
-For each TODO:
-- If the thing was shipped → remove the TODO
-- If still valid → leave it
-- If no longer relevant → remove it
+Record:
+```
+SAFETY BASELINE
+────────────────────────────────────────
+Tests passing:   [N]
+Tests failing:   [N]  ← must be 0 to proceed
+Test command:    [npm test | pytest | go test | etc.]
+Baseline saved:  /tmp/refactor-baseline.txt
+────────────────────────────────────────
+```
 
-## Phase 7: VERSION Bump (Optional)
+**Gate:** If `Tests failing > 0` → report BLOCKED. Do not proceed.
 
-Ask the user if they want to bump the version:
+## Phase 3: Smell Detection
+
+Identify refactoring targets using the standard smell catalog:
+
+| Smell | Detection | Refactoring |
+|-------|----------|-------------|
+| Long function | > 30 lines with multiple concerns | Extract method |
+| Duplicate code | Same logic in 2+ places | Extract and DRY |
+| Magic numbers/strings | `if (code === 42)` | Extract named constant |
+| God object | Class handling too many responsibilities | Extract class |
+| Deep nesting | > 3 levels of if/for/try | Guard clauses, early returns |
+| Long parameter list | > 4 parameters | Introduce parameter object |
+| Feature envy | Method uses another class's data more than its own | Move method |
+| Data clump | 3+ params always passed together | Extract into type/struct |
+| Dead code | Unused variables, functions, imports | Delete safely |
+| Inconsistent naming | Mixed conventions in same module | Systematic rename |
+
+Produce:
+```
+SMELL INVENTORY
+────────────────────────────────────────
+[file:line] — [smell name] — [priority: P0|P1|P2]
+[file:line] — [smell name] — [priority: P0|P1|P2]
+────────────────────────────────────────
+Total smells found: [N]
+```
+
+## Phase 4: Dispatch `refactoring-agent`
+
+**Dispatch the `refactoring-agent`** with:
+- The smell inventory from Phase 3
+- The target files and their current content
+- The safety baseline (test command + passing count)
+- Explicit constraints: "do NOT change behavior, do NOT mix bug fixes"
+
+The agent will:
+1. Execute refactorings from lowest to highest risk
+2. Run tests after each change step
+3. Return a REFACTORING REPORT with before/after test counts and diff summary
+
+**Handoff:**
+- `DONE` → proceed to Phase 5 verification
+- `DONE_WITH_CONCERNS` → review concerns, proceed if only style-level (not behavior-level)
+- `BLOCKED` → test failure during refactoring — agent will have reverted; review what went wrong
+
+## Phase 5: Verification
+
+After the agent completes:
 
 ```bash
-# Check current version
-cat package.json 2>/dev/null | grep '"version"' | head -1
-cat VERSION 2>/dev/null
+# Re-run the full test suite
+npm test 2>&1 | tee /tmp/refactor-after.txt
+
+# Compare to baseline
+echo "Before: $(grep -cE 'pass|PASS|✓' /tmp/refactor-baseline.txt 2>/dev/null) passing"
+echo "After:  $(grep -cE 'pass|PASS|✓' /tmp/refactor-after.txt 2>/dev/null) passing"
+
+# Confirm the diff is structural, not behavioral
+git diff HEAD | grep "^[+-]" | grep -v "^---\|^+++" | \
+  grep -vE "^[+-][[:space:]]*$" | head -30
 ```
 
-If yes, bump according to what shipped:
-- New features, backward compatible → MINOR
-- Bug fixes only → PATCH
-- Breaking changes → MAJOR
+Verification checklist:
+- [ ] Test count matches baseline (no tests added or removed)
+- [ ] All tests still pass
+- [ ] Diff shows structural changes only (no logic changes)
+- [ ] No new files outside the defined scope were touched
 
-## Output Format
+## Phase 6: Refactoring Report
 
 ```
-DOCUMENT RELEASE COMPLETE
+REFACTORING COMPLETE
 ════════════════════════════════════════
-Files updated:   [N]
-  ✓ README.md       [summary of changes]
-  ✓ CHANGELOG.md    [entry added for vX.Y.Z]
-  ✓ [other files]
-TODOs cleared:   [N]
-VERSION:         [old] → [new] (or: unchanged)
+Target:         [files/modules refactored]
+Smells fixed:   [N of N found]
+
+Changes:
+  [file] — [smell] → [refactoring applied]
+  [file] — [smell] → [refactoring applied]
+
+Tests:          [N] before → [N] after (must be equal)
+Behavior:       PRESERVED | CHANGES_NEEDED
+Code delta:     [shorter by N lines | flatter by N indentation levels]
+
+Skipped (out of scope or too risky):
+  [file] — [reason]
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
+```
+
+## Save Refactoring Artifact
+
+```bash
+mkdir -p docs/superomni/executions
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d)
+_REF_FILE="docs/superomni/executions/refactoring-${_BRANCH}-${_DATE}.md"
+echo "Refactoring record saved to ${_REF_FILE}"
 ```

@@ -33,6 +33,8 @@ Philosophy: **Plan Lean, Execute Complete**
 | qa | "qa", "quality assurance" | P1 |
 | careful | "careful", destructive operations | P1 |
 | workflow | "workflow", "sprint", "what's next" | P1 |
+| refactoring | "refactor", "clean up code", "reduce tech debt", "improve code quality" | P1 |
+| dependency-audit | "dependency audit", "check dependencies", "npm audit", "security scan" | P1 |
 | office-hours | "office hours", "validate idea" (product discovery, not sprint pipeline) | P2 |
 | frontend-design | "frontend design", "build UI", "design page", "make it look good" | P1 |
 | git-worktrees | Parallel work | P2 |

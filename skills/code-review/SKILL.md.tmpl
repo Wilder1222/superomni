@@ -137,6 +137,10 @@ If the diff includes files matching `*.html`, `*.jsx`, `*.tsx`, `*.vue`, `*.svel
 - [ ] Are dependencies appropriate?
 - [ ] Does this introduce tech debt?
 
+### Post-Review: Refactoring Opportunity Detection
+
+If Layer 4 or Layer 6 finds significant structural issues (≥ 3 P1/P2 code quality findings, duplicate code, God objects, or functions > 50 lines), **dispatch the `refactoring-agent`** alongside the review to produce a concrete refactoring plan. This allows the developer to address structural debt in a safe, separate refactoring pass without mixing cleanup into the feature branch.
+
 ## Review Output Format
 
 ```

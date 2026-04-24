@@ -1,0 +1,182 @@
+---
+name: dependency-audit
+description: |
+  Dependency security, license, and freshness audit.
+  Dispatches dependency-auditor agent to scan all package managers.
+  Triggers: "dependency audit", "check dependencies", "npm audit", "security scan",
+  "check for vulnerabilities", "outdated packages", "license check".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# Dependency Audit
+
+**Goal:** Systematically audit all project dependencies for security vulnerabilities, license compliance, and staleness — then produce an actionable remediation plan.
+
+## Iron Law: No P0 CVEs Before Deploy
+
+A dependency with a known critical CVE and an available fix is a P0 blocker. No exceptions. The deployment gate is `VERDICT: APPROVED` from the dependency-auditor report.
+
+### Good Example (Proper Audit Gate)
+
+```
+Production Readiness check includes dependency audit
+dependency-auditor finds: express@4.17.1 — CVE-2022-24999 (critical) — fix: express@4.18.2
+Action: npm update express@4.18.2 → re-audit → APPROVED
+Deploy proceeds
+```
+
+### Bad Example (AVOID)
+
+```
+"Audit passed last month, skip for now"
+[VIOLATED: CVEs are disclosed daily — audit must happen before every deploy]
+```
+
+---
+
+## Phase 1: Package Manager Discovery
+
+Identify all dependency manifests in the project:
+
+```bash
+# Find all package manifests
+echo "=== npm/node ==="
+find . -name "package.json" -not -path "*/node_modules/*" | head -5
+
+echo "=== python ==="
+find . \( -name "requirements*.txt" -o -name "Pipfile" -o -name "pyproject.toml" \) \
+  -not -path "*/.git/*" | head -5
+
+echo "=== go ==="
+find . -name "go.mod" -not -path "*/.git/*" | head -3
+
+echo "=== ruby ==="
+find . -name "Gemfile" -not -path "*/.git/*" | head -3
+
+echo "=== rust ==="
+find . -name "Cargo.toml" -not -path "*/.git/*" | head -3
+
+echo "=== java ==="
+find . \( -name "pom.xml" -o -name "build.gradle" \) -not -path "*/.git/*" | head -3
+```
+
+Record what was found:
+```
+PACKAGE MANAGERS FOUND
+────────────────────────────────────────
+npm:    [manifest files found | none]
+pip:    [manifest files found | none]
+go:     [manifest files found | none]
+ruby:   [manifest files found | none]
+rust:   [manifest files found | none]
+java:   [manifest files found | none]
+────────────────────────────────────────
+```
+
+## Phase 2: Dispatch `dependency-auditor` Agent
+
+**Dispatch the `dependency-auditor` agent** with:
+- The list of all package manifests found in Phase 1
+- The production context (are we pre-deploy or routine audit?)
+- Any known false positives to skip (if documented)
+
+The agent will:
+1. Run security scans across all package managers
+2. Run license audit on all dependencies
+3. Check freshness (major versions behind)
+4. Produce a DEPENDENCY AUDIT REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED`
+
+**Handoff:**
+- `APPROVED` → proceed to Phase 3 summary
+- `APPROVED_WITH_NOTES` → note P1/P2 findings for next sprint backlog
+- `CHANGES_REQUIRED` → P0 CVEs found; apply remediation commands before re-auditing
+- `BLOCKED` → package manager tools not available; install tools and retry
+
+## Phase 3: Triage Findings
+
+For each finding returned by the agent:
+
+### Security Triage
+
+| Severity | Action | Timeline |
+|----------|--------|----------|
+| P0 Critical (CVSS ≥ 9.0) | Block deploy; fix immediately | Before any deployment |
+| P1 High (CVSS 7-8.9) | Fix before next release | Within current sprint |
+| P2 Medium (CVSS 4-6.9) | Fix if easy; backlog if not | Within next 2 sprints |
+| P3 Low (CVSS < 4) | Backlog | Opportunistic |
+
+### License Triage
+
+| License type | Action |
+|-------------|--------|
+| GPL/AGPL in production | Legal review required before deploy |
+| Unknown license | Legal review required |
+| LGPL (dynamic link only) | Usually OK — confirm with legal |
+| MIT/Apache/BSD/ISC | No action needed |
+
+## Phase 4: Apply P0 Remediation
+
+For each P0 finding, apply the exact remediation command from the agent's report:
+
+```bash
+# Example npm remediations (agent will provide actual commands)
+# npm update vulnerable-package@safe-version
+# npm audit fix --force  (only if agent recommends)
+
+# Verify fix applied
+npm audit 2>&1 | grep -E "critical|high" | head -10
+```
+
+After applying remediations, re-run the test suite:
+```bash
+npm test 2>&1 | tail -10
+```
+
+If tests fail after upgrade → the dependency has a breaking change. Escalate to user.
+
+## Phase 5: Audit Report
+
+```
+DEPENDENCY AUDIT COMPLETE
+════════════════════════════════════════
+Scope:          [package managers audited]
+Date:           [YYYY-MM-DD]
+
+Security:
+  P0 Critical: [N] — [fixed | outstanding]
+  P1 High:     [N]
+  P2 Medium:   [N]
+  P3 Low:      [N]
+
+License:
+  Copyleft risk:   [N packages — names]
+  Unknown:         [N packages — names]
+
+Freshness:
+  Major versions behind: [N packages]
+
+Verdict:        APPROVED | APPROVED_WITH_NOTES | CHANGES_REQUIRED
+
+Remediation applied:
+  [package@version] — [CVE fixed]
+
+Backlog items (P1/P2):
+  [package] — [finding] — fix by [sprint/date]
+
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+════════════════════════════════════════
+```
+
+## Save Audit Artifact
+
+```bash
+mkdir -p docs/superomni/evaluations
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d)
+_AUDIT_FILE="docs/superomni/evaluations/dependency-audit-${_BRANCH}-${_DATE}.md"
+echo "Dependency audit saved to ${_AUDIT_FILE}"
+```
+
+Write the full DEPENDENCY AUDIT COMPLETE report block to `$_AUDIT_FILE`.

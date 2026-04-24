@@ -185,6 +185,28 @@ Questions to answer before reviewing:
 
 **Dispatch the `code-reviewer` agent** with the diff and relevant source files as input. The agent will perform a full P0/P1/P2 layered review (correctness, security, tests, quality, blast radius, architecture) applying the 6 Decision Principles. Incorporate the CODE REVIEW block it returns as the primary review output.
 
+### Auto-Dispatch: `security-auditor` on Security-Sensitive Diffs
+
+Before or alongside `code-reviewer`, detect security-sensitive changes:
+
+```bash
+git diff main...HEAD -- . | grep -iE \
+  "password|secret|token|api[_-]?key|credential|auth|permission|role|privilege|\
+  sql|query|exec\(|eval\(|req\.|request\.|sanitize|validate|escape|\
+  cookie|session|jwt|oauth|hash|encrypt|decrypt|cipher|cors|crypt" \
+  | grep -v "^Binary\|^---\|^+++" | head -20
+```
+
+**If any security-sensitive patterns are found**, also dispatch the `security-auditor` agent with the diff and relevant source files. Do NOT require an explicit `security` mode request — trigger it automatically.
+
+**Auto-trigger `security-auditor` when the diff touches:**
+- Authentication or authorization logic
+- Input validation, parsing, or sanitization
+- Cryptographic operations (hashing, encryption, tokens, keys)
+- Database queries or raw SQL
+- External API calls or network requests
+- Session or cookie management
+
 ## Review Layers (in priority order)
 
 ### Layer 1: Correctness (P0 — blocks merge)

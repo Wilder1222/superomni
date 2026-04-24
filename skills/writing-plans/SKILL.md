@@ -142,7 +142,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Writing Implementation Plans
 
 **Goal:** Transform a spec or goal into a step-by-step, executable plan that an AI agent can follow.
@@ -179,7 +178,14 @@ Apply the **Completeness is Cheap** principle. Before writing the plan, list:
 - [ ] Design direction defined (aesthetic, key visual elements, target references)
 - [ ] Acceptance criterion: "passes designer agent review at 7+/10 on all dimensions"
 
-## Phase 3: Plan Structure
+## Phase 3: Generate Plan — Dispatch `planner` Agent
+
+**Dispatch the `planner` agent** with the following inputs:
+- The spec document (if available): `docs/superomni/specs/spec-*.md`
+- The scope summary and constraints from Phase 1
+- The completeness checklist from Phase 2
+
+The `planner` agent applies its 4-phase process (Understand → Decompose → Risk Assessment → Write Plan), outputs a `PLAN COMPLETE` block, and writes the plan file to `docs/superomni/plans/plan-[branch]-[session]-[date].md`.
 
 ```bash
 mkdir -p docs/superomni/plans
@@ -189,7 +195,15 @@ _DATE=$(date +%Y%m%d)
 _PLAN_FILE="docs/superomni/plans/plan-${_BRANCH}-${_SESSION}-${_DATE}.md"
 ```
 
-Write `docs/superomni/plans/plan-[branch]-[session]-[date].md` with this structure:
+After the `planner` agent returns its `PLAN COMPLETE` output, confirm:
+- [ ] Plan file written to `docs/superomni/plans/`
+- [ ] ≤ 7 milestones (planner Iron Law)
+- [ ] P0 risks listed or explicitly stated as "none"
+- [ ] Each milestone has measurable acceptance criteria
+
+If the agent reports BLOCKED or DONE_WITH_CONCERNS, surface the concern to the user before proceeding to Phase 4.
+
+The plan must follow this structure:
 
 ```markdown
 # Implementation Plan: [Feature Name]

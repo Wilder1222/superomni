@@ -143,7 +143,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Executing Plans
 
 **Goal:** Execute a written implementation plan precisely, with verification at each stage — running independent steps in parallel to minimize elapsed time.
@@ -225,7 +224,7 @@ Involves code changes? [YES / NO]
 ```
 
 1. **Read** — understand what the step requires
-2. **TDD Check** — if this step involves writing or modifying source code: **apply the `test-driven-development` skill** (Red → Green → Refactor) before committing any code
+2. **TDD Check** — if this step involves writing or modifying source code: **dispatch the `test-writer` agent** (RED phase) with the step description, files to be modified, and expected behavior. The agent writes the failing test suite and returns a TEST REPORT block. Confirm the tests fail before writing any implementation. Then implement the minimum code to make tests pass (GREEN), and refactor as needed.
 3. **Frontend Check** — if this step involves UI files (`.html`, `.jsx`, `.tsx`, `.vue`, `.svelte`, `.css`, `.scss`): **apply the `frontend-design` skill** Phase 4 (Implementation) with the plan's design direction. After completing all UI steps in a wave, run the designer agent quality gate (Phase 5).
 4. **Do** — make the minimum change needed for this step only
 5. **Verify** — run the step's verification criterion
@@ -240,7 +239,7 @@ Step involves code? ─── NO ──→ Execute directly
         │
         YES
         ↓
-Write failing test (RED) → confirm it fails
+Dispatch `test-writer` agent (RED) → failing tests written → confirm they fail
         ↓
 Write minimum implementation (GREEN) → confirm test passes
         ↓
@@ -310,7 +309,12 @@ If the gate **FAILS**:
 2. Determine if this is a harness signal (update plan/skill) or an implementation error (fix and re-run)
 3. Do NOT advance to the next wave until the gate passes
 
-Spawn the `evaluator` agent for complex waves or when the gate result is ambiguous.
+Spawn the `evaluator` agent when **any** of these conditions apply:
+- The wave contains **≥ 5 steps**
+- Any step in the wave reported `DONE_WITH_CONCERNS`
+- This is the **final wave** of the plan
+
+Dispatch with: the wave's acceptance criteria, all step completion blocks, and test output. The agent returns an EVALUATION REPORT with one of four verdicts: `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Do NOT advance to the next wave if the verdict is `CHANGES_REQUIRED` — return to the failing step(s) with the evaluator's specific findings.
 
 ## Phase 5: Mid-Plan Check-ins
 

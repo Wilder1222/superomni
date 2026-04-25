@@ -144,7 +144,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Systematic Debugging
 
 ## Iron Law
@@ -222,6 +221,23 @@ git diff HEAD~5 HEAD -- <affected-area>
 
 Required output: **"Root cause hypothesis: ..."** — a specific, testable claim.
 Example: "Root cause hypothesis: The `authenticate()` function returns `null` when the JWT is expired, but the caller doesn't handle `null` and passes it directly to `getUserData()`, causing a NullPointerException at line 47."
+
+## Dispatch: `debugger` Agent
+
+After completing Phase 1 (scope locked, initial evidence gathered), **dispatch the `debugger` agent** with:
+- Bug statement: *"When [X], [Y] happens instead of [Z]."*
+- All Phase 1 evidence: error messages, stack traces, `git log` output
+- The scope-locked directory path
+- Reproduction steps (if found)
+
+The `debugger` agent runs its Phases 2–5 (trace execution path → form hypotheses → verify root cause → write fix) and returns a DEBUG REPORT block.
+
+**Handoff protocol:**
+- `DONE` → incorporate root cause into Phase 2 pattern analysis; apply the agent's fix; proceed to Phase 5 Debug Report
+- `DONE_WITH_CONCERNS` → note concerns, apply fix, flag to user before closing
+- `BLOCKED` (3 failed hypotheses) → apply the 3-Strike Rule in Phase 3 and escalate with full evidence
+
+The skill's Phases 2–4 may also run inline as a fallback when the debugging session is simple.
 
 ## Scope Lock
 

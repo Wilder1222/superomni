@@ -80,6 +80,61 @@ Coverage targets:
 - P1 (normal paths): >80% line coverage
 - P2 (utility functions): >60% line coverage
 
+## Advanced Testing Techniques
+
+### Property-Based Testing
+
+For functions with complex input spaces, consider property-based tests alongside example-based tests:
+
+```javascript
+// Example (fast-check for JS/TS)
+fc.assert(fc.property(fc.array(fc.integer()), (arr) => {
+  const sorted = sort(arr);
+  expect(sorted.length).toBe(arr.length);           // preserves length
+  expect(sorted).toEqual([...sorted].sort());        // is actually sorted
+  expect(arr.every(x => sorted.includes(x))).toBe(true); // preserves elements
+}));
+```
+
+Use when: parsing/serialization, math functions, sort/filter/map, string transformations.
+
+### Mutation Testing Awareness
+
+After writing tests, mentally verify: "Would these tests catch a mutation?"
+- Change `>` to `>=` — does a test fail?
+- Delete an error check — does a test fail?
+- Swap two variable assignments — does a test fail?
+
+If no test would catch these mutations, add targeted tests. Tools: Stryker (JS), mutmut (Python), cargo-mutants (Rust).
+
+### Contract Testing (for APIs/services)
+
+When the unit under test calls an external service, write a contract test that documents the expected interface:
+
+```javascript
+// Consumer contract: "our code expects this shape from UserService"
+describe("UserService contract", () => {
+  it("returns user with id, name, email when found", async () => {
+    const user = await UserService.getById("123");
+    expect(user).toMatchObject({ id: expect.any(String), name: expect.any(String), email: expect.any(String) });
+  });
+  it("throws UserNotFoundError when user does not exist", async () => {
+    await expect(UserService.getById("nonexistent")).rejects.toThrow(UserNotFoundError);
+  });
+});
+```
+
+### Test Hierarchy Guidance
+
+| Level | What it tests | When to use | Speed |
+|-------|-------------|-------------|-------|
+| Unit | Single function/class in isolation | Core logic, edge cases, all error paths | < 10ms |
+| Integration | Two or more real components together | DB queries, file I/O, service interactions | < 500ms |
+| E2E | Full user journey through the system | Critical user flows only (happy path + one error) | < 30s |
+| Contract | Interface between producer and consumer | Service boundaries, public APIs | < 100ms |
+
+Rule: **70% unit / 20% integration / 10% E2E** (the testing pyramid).
+
 ## Anti-Patterns to Avoid
 
 From `skills/test-driven-development/testing-anti-patterns.md`:

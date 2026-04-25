@@ -1,9 +1,10 @@
 ---
-name: ship
+name: dependency-audit
 description: |
-  Complete release workflow: verify → build → test → deploy → announce.
-  Use when releasing software to production or any public environment.
-  Triggers: "/ship", "deploy", "release", "ship this", "publish".
+  Dependency security, license, and freshness audit.
+  Dispatches dependency-auditor agent to scan all package managers.
+  Triggers: "dependency audit", "check dependencies", "npm audit", "security scan",
+  "check for vulnerabilities", "outdated packages", "license check".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -143,203 +144,172 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
+# Dependency Audit
 
-# /ship — Release Workflow
+**Goal:** Systematically audit all project dependencies for security vulnerabilities, license compliance, and staleness — then produce an actionable remediation plan.
 
-**Goal:** Safely release software through a structured, verifiable process.
+## Iron Law: No P0 CVEs Before Deploy
 
-## Iron Law: Never Skip Verification
+A dependency with a known critical CVE and an available fix is a P0 blocker. No exceptions. The deployment gate is `VERDICT: APPROVED` from the dependency-auditor report.
 
-Every step that can fail will fail. The release checklist exists because "it looked fine" is not acceptable for production.
+### Good Example (Proper Audit Gate)
 
-## Pre-Ship Assessment
+```
+Production Readiness check includes dependency audit
+dependency-auditor finds: express@4.17.1 — CVE-2022-24999 (critical) — fix: express@4.18.2
+Action: npm update express@4.18.2 → re-audit → APPROVED
+Deploy proceeds
+```
 
-Before running the release workflow, assess:
+### Bad Example (AVOID)
+
+```
+"Audit passed last month, skip for now"
+[VIOLATED: CVEs are disclosed daily — audit must happen before every deploy]
+```
+
+---
+
+## Phase 1: Package Manager Discovery
+
+Identify all dependency manifests in the project:
 
 ```bash
-# Current state
-git status --short         # any uncommitted changes?
-git log origin/main..HEAD --oneline  # commits ahead of main?
-git stash list             # any stashed work?
+# Find all package manifests
+echo "=== npm/node ==="
+find . -name "package.json" -not -path "*/node_modules/*" | head -5
+
+echo "=== python ==="
+find . \( -name "requirements*.txt" -o -name "Pipfile" -o -name "pyproject.toml" \) \
+  -not -path "*/.git/*" | head -5
+
+echo "=== go ==="
+find . -name "go.mod" -not -path "*/.git/*" | head -3
+
+echo "=== ruby ==="
+find . -name "Gemfile" -not -path "*/.git/*" | head -3
+
+echo "=== rust ==="
+find . -name "Cargo.toml" -not -path "*/.git/*" | head -3
+
+echo "=== java ==="
+find . \( -name "pom.xml" -o -name "build.gradle" \) -not -path "*/.git/*" | head -3
 ```
 
-Confirm:
-- [ ] On the correct branch (or tag)
-- [ ] No uncommitted changes
-- [ ] All tests pass on CI (check CI status)
-- [ ] No open P0 issues blocking this release
+Record what was found:
+```
+PACKAGE MANAGERS FOUND
+────────────────────────────────────────
+npm:    [manifest files found | none]
+pip:    [manifest files found | none]
+go:     [manifest files found | none]
+ruby:   [manifest files found | none]
+rust:   [manifest files found | none]
+java:   [manifest files found | none]
+────────────────────────────────────────
+```
 
-## Step 1: Version Bump
+## Phase 2: Dispatch `security-auditor` Agent (Dependency Mode)
+
+**Dispatch the `security-auditor` agent** with:
+- The list of all package manifests found in Phase 1
+- Explicit instruction to run **Phase 4: Dependency Audit (OWASP A06)** and skip code scanning
+- The production context (pre-deploy or routine audit?)
+
+The agent will:
+1. Run CVE scans across all discovered package managers (npm audit, pip-audit, cargo audit, etc.)
+2. Classify findings by severity (P0/P1/P2/P3)
+3. Return a SECURITY AUDIT REPORT focused on the `DEPENDENCIES (OWASP A06)` section with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED`
+
+**Handoff:**
+- `APPROVED` → proceed to Phase 3 summary
+- `APPROVED_WITH_NOTES` → note P1/P2 findings for next sprint backlog
+- `CHANGES_REQUIRED` → P0 CVEs found; apply remediation commands before re-auditing
+- `BLOCKED` → package manager tools not available; install tools and retry
+
+## Phase 3: Triage Findings
+
+For each finding returned by the agent:
+
+### Security Triage
+
+| Severity | Action | Timeline |
+|----------|--------|----------|
+| P0 Critical (CVSS ≥ 9.0) | Block deploy; fix immediately | Before any deployment |
+| P1 High (CVSS 7-8.9) | Fix before next release | Within current sprint |
+| P2 Medium (CVSS 4-6.9) | Fix if easy; backlog if not | Within next 2 sprints |
+| P3 Low (CVSS < 4) | Backlog | Opportunistic |
+
+### License Triage
+
+| License type | Action |
+|-------------|--------|
+| GPL/AGPL in production | Legal review required before deploy |
+| Unknown license | Legal review required |
+| LGPL (dynamic link only) | Usually OK — confirm with legal |
+| MIT/Apache/BSD/ISC | No action needed |
+
+## Phase 4: Apply P0 Remediation
+
+For each P0 finding, apply the exact remediation command from the agent's report:
 
 ```bash
-# Check current version
-cat package.json 2>/dev/null | grep '"version"'
-# or
-cat VERSION 2>/dev/null
-# or
-grep "^version" pyproject.toml 2>/dev/null
+# Example npm remediations (agent will provide actual commands)
+# npm update vulnerable-package@safe-version
+# npm audit fix --force  (only if agent recommends)
 
-# Determine next version (semantic versioning)
-# MAJOR: breaking changes
-# MINOR: new features, backward compatible
-# PATCH: bug fixes, backward compatible
+# Verify fix applied
+npm audit 2>&1 | grep -E "critical|high" | head -10
 ```
 
+After applying remediations, re-run the test suite:
 ```bash
-# Bump version (example for npm)
-npm version patch  # or minor, major
-# or manually edit the version file
+npm test 2>&1 | tail -10
 ```
 
-## Step 2: Changelog
+If tests fail after upgrade → the dependency has a breaking change. Escalate to user.
 
-Update `CHANGELOG.md` (or equivalent):
-
-```markdown
-## [vX.Y.Z] — YYYY-MM-DD
-
-### Added
-- [New features]
-
-### Fixed
-- [Bug fixes]
-
-### Changed
-- [Behavior changes]
-
-### Removed
-- [Deprecated items removed]
-```
-
-```bash
-# Generate from commits since last tag
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-if [ -n "${LAST_TAG}" ]; then
-  echo "Changes since ${LAST_TAG}:"
-  git log "${LAST_TAG}..HEAD" --oneline --author="$(git config user.email)"
-fi
-```
-
-## Step 3: Final Verification
-
-Run the full verification checklist:
-
-```bash
-# Full test suite
-npm test 2>&1 | tail -20
-# or: pytest -v && or: go test ./...
-
-# Build verification (if applicable)
-npm run gen-skills 2>&1 | tail -10
-# or: go build ./... or: python -m build
-```
-
-Confirm:
-- [ ] All tests pass
-- [ ] Build succeeds (if applicable)
-- [ ] No security vulnerabilities in dependencies
-- [ ] No breaking changes without major version bump
-
-## Step 4: Tag the Release
-
-```bash
-VERSION="v$(cat package.json | grep '"version"' | cut -d'"' -f4 2>/dev/null || echo "0.1.0")"
-
-# Create annotated tag
-git tag -a "${VERSION}" -m "Release ${VERSION}
-
-$(cat CHANGELOG.md | head -20)"
-
-echo "Tagged: ${VERSION}"
-git tag -l | tail -5  # verify
-```
-
-## Step 5: Push and Publish
-
-```bash
-# Push commits and tag
-git push origin HEAD
-git push origin "${VERSION}"
-
-# Publish to package registry (if applicable)
-# npm publish
-# or: pip publish (twine)
-# or: gh release create ${VERSION}
-
-# Create GitHub release (if using GitHub)
-gh release create "${VERSION}" \
-  --title "Release ${VERSION}" \
-  --notes "$(cat CHANGELOG.md | awk '/^## \[/{count++; if(count==2)exit} count==1{print}')" \
-  --latest
-```
-
-## Step 6: Verify Deployment
-
-After release:
-
-```bash
-# For web deployments: health check
-# curl -f https://your-app.com/health || echo "HEALTH CHECK FAILED"
-
-# For npm: verify published
-# npm view <package> version
-
-# For GitHub: verify release page
-gh release view "${VERSION}"
-```
-
-## Step 7: Announce (if applicable)
-
-Prepare release announcement:
+## Phase 5: Audit Report
 
 ```
-RELEASE ANNOUNCEMENT: ${VERSION}
+DEPENDENCY AUDIT COMPLETE
 ════════════════════════════════════════
-What's new:
-  [bullet points from changelog]
+Scope:          [package managers audited]
+Date:           [YYYY-MM-DD]
 
-Upgrade instructions:
-  npm install <package>@${VERSION}
-  # or pip install <package>==${VERSION}
+Security:
+  P0 Critical: [N] — [fixed | outstanding]
+  P1 High:     [N]
+  P2 Medium:   [N]
+  P3 Low:      [N]
 
-Breaking changes:
-  [list or "none"]
-════════════════════════════════════════
-```
+License:
+  Copyleft risk:   [N packages — names]
+  Unknown:         [N packages — names]
 
-## Rollback Plan
+Freshness:
+  Major versions behind: [N packages]
 
-If something goes wrong after release:
+Verdict:        APPROVED | APPROVED_WITH_NOTES | CHANGES_REQUIRED
 
-```bash
-# Rollback to previous version
-PREV_TAG=$(git tag -l 'v*' | sort -V | tail -2 | head -1)
-echo "Rolling back to: ${PREV_TAG}"
+Remediation applied:
+  [package@version] — [CVE fixed]
 
-# Revert the release tag
-git tag -d "${VERSION}"
-git push origin --delete "${VERSION}"
-
-# Deploy previous version
-# [deployment-specific command]
-```
-
-## Ship Report
-
-```
-SHIP REPORT
-════════════════════════════════════════
-Version:     [vX.Y.Z]
-Branch:      [branch name]
-Commits:     [N since last release]
-Tests:       [all passing]
-Build:       [success | N/A]
-Tagged:      [tag name]
-Published:   [where]
-Health:      [checked | N/A]
+Backlog items (P1/P2):
+  [package] — [finding] — fix by [sprint/date]
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
-Concerns:
-  - [any post-ship concerns]
 ════════════════════════════════════════
 ```
+
+## Save Audit Artifact
+
+```bash
+mkdir -p docs/superomni/evaluations
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d)
+_AUDIT_FILE="docs/superomni/evaluations/dependency-audit-${_BRANCH}-${_DATE}.md"
+echo "Dependency audit saved to ${_AUDIT_FILE}"
+```
+
+Write the full DEPENDENCY AUDIT COMPLETE report block to `$_AUDIT_FILE`.

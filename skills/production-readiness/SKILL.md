@@ -144,7 +144,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Production Readiness Gate
 
 **Goal:** Verify that code is ready for production deployment — beyond just passing tests.
@@ -267,8 +266,10 @@ Confirm security review has been done (or is not required).
 - [ ] **Dependencies clean** — no new CVEs in added dependencies?
 - [ ] **Secrets management** — no hardcoded credentials, all secrets via env/vault?
 
+**Dispatch the `security-auditor` agent** in **dependency audit mode** (Phase 4: OWASP A06) to scan all package manifests for CVEs, license issues, and stale packages. The agent returns a SECURITY AUDIT REPORT with the `DEPENDENCIES` section and an overall verdict. Any `CHANGES_REQUIRED` verdict is a deploy blocker.
+
 ```bash
-# Quick secrets scan
+# Quick secrets scan (dependency-auditor handles the full vulnerability scan)
 git diff main...HEAD 2>/dev/null | grep "+" | \
   grep -vE "^---|\+\+\+|test|spec|mock|example" | \
   grep -iE "(password|secret|api_key|private_key)\s*[=:]\s*['\"][^'\"]{8,}" | head -10

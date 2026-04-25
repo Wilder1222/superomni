@@ -87,6 +87,41 @@ Classify debt:
 - **P1** — debt that slows development significantly
 - **P2** — suboptimal patterns worth cleaning up
 
+### Phase 7: Performance Analysis
+
+Architecture-level performance review — measure what is slow, not what looks slow:
+
+```bash
+# Find ORM-specific N+1 query patterns (Sequelize, Mongoose, Django ORM, ActiveRecord)
+# NOTE: these patterns are heuristic — filter out array method false positives manually
+grep -rn "findAll\|findOne\|\.find(\|\.filter(\|Model\.query\|objects\.filter\|\.where(" . \
+  --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
+  | grep -v "test\|spec\|mock" | head -15
+
+# Find synchronous I/O in async context (Node.js)
+grep -rn "readFileSync\|writeFileSync\|execSync\|spawnSync" . \
+  --include="*.js" --include="*.ts" | grep -v "test\|spec\|script" | head -10
+
+# Find unbounded loops over potentially large datasets
+grep -rn "\.forEach\|\.map\|\.reduce\|for.*in\|for.*of" . \
+  --include="*.js" --include="*.ts" | grep -v "test\|spec" | head -15
+```
+
+Performance smell classification:
+
+| Smell | Category | Typical fix |
+|-------|---------|------------|
+| N+1 queries | Database | Eager load / batch query |
+| Synchronous I/O in hot path | I/O-bound | Convert to async |
+| Unbounded in-memory collection | Memory | Pagination / streaming |
+| Missing DB index | Database | Add index |
+| Redundant serialization | CPU | Cache / reduce calls |
+
+For each performance P0/P1 finding, state:
+- **Measured evidence** (profiler output, benchmark, query plan) — never guess
+- **Expected improvement** (e.g., "batch queries expected to cut p95 from 800ms → 150ms")
+- **Verification method** (re-run the same benchmark after fix)
+
 ## Decision Framework
 
 For each architectural decision surface to the team:
@@ -132,6 +167,61 @@ ARCHITECTURAL DECISIONS NEEDED:
 
 VERDICT: APPROVED | APPROVED_WITH_NOTES | REDESIGN_REQUIRED
 
+PERFORMANCE:
+  Hotspots found: [N]
+  [file/service] — [category] — [measured impact]
+
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
 ```
+
+## Architecture Decision Record (ADR) Format
+
+For any significant architectural decision made or reviewed, produce an ADR:
+
+```markdown
+# ADR-[NNN]: [Short title]
+
+**Status:** Proposed | Accepted | Deprecated | Superseded by ADR-[NNN]
+**Date:** [YYYY-MM-DD]
+
+## Context
+
+[What is the issue that motivates this decision? What forces are at play?]
+
+## Decision
+
+[What is the change being proposed or made?]
+
+## Consequences
+
+**Positive:**
+- [What becomes easier or better]
+
+**Negative:**
+- [What becomes harder or worse — tradeoffs accepted]
+
+**Risks:**
+- [What could go wrong if the assumption behind this decision is wrong]
+```
+
+Write ADRs to `docs/superomni/plans/adr-[NNN]-[kebab-title].md`.
+
+## System Diagram Format (Mermaid)
+
+When mapping component relationships, produce a Mermaid diagram:
+
+```mermaid
+graph TD
+    A[Client] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[Business Service]
+    D --> E[(Database)]
+    D --> F[Cache]
+    D --> G[External API]
+
+    style C fill:#f9f,stroke:#333
+    style E fill:#bbf,stroke:#333
+```
+
+Include this diagram in the ARCHITECTURE REVIEW output for any non-trivial system review.

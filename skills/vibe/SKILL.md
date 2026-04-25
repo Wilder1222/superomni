@@ -429,9 +429,9 @@ Stage reference table:
 | THINK   | `brainstorm`       | none                                      | `docs/superomni/specs/spec-*.md` |
 | PLAN    | `writing-plans`    | `planner`                                 | `docs/superomni/plans/plan-*.md` |
 | REVIEW  | `plan-review`      | `ceo-advisor`, `architect` (+ `designer` if UI) | `docs/superomni/reviews/plan-review-*.md` |
-| BUILD   | `executing-plans` / `subagent-development` | depends on steps (+ `frontend-design` if UI) | `docs/superomni/executions/execution-*.md` |
-| VERIFY  | `code-review` → `qa` → `verification` | `code-reviewer` (+ `security-auditor` if security mode) | `docs/superomni/evaluations/evaluation-*.md` |
-| RELEASE | `release`          | none                                      | `docs/superomni/releases/release-*.md` |
+| BUILD   | `executing-plans` / `subagent-development` / `refactoring` | `test-writer` (code steps), `evaluator` (wave gates: ≥5 steps or DONE_WITH_CONCERNS or final wave), `designer` (UI steps), `refactoring-agent` (debt cleanup) | `docs/superomni/executions/execution-*.md` |
+| VERIFY  | `code-review` → `qa` → `verification` → `dependency-audit` | `code-reviewer`, `security-auditor` (auto on security-sensitive diffs, includes OWASP A06 dependency scan), `test-writer` (qa gap fill), `evaluator` (final gate) | `docs/superomni/evaluations/evaluation-*.md` |
+| RELEASE | `release` → `document-release` | `doc-writer` (post-ship documentation)    | `docs/superomni/releases/release-*.md` |
 
 Example output when entering REVIEW stage:
 

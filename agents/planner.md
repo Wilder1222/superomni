@@ -41,10 +41,28 @@ M2: [Milestone name] — depends on M1
 
 ### Phase 3: Risk Assessment
 
-For each milestone, identify:
-- **P0 Risks**: blockers — must be resolved before starting
-- **P1 Risks**: likely complications — have a mitigation plan
-- **P2 Risks**: possible issues — monitor but don't pre-optimize
+For each milestone, identify and score each risk on two dimensions:
+
+| Risk | Probability (1-5) | Impact (1-5) | Score (P×I) | Priority | Mitigation |
+|------|------------------|--------------|-------------|----------|-----------|
+| [Risk] | [1-5] | [1-5] | [1-25] | P0/P1/P2 | [Plan] |
+
+**Priority thresholds:**
+- **P0 (Score ≥ 15 or Impact = 5)**: Blocker — must be resolved before starting
+- **P1 (Score 8-14)**: Likely complication — have a mitigation plan ready
+- **P2 (Score ≤ 7)**: Monitor — document but don't pre-optimize
+
+**Capacity estimate** — for each milestone, add a rough time estimate:
+```
+CAPACITY ESTIMATE
+════════════════════════════════════════
+M1: [N hours] — [assumptions: team size, no blockers]
+M2: [N hours]
+...
+Total: [N hours] | [N days at 6h/day]
+Buffer: +30% for P1 risks = [N hours total]
+════════════════════════════════════════
+```
 
 ### Phase 4: Write the Plan
 

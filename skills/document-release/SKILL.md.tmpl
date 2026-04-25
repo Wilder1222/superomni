@@ -47,6 +47,14 @@ find . -name "README.md" -o -name "CHANGELOG.md" -o -name "ARCHITECTURE.md" \
        -o -name "docs/*.md" 2>/dev/null | grep -v node_modules | grep -v .git
 ```
 
+**Dispatch the `doc-writer` agent** with:
+- The diff summary from Phase 1 (what shipped)
+- The list of documentation files found
+- Any existing README.md / ARCHITECTURE.md content (so the agent can match voice/style)
+- Explicit instructions on which doc type needs updating: README / CHANGELOG / ARCHITECTURE / CONTRIBUTING
+
+The agent returns a DOC WRITER REPORT with files written/updated. Incorporate its output and review each changed file for accuracy before committing.
+
 For each doc, check:
 - [ ] Does it reflect what shipped?
 - [ ] Are installation instructions current?

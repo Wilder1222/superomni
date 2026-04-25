@@ -1,9 +1,11 @@
 ---
-name: writing-skills
+name: refactoring
 description: |
-  Meta-skill: use when creating a new skill for the superomni framework.
-  Guides through the process of designing and writing a well-structured skill.
-  Triggers: "create a new skill", "write a skill for", "add a skill that".
+  Systematic code refactoring with safety gates.
+  Improves code structure without changing behavior.
+  Dispatches refactoring-agent for execution.
+  Triggers: "refactor", "clean up code", "reduce tech debt", "improve code quality",
+  "extract method", "rename", "make this cleaner".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -143,201 +145,191 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
+# Refactoring
 
-# Writing Skills (Meta-Skill)
+**Goal:** Improve the structure and readability of existing code without changing its observable behavior, using systematic refactoring patterns with safety gates at every step.
 
-**Goal:** Create a new, well-designed skill that integrates cleanly into the superomni framework.
+## Iron Law: Green Before You Refactor
 
-## What Makes a Good Skill
+**Never start refactoring if tests are failing.** Refactoring broken code creates two problems from one. Run the full test suite first and get it green, then refactor.
 
-A skill is good when:
-1. **Triggers are clear** — there's no ambiguity about when to use it
-2. **Protocol is executable** — an agent can follow it without interpretation
-3. **Output is defined** — there's a defined output format/artifact
-4. **It doesn't duplicate** — it doesn't overlap significantly with existing skills
-5. **It uses the preamble** — via `{{PREAMBLE}}` for consistency
-
-## Selection Flow
-
-**Always follow this order before writing a new skill from scratch:**
+### Good Example (Safe Refactoring)
 
 ```
-1. Check project built-ins     →  ls skills/ && bin/skill-manager list
-2. Search the network          →  bin/skill-manager search <query>
-3. Install from URL            →  bin/skill-manager install <url>
-4. Write from scratch          →  follow steps below
+Refactoring: extract calculateTax() from 45-line processOrder() function
+BEFORE: npm test → 47 passing, 0 failing
+Refactor: extract 12 lines into calculateTax(), update all call sites
+AFTER:  npm test → 47 passing, 0 failing
+Result: DONE — behavior preserved, code cleaner
 ```
 
-Never write a new skill without first completing steps 1–3.
+### Bad Example (AVOID)
 
-## Step 1: Check Existing Skills
-
-Before writing anything, verify no existing skill already covers your need:
-
-```bash
-# Check built-in skills for overlap
-bin/skill-manager list
-grep -rn "name:" skills/*/SKILL.md.tmpl | head -20
+```
+Refactoring: "clean up the order processing module"
+BEFORE: (didn't run tests)
+Refactored: moved logic, renamed variables, fixed a bug I noticed
+AFTER:  npm test → 44 passing, 3 failing
+[VIOLATED: Mixed refactoring with bug fix; no baseline established]
 ```
 
-**Gate:** If an existing skill fits → use or extend it. Stop here.
-If none fits → proceed to Step 2.
-
-## Step 2: Search the Network
-
-If no built-in skill covers your need, search GitHub and known registries:
-
-```bash
-# Search GitHub for matching skills
-bin/skill-manager search <your-query>
-```
-
-Check known registries:
-- obra/superpowers: `https://github.com/obra/superpowers/tree/main/skills`
-- garrytan/gstack: `https://github.com/garrytan/gstack/tree/main/skills`
-
-**Gate:** If a suitable skill is found online → install it:
-```bash
-bin/skill-manager install <raw-url>
-```
-Stop here. If nothing suitable → proceed to Step 3.
-
-## Step 3: Define the New Skill
-
-Answer these questions before writing:
-
-1. **Name** — short, verb-noun format (e.g., `systematic-debugging`, `writing-plans`)
-2. **Trigger conditions** — when should this skill activate automatically?
-3. **What does it do?** — describe in 2 sentences max
-4. **What is the output?** — file, report, code change, recommendation?
-5. **What skills are similar?** — how does this differ from existing skills?
-
-## Step 4: Create the Skill Directory
-
-```bash
-SKILL_NAME="your-skill-name"
-mkdir -p "skills/${SKILL_NAME}"
-```
-
-## Step 5: Write the Skill Template
-
-Create `skills/<skill-name>/SKILL.md.tmpl`:
-
-### Required Sections
-
-```markdown
----
-name: <skill-name>
-description: |
-  [2-3 sentence description]
-  Triggers: [comma-separated trigger phrases]
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
-{{PREAMBLE}}
+## Phase 1: Scope Definition
 
-# <Skill Title>
-
-**Goal:** [One sentence: what does this skill accomplish?]
-
-## Iron Law (if applicable)
-[Absolute rule that must never be violated]
-
-## Phase 1: [First Phase Name]
-[Steps, commands, outputs]
-
-## Phase N: [Last Phase Name]
-[...]
-
-## Status Report
-[Required output format for this skill]
-```
-
-### Checklist for Quality
-
-- [ ] `{{PREAMBLE}}` is included
-- [ ] YAML frontmatter has `name`, `description`, `allowed-tools`
-- [ ] Description includes trigger phrases
-- [ ] At least one "Iron Law" or governing principle
-- [ ] Clear output format defined
-- [ ] Status report uses DONE/DONE_WITH_CONCERNS/BLOCKED/NEEDS_CONTEXT
-
-## Step 6: Generate the SKILL.md
+Identify what needs refactoring and why:
 
 ```bash
-bash lib/gen-skill-docs.sh "skills/${SKILL_NAME}/SKILL.md.tmpl"
+# Review the code to be refactored
+git diff main...HEAD --stat 2>/dev/null | head -20
+git log --oneline -5
+
+# Find complexity hotspots
+find . -name "*.js" -o -name "*.ts" -o -name "*.py" | \
+  xargs wc -l 2>/dev/null | sort -rn | head -15
+
+# Find code smells
+grep -rn "TODO\|FIXME\|HACK\|SMELL\|DUPLICATE" \
+  --include="*.js" --include="*.ts" --include="*.py" . \
+  | grep -v "node_modules\|.git" | head -15
 ```
 
-Verify the output:
+Define scope:
+```
+REFACTORING SCOPE
+────────────────────────────────────────
+Target files:    [list of files to refactor]
+Reason:          [why this code needs improvement]
+Boundaries:      [what files/modules are out of scope]
+Behavior contract: [what must remain unchanged]
+────────────────────────────────────────
+```
+
+## Phase 2: Safety Baseline
+
+**This phase is a hard gate — do not proceed until tests pass.**
+
 ```bash
-cat "skills/${SKILL_NAME}/SKILL.md"
-head -5 "skills/${SKILL_NAME}/SKILL.md"  # confirm preamble was expanded
+# Run the full test suite and save results
+npm test 2>&1 | tee /tmp/refactor-baseline.txt
+# or:  pytest -v 2>&1 | tee /tmp/refactor-baseline.txt
+# or:  go test ./... 2>&1 | tee /tmp/refactor-baseline.txt
+
+# Extract the test count
+grep -cE "pass|PASS|✓|ok " /tmp/refactor-baseline.txt 2>/dev/null || \
+  tail -5 /tmp/refactor-baseline.txt
 ```
 
-## Step 7: Register in CLAUDE.md
-
-Add the new skill to the Skills Quick Reference in `CLAUDE.md`:
-
-```markdown
-| <skill-name> | [trigger phrases] | P[0-2] |
+Record:
+```
+SAFETY BASELINE
+────────────────────────────────────────
+Tests passing:   [N]
+Tests failing:   [N]  ← must be 0 to proceed
+Test command:    [npm test | pytest | go test | etc.]
+Baseline saved:  /tmp/refactor-baseline.txt
+────────────────────────────────────────
 ```
 
-## Step 8: Test the Skill
+**Gate:** If `Tests failing > 0` → report BLOCKED. Do not proceed.
 
-Write a brief test scenario:
-1. Describe a situation that should trigger this skill
-2. Manually verify the skill protocol is clear and executable
-3. Ensure the output format matches what the skill claims to produce
+## Phase 3: Smell Detection
 
-## Skill Design Principles
+Identify refactoring targets using the standard smell catalog:
 
-### Do
-- Keep phases short and numbered
-- Use code blocks for all commands
-- Define explicit output formats
-- Include at least one verification step
-- Use the status protocol (DONE/BLOCKED/etc.)
+| Smell | Detection | Refactoring |
+|-------|----------|-------------|
+| Long function | > 30 lines with multiple concerns | Extract method |
+| Duplicate code | Same logic in 2+ places | Extract and DRY |
+| Magic numbers/strings | `if (code === 42)` | Extract named constant |
+| God object | Class handling too many responsibilities | Extract class |
+| Deep nesting | > 3 levels of if/for/try | Guard clauses, early returns |
+| Long parameter list | > 4 parameters | Introduce parameter object |
+| Feature envy | Method uses another class's data more than its own | Move method |
+| Data clump | 3+ params always passed together | Extract into type/struct |
+| Dead code | Unused variables, functions, imports | Delete safely |
+| Inconsistent naming | Mixed conventions in same module | Systematic rename |
 
-### Don't
-- Don't duplicate logic from existing skills (link to them instead)
-- Don't make phases so long they require scrolling
-- Don't leave trigger conditions ambiguous
-- Don't omit the preamble (`{{PREAMBLE}}`)
-- Don't create skills for one-time tasks
+Produce:
+```
+SMELL INVENTORY
+────────────────────────────────────────
+[file:line] — [smell name] — [priority: P0|P1|P2]
+[file:line] — [smell name] — [priority: P0|P1|P2]
+────────────────────────────────────────
+Total smells found: [N]
+```
 
-## Example: Minimal Skill Template
+## Phase 4: Dispatch `refactoring-agent`
 
-```markdown
----
-name: my-skill
-description: |
-  Use when [trigger condition].
-  Triggers: "keyword 1", "keyword 2".
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
----
+**Dispatch the `refactoring-agent`** with:
+- The smell inventory from Phase 3
+- The target files and their current content
+- The safety baseline (test command + passing count)
+- Explicit constraints: "do NOT change behavior, do NOT mix bug fixes"
 
-{{PREAMBLE}}
+The agent will:
+1. Execute refactorings from lowest to highest risk
+2. Run tests after each change step
+3. Return a REFACTORING REPORT with before/after test counts and diff summary
 
-# My Skill
+**Handoff:**
+- `DONE` → proceed to Phase 5 verification
+- `DONE_WITH_CONCERNS` → review concerns, proceed if only style-level (not behavior-level)
+- `BLOCKED` → test failure during refactoring — agent will have reverted; review what went wrong
 
-**Goal:** [What this accomplishes.]
+## Phase 5: Verification
 
-## Iron Law
-[Non-negotiable rule]
+After the agent completes:
 
-## Phase 1: [Name]
-[Steps]
+```bash
+# Re-run the full test suite
+npm test 2>&1 | tee /tmp/refactor-after.txt
 
-## Phase 2: [Name]
-[Steps]
+# Compare to baseline
+echo "Before: $(grep -cE 'pass|PASS|✓' /tmp/refactor-baseline.txt 2>/dev/null) passing"
+echo "After:  $(grep -cE 'pass|PASS|✓' /tmp/refactor-after.txt 2>/dev/null) passing"
 
-## Report
+# Confirm the diff is structural, not behavioral
+git diff HEAD | grep "^[+-]" | grep -v "^---\|^+++" | \
+  grep -vE "^[+-][[:space:]]*$" | head -30
+```
 
-\`\`\`
-MY SKILL REPORT
-════════════════
+Verification checklist:
+- [ ] Test count matches baseline (no tests added or removed)
+- [ ] All tests still pass
+- [ ] Diff shows structural changes only (no logic changes)
+- [ ] No new files outside the defined scope were touched
+
+## Phase 6: Refactoring Report
+
+```
+REFACTORING COMPLETE
+════════════════════════════════════════
+Target:         [files/modules refactored]
+Smells fixed:   [N of N found]
+
+Changes:
+  [file] — [smell] → [refactoring applied]
+  [file] — [smell] → [refactoring applied]
+
+Tests:          [N] before → [N] after (must be equal)
+Behavior:       PRESERVED | CHANGES_NEEDED
+Code delta:     [shorter by N lines | flatter by N indentation levels]
+
+Skipped (out of scope or too risky):
+  [file] — [reason]
+
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
-[Key output]
-════════════════
-\`\`\`
+════════════════════════════════════════
+```
+
+## Save Refactoring Artifact
+
+```bash
+mkdir -p docs/superomni/executions
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
+_DATE=$(date +%Y%m%d)
+_REF_FILE="docs/superomni/executions/refactoring-${_BRANCH}-${_DATE}.md"
+echo "Refactoring record saved to ${_REF_FILE}"
 ```

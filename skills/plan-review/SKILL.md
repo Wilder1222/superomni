@@ -143,7 +143,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Plan Review Pipeline
 
 **Goal:** Review a plan through multiple lenses before execution begins. Catch problems before they become expensive mistakes.
@@ -217,6 +216,8 @@ STRATEGY REVIEW
 ## Phase 2: Design Review (conditional)
 
 **Only run this phase if the plan includes UI or user-facing changes.**
+
+**Dispatch the `designer` agent** with the plan document and any relevant UI context as input. The agent will rate all 10 design dimensions (0-10), run its AI Slop detection checklist, edit the plan to add missing design requirements, and return a DESIGN REVIEW block. Incorporate its findings and any plan edits directly into the review output.
 
 Check:
 - [ ] **Information hierarchy** — is the most important thing most prominent?

@@ -143,7 +143,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Verification Before Completion
 
 **Goal:** Systematically verify that work is complete and correct before declaring done.
@@ -295,9 +294,21 @@ git diff HEAD | grep "console.log\|debugger\|TODO\|FIXME\|print(" | head -10
 - [ ] If >5 files: was this flagged to the user?
 - [ ] Any unexpected files in the diff?
 
+## Independent Gate: Dispatch `evaluator` Agent
+
+After completing the checklist, **dispatch the `evaluator` agent** with:
+- The spec/plan acceptance criteria (from `docs/superomni/specs/spec-*.md` or `docs/superomni/plans/plan-*.md`)
+- All checklist results from above
+- Test output
+- Files changed
+
+The evaluator provides an independent EVALUATION REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Incorporate its TOP FINDING into the Verification Report below.
+
+**If the evaluator returns `CHANGES_REQUIRED`**: set status to `BLOCKED` and do NOT advance to RELEASE until the flagged issues are resolved.
+
 ## Verification Report
 
-After completing the checklist:
+After completing the checklist and receiving the evaluator's verdict:
 
 ```
 VERIFICATION REPORT

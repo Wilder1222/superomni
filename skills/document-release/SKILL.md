@@ -146,7 +146,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # /document-release — Post-Ship Documentation Update
 
 **Goal:** After shipping, ensure all documentation matches what was actually built. Catch stale READMEs, outdated architecture docs, and missing CHANGELOG entries.
@@ -181,6 +180,14 @@ find . -name "README.md" -o -name "CHANGELOG.md" -o -name "ARCHITECTURE.md" \
        -o -name "CONTRIBUTING.md" -o -name "CLAUDE.md" -o -name "AGENTS.md" \
        -o -name "docs/*.md" 2>/dev/null | grep -v node_modules | grep -v .git
 ```
+
+**Dispatch the `doc-writer` agent** with:
+- The diff summary from Phase 1 (what shipped)
+- The list of documentation files found
+- Any existing README.md / ARCHITECTURE.md content (so the agent can match voice/style)
+- Explicit instructions on which doc type needs updating: README / CHANGELOG / ARCHITECTURE / CONTRIBUTING
+
+The agent returns a DOC WRITER REPORT with files written/updated. Incorporate its output and review each changed file for accuracy before committing.
 
 For each doc, check:
 - [ ] Does it reflect what shipped?

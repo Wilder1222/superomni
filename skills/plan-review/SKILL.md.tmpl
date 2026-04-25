@@ -83,6 +83,8 @@ STRATEGY REVIEW
 
 **Only run this phase if the plan includes UI or user-facing changes.**
 
+**Dispatch the `designer` agent** with the plan document and any relevant UI context as input. The agent will rate all 10 design dimensions (0-10), run its AI Slop detection checklist, edit the plan to add missing design requirements, and return a DESIGN REVIEW block. Incorporate its findings and any plan edits directly into the review output.
+
 Check:
 - [ ] **Information hierarchy** — is the most important thing most prominent?
 - [ ] **Missing states** — loading, empty, error, partial/degraded?

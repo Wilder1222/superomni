@@ -143,7 +143,6 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-
 # Quality Assurance
 
 **Goal:** Ensure code changes are correct, well-tested, and free of regressions through systematic test analysis, gap filling, and edge case exploration.
@@ -238,10 +237,14 @@ If tests fail, classify each failure:
 
 For each uncovered code path identified in Phase 1:
 
-1. **Identify the behavior** — what should this code do?
-2. **Write a test** — one behavior per test, descriptive name
-3. **Run the test** — verify it passes (and would fail if the behavior broke)
+**Dispatch the `test-writer` agent** with:
+- The file(s) under test
+- The specific behaviors to cover (from Phase 1 scope map)
+- The project's existing test conventions (`find . -name "*.test.*" -o -name "*.spec.*" | head -5`)
 
+The agent returns a TEST REPORT block with all new tests written. Confirm the new tests pass (and would fail if the behavior broke) before proceeding to Phase 4.
+
+For each uncovered behavior, the agent will write:
 ### Test Naming Convention
 
 Follow the project's existing convention. If none exists, use:

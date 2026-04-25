@@ -41,8 +41,7 @@ Philosophy: **Plan Lean, Execute Complete**
 | finishing-branch | "finish branch", "merge" | P2 |
 | investigate | "investigate", "explore" | P2 |
 | release | "release", "ship and reflect", "end sprint" | P2 |
-| writing-skills | "create skill", "install skill", "list skills" | P2 |
-| agent-management | "install agent", "create agent", "list agents", "new agent" | P2 |
+| framework-management | "create skill", "write skill", "install skill", "list skills", "create agent", "install agent", "list agents", "new agent", "manage framework" | P2 |
 | document-release | "update docs", "sync docs" (optional post-ship) | P3 |
 | production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |
 | self-improvement | Reflection skill (process/retro/harness scopes) | P1 |

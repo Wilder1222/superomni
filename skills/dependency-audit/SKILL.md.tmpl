@@ -75,18 +75,17 @@ java:   [manifest files found | none]
 ────────────────────────────────────────
 ```
 
-## Phase 2: Dispatch `dependency-auditor` Agent
+## Phase 2: Dispatch `security-auditor` Agent (Dependency Mode)
 
-**Dispatch the `dependency-auditor` agent** with:
+**Dispatch the `security-auditor` agent** with:
 - The list of all package manifests found in Phase 1
-- The production context (are we pre-deploy or routine audit?)
-- Any known false positives to skip (if documented)
+- Explicit instruction to run **Phase 4: Dependency Audit (OWASP A06)** and skip code scanning
+- The production context (pre-deploy or routine audit?)
 
 The agent will:
-1. Run security scans across all package managers
-2. Run license audit on all dependencies
-3. Check freshness (major versions behind)
-4. Produce a DEPENDENCY AUDIT REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED`
+1. Run CVE scans across all discovered package managers (npm audit, pip-audit, cargo audit, etc.)
+2. Classify findings by severity (P0/P1/P2/P3)
+3. Return a SECURITY AUDIT REPORT focused on the `DEPENDENCIES (OWASP A06)` section with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED`
 
 **Handoff:**
 - `APPROVED` → proceed to Phase 3 summary

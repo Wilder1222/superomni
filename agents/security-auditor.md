@@ -92,7 +92,40 @@ grep -rn "SELECT.*+\|INSERT.*+\|format.*SELECT\|f\"SELECT" .
 - Weak cryptographic choices (but not broken)
 - Missing audit logging
 
-### Phase 4: Write Findings
+### Phase 4: Dependency Audit (OWASP A06 — Vulnerable Components)
+
+Per OWASP Top 10 A06, scan all package manifests for known CVEs, license risks, and version staleness:
+
+```bash
+# npm (Node.js)
+npm audit --json 2>/dev/null | python3 -c "
+import sys, json
+try:
+  d = json.load(sys.stdin)
+  crit = [(k, v) for k, v in d.get('vulnerabilities', {}).items() if v.get('severity') in ('critical','high')]
+  print(f'Critical/High: {len(crit)}')
+  for n, v in crit[:10]:
+    print(f'  [{v[\"severity\"].upper()}] {n}: fix={v.get(\"fixAvailable\",False)}')
+except Exception:
+  print('(parse error)')
+" 2>/dev/null || npm audit 2>/dev/null | grep -E "critical|high|moderate" | head -15
+
+# pip (Python)
+pip-audit 2>/dev/null | head -20 || safety check 2>/dev/null | head -20 || echo "(pip-audit not installed)"
+
+# go
+go list -m -json all 2>/dev/null | grep -i "deprecated\|retracted" | head -10 || true
+```
+
+Severity thresholds for P-classification:
+- **P0**: CVSS ≥ 9.0 (Critical), fix available → deploy blocker
+- **P1**: CVSS 7.0–8.9 (High), fix available → fix before next release
+- **P2**: CVSS 4.0–6.9 (Medium) → fix within sprint
+- **P3**: CVSS < 4.0 (Low) → opportunistic
+
+**Gate:** Any P0 finding → include in `DEPENDENCIES: CHANGES_REQUIRED` section and set overall VERDICT to `CHANGES_REQUIRED`.
+
+### Phase 5: Write Findings
 
 For each finding:
 - **Location**: file + line number
@@ -127,6 +160,12 @@ HARDCODED SECRETS: CLEAN | FOUND
 
 INJECTION RISKS: CLEAN | FOUND
   [Details if found]
+
+DEPENDENCIES (OWASP A06):
+  P0 Critical CVEs: [N] — [package names]
+  P1 High CVEs:     [N]
+  P2/P3:            [N]
+  Status: CLEAN | CHANGES_REQUIRED
 
 VERDICT: APPROVED | APPROVED_WITH_NOTES | CHANGES_REQUIRED
 

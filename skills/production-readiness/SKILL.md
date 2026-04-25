@@ -266,7 +266,7 @@ Confirm security review has been done (or is not required).
 - [ ] **Dependencies clean** — no new CVEs in added dependencies?
 - [ ] **Secrets management** — no hardcoded credentials, all secrets via env/vault?
 
-**Dispatch the `dependency-auditor` agent** to scan all package manifests for CVEs, license issues, and stale packages. The agent returns a DEPENDENCY AUDIT REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED`. Any `CHANGES_REQUIRED` verdict is a deploy blocker.
+**Dispatch the `security-auditor` agent** in **dependency audit mode** (Phase 4: OWASP A06) to scan all package manifests for CVEs, license issues, and stale packages. The agent returns a SECURITY AUDIT REPORT with the `DEPENDENCIES` section and an overall verdict. Any `CHANGES_REQUIRED` verdict is a deploy blocker.
 
 ```bash
 # Quick secrets scan (dependency-auditor handles the full vulnerability scan)

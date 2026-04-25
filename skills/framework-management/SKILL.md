@@ -1,9 +1,11 @@
 ---
-name: ship
+name: framework-management
 description: |
-  Complete release workflow: verify → build → test → deploy → announce.
-  Use when releasing software to production or any public environment.
-  Triggers: "/ship", "deploy", "release", "ship this", "publish".
+  Meta-skill: create, install, list, and manage skills and agents within the superomni framework.
+  Merges writing-skills + agent-management into one unified workflow.
+  Triggers: "create skill", "write a skill", "install skill", "list skills",
+  "create agent", "write an agent", "install agent", "list agents",
+  "new skill", "new agent", "add skill", "add agent", "manage framework".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 ---
 
@@ -143,202 +145,250 @@ If you have already entered Plan Mode (via `EnterPlanMode`), these rules apply:
 4. **Route planning through vibe workflow.** Even inside plan mode, follow the pipeline: brainstorm → writing-plans → plan-review → executing-plans. Write the plan to `docs/superomni/plans/`, not to Claude's built-in plan file.
 5. **ExitPlanMode timing:** Only call `ExitPlanMode` after the current skill workflow is complete and has reported a status (DONE/BLOCKED/etc).
 
-# /ship — Release Workflow
+# Framework Management
 
-**Goal:** Safely release software through a structured, verifiable process.
+**Goal:** Find, install, create, and manage both **skills** and **agents** within the superomni framework — through a single, unified discovery-first workflow.
 
-## Iron Law: Never Skip Verification
+## Iron Law: Discover Before Creating
 
-Every step that can fail will fail. The release checklist exists because "it looked fine" is not acceptable for production.
+**Never create a skill or agent from scratch without first checking built-ins and the network.** Duplicate skills and agents fragment the framework and create maintenance burden.
 
-## Pre-Ship Assessment
+### Good Example
 
-Before running the release workflow, assess:
-
-```bash
-# Current state
-git status --short         # any uncommitted changes?
-git log origin/main..HEAD --oneline  # commits ahead of main?
-git stash list             # any stashed work?
+```
+Need: "I need something that audits performance"
+Step 1: bin/agent-manager list → found: architect (Phase 7: Performance Analysis)
+Action: Use the built-in architect agent
+Result: No new agent needed — DONE
 ```
 
-Confirm:
-- [ ] On the correct branch (or tag)
-- [ ] No uncommitted changes
-- [ ] All tests pass on CI (check CI status)
-- [ ] No open P0 issues blocking this release
+### Bad Example (AVOID)
 
-## Step 1: Version Bump
-
-```bash
-# Check current version
-cat package.json 2>/dev/null | grep '"version"'
-# or
-cat VERSION 2>/dev/null
-# or
-grep "^version" pyproject.toml 2>/dev/null
-
-# Determine next version (semantic versioning)
-# MAJOR: breaking changes
-# MINOR: new features, backward compatible
-# PATCH: bug fixes, backward compatible
+```
+Need: "I need something that checks security"
+Action: Immediately create agents/my-security-checker.md from scratch
+[VIOLATED: security-auditor already exists — checked built-ins first]
 ```
 
-```bash
-# Bump version (example for npm)
-npm version patch  # or minor, major
-# or manually edit the version file
+---
+
+## Phase 1: Identify What You Need
+
+Answer these questions first:
+
+1. **Component type**: Skill (process/workflow for Claude to follow) or Agent (specialized persona for delegation)?
+2. **Domain**: What area does it cover? (testing / security / design / planning / etc.)
+3. **Trigger**: When should it activate?
+4. **Output**: What does it produce? (report / code / file / recommendation?)
+
+```
+COMPONENT SPEC
+────────────────────────────────────────
+Type:     skill | agent
+Name:     [proposed name — verb-noun or domain]
+Domain:   [area of expertise]
+Trigger:  [when it should activate]
+Output:   [what it produces]
+────────────────────────────────────────
 ```
 
-## Step 2: Changelog
+## Phase 2: Check Built-ins
 
-Update `CHANGELOG.md` (or equivalent):
+Always check existing components first:
+
+```bash
+# List all built-in agents
+bin/agent-manager list 2>/dev/null || ls agents/
+
+# List all built-in skills
+bin/skill-manager list 2>/dev/null || ls skills/
+
+# Search for overlap
+grep -rn "name:" skills/*/SKILL.md.tmpl | grep -i "<your-keyword>" | head -10
+grep -l "<your-keyword>" agents/*.md | head -5
+```
+
+**Current built-in agents:**
+
+| Agent | Specialty |
+|-------|-----------|
+| `code-reviewer` | Structured code review (P0/P1/P2) |
+| `planner` | Strategic decomposition and plan writing |
+| `debugger` | Root-cause analysis and bug resolution |
+| `test-writer` | Behavior-verifying test suites with TDD |
+| `security-auditor` | OWASP-aware vulnerability + dependency CVE audit |
+| `architect` | System design, architectural review, performance analysis |
+| `ceo-advisor` | Product strategy, scope, demand validation |
+| `designer` | UX design, missing states, AI slop detection |
+| `evaluator` | Independent verdict gate (APPROVED / CHANGES_REQUIRED) |
+| `refactoring-agent` | Behavior-preserving code refactoring |
+| `doc-writer` | Diff-driven documentation generation |
+
+**Gate:** If a built-in component fits → use or extend it. **Stop here.**
+If none fits → proceed to Phase 3.
+
+## Phase 3: Search the Network
+
+If no built-in covers your need:
+
+```bash
+# Search GitHub for agents
+bin/agent-manager search <your-query> 2>/dev/null
+
+# Search GitHub for skills
+bin/skill-manager search <your-query> 2>/dev/null
+```
+
+Known registries to check manually:
+- `https://github.com/obra/superpowers/tree/main/agents`
+- `https://github.com/garrytan/gstack/tree/main/agents`
+- `https://github.com/obra/superpowers/tree/main/skills`
+
+**Gate:** If suitable → install it (Phase 4A). If nothing suitable → create from scratch (Phase 4B).
+
+## Phase 4A: Install from URL
+
+```bash
+# Install an agent from GitHub
+bin/agent-manager install https://raw.githubusercontent.com/user/repo/main/agents/my-agent.md
+
+# Install a skill from GitHub
+bin/skill-manager install https://raw.githubusercontent.com/user/repo/main/skills/my-skill/SKILL.md
+
+# Verify installation
+bin/agent-manager list
+bin/skill-manager list
+```
+
+## Phase 4B: Create from Scratch
+
+### Creating an Agent
+
+Agents are markdown files in `agents/<name>.md`. Required sections:
 
 ```markdown
-## [vX.Y.Z] — YYYY-MM-DD
+# [Agent Name]
 
-### Added
-- [New features]
+You are the **superomni [Name]** — [one-sentence specialty].
 
-### Fixed
-- [Bug fixes]
+## Your Identity
+[Who you are and what framework you apply]
 
-### Changed
-- [Behavior changes]
+## Iron Law: [Non-negotiable rule]
+[The one rule this agent must never violate]
 
-### Removed
-- [Deprecated items removed]
-```
+## Your Process
 
-```bash
-# Generate from commits since last tag
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-if [ -n "${LAST_TAG}" ]; then
-  echo "Changes since ${LAST_TAG}:"
-  git log "${LAST_TAG}..HEAD" --oneline --author="$(git config user.email)"
-fi
-```
+### Phase 1: [Name]
+[Steps, commands, outputs]
 
-## Step 3: Final Verification
+### Phase N: [Final phase]
+[...]
 
-Run the full verification checklist:
+## Output Format
 
-```bash
-# Full test suite
-npm test 2>&1 | tail -20
-# or: pytest -v && or: go test ./...
-
-# Build verification (if applicable)
-npm run gen-skills 2>&1 | tail -10
-# or: go build ./... or: python -m build
-```
-
-Confirm:
-- [ ] All tests pass
-- [ ] Build succeeds (if applicable)
-- [ ] No security vulnerabilities in dependencies
-- [ ] No breaking changes without major version bump
-
-## Step 4: Tag the Release
-
-```bash
-VERSION="v$(cat package.json | grep '"version"' | cut -d'"' -f4 2>/dev/null || echo "0.1.0")"
-
-# Create annotated tag
-git tag -a "${VERSION}" -m "Release ${VERSION}
-
-$(cat CHANGELOG.md | head -20)"
-
-echo "Tagged: ${VERSION}"
-git tag -l | tail -5  # verify
-```
-
-## Step 5: Push and Publish
-
-```bash
-# Push commits and tag
-git push origin HEAD
-git push origin "${VERSION}"
-
-# Publish to package registry (if applicable)
-# npm publish
-# or: pip publish (twine)
-# or: gh release create ${VERSION}
-
-# Create GitHub release (if using GitHub)
-gh release create "${VERSION}" \
-  --title "Release ${VERSION}" \
-  --notes "$(cat CHANGELOG.md | awk '/^## \[/{count++; if(count==2)exit} count==1{print}')" \
-  --latest
-```
-
-## Step 6: Verify Deployment
-
-After release:
-
-```bash
-# For web deployments: health check
-# curl -f https://your-app.com/health || echo "HEALTH CHECK FAILED"
-
-# For npm: verify published
-# npm view <package> version
-
-# For GitHub: verify release page
-gh release view "${VERSION}"
-```
-
-## Step 7: Announce (if applicable)
-
-Prepare release announcement:
-
-```
-RELEASE ANNOUNCEMENT: ${VERSION}
+\`\`\`
+[AGENT TYPE] REPORT
 ════════════════════════════════════════
-What's new:
-  [bullet points from changelog]
-
-Upgrade instructions:
-  npm install <package>@${VERSION}
-  # or pip install <package>==${VERSION}
-
-Breaking changes:
-  [list or "none"]
-════════════════════════════════════════
-```
-
-## Rollback Plan
-
-If something goes wrong after release:
-
-```bash
-# Rollback to previous version
-PREV_TAG=$(git tag -l 'v*' | sort -V | tail -2 | head -1)
-echo "Rolling back to: ${PREV_TAG}"
-
-# Revert the release tag
-git tag -d "${VERSION}"
-git push origin --delete "${VERSION}"
-
-# Deploy previous version
-# [deployment-specific command]
-```
-
-## Ship Report
-
-```
-SHIP REPORT
-════════════════════════════════════════
-Version:     [vX.Y.Z]
-Branch:      [branch name]
-Commits:     [N since last release]
-Tests:       [all passing]
-Build:       [success | N/A]
-Tagged:      [tag name]
-Published:   [where]
-Health:      [checked | N/A]
+Agent:   superomni [Name]
+[Key fields]
 
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
-Concerns:
-  - [any post-ship concerns]
+════════════════════════════════════════
+\`\`\`
+```
+
+```bash
+# Scaffold
+cp agents/evaluator.md agents/<new-name>.md
+# Edit to match new specialty
+```
+
+### Creating a Skill
+
+Skills are `SKILL.md.tmpl` files in `skills/<name>/`. Required sections:
+
+```markdown
+---
+name: <skill-name>
+description: |
+  [2-3 sentences].
+  Triggers: "keyword 1", "keyword 2".
+allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+---
+
+{{PREAMBLE}}
+
+# [Skill Title]
+
+**Goal:** [One sentence.]
+
+## Iron Law
+[Non-negotiable rule]
+
+## Phase 1: [Name]
+[Steps]
+
+## Phase N: Report
+
+\`\`\`
+[SKILL] REPORT
+════════════════
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+════════════════
+\`\`\`
+```
+
+```bash
+# Scaffold
+SKILL_NAME="your-skill-name"
+mkdir -p "skills/${SKILL_NAME}"
+# Write SKILL.md.tmpl, then build:
+bin/build-skills skills/${SKILL_NAME}/SKILL.md.tmpl
+```
+
+### Quality Checklist (Skills)
+
+- [ ] `{{PREAMBLE}}` is present
+- [ ] YAML has `name`, `description` (with trigger phrases), `allowed-tools`
+- [ ] At least one Iron Law with Good/Bad examples
+- [ ] Phase structure (numbered phases)
+- [ ] Defined output format with status protocol
+
+### Quality Checklist (Agents)
+
+- [ ] Single focused specialty — no overlap with existing agents
+- [ ] Iron Law (non-negotiable rule)
+- [ ] Phase-based protocol (3–5 phases)
+- [ ] Structured output report with DONE/BLOCKED status
+
+## Phase 5: Register and Validate
+
+```bash
+# Build the SKILL.md (if creating a skill)
+bin/build-skills --force
+
+# Run validation
+npm test
+
+# Register in CLAUDE.md (skills only)
+# Add row to the Skills Available table
+```
+
+## Framework Management Report
+
+```
+FRAMEWORK MANAGEMENT REPORT
+════════════════════════════════════════
+Operation:    [list | install | create | check]
+Component:    [skill | agent]
+Name:         [component name]
+Source:       [built-in | network | created from scratch]
+Discovery:    [built-ins checked ✓ | network searched ✓]
+
+Built-in agents:   [N]
+Built-in skills:   [N]
+
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
 ```

@@ -21,7 +21,7 @@ Loads `skills/document-release/SKILL.md` and:
 
 ## When to Use
 
-After any merge or release. Proactively suggested by the `ship` skill after deploying.
+After any merge or release. Automatically invoked by the `release` skill as part of the RELEASE stage, or run standalone when docs need a targeted update without a full release cycle.
 
 ## Files Updated
 

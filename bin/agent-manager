@@ -67,11 +67,25 @@ cmd_list() {
     count=$((count + 1))
   done
 
-  # Show installed (user) agents
-  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+  # Show project agents (.claude/agents/ relative to CWD)
+  PROJECT_AGENTS_DIR="${PWD}/.claude/agents"
+  if [ -d "${PROJECT_AGENTS_DIR}" ] && [ "$(ls -A "${PROJECT_AGENTS_DIR}" 2>/dev/null)" ]; then
+    echo ""
+    echo "Project agents (.claude/agents/):"
+    for f in "${PROJECT_AGENTS_DIR}"/*.md; do
+      [ -f "${f}" ] || continue
+      name="$(basename "${f}" .md)"
+      desc="$(grep -m1 '^# ' "${f}" 2>/dev/null | sed 's/^# //' || echo "(no description)")"
+      printf "  %-22s %s\n" "${name}" "${desc}"
+      count=$((count + 1))
+    done
+  fi
+
+  # Show personal agents (~/.claude/agents/)
+  USER_AGENTS_DIR="${HOME}/.claude/agents"
   if [ -d "${USER_AGENTS_DIR}" ] && [ "$(ls -A "${USER_AGENTS_DIR}" 2>/dev/null)" ]; then
     echo ""
-    echo "Installed agents (~/.omni-skills/agents):"
+    echo "Personal agents (~/.claude/agents/):"
     for f in "${USER_AGENTS_DIR}"/*.md; do
       [ -f "${f}" ] || continue
       name="$(basename "${f}" .md)"
@@ -90,9 +104,9 @@ cmd_info() {
   local name="${1}"
   [ -n "${name}" ] || err "Usage: bin/agent-manager info <name>"
 
-  # Search built-in first, then user agents
+  # Search built-in first, then project, then personal agents
   local agent_file=""
-  for search_dir in "${AGENTS_DIR}" "${HOME}/.omni-skills/agents"; do
+  for search_dir in "${AGENTS_DIR}" "${PWD}/.claude/agents" "${HOME}/.claude/agents"; do
     if [ -f "${search_dir}/${name}.md" ]; then
       agent_file="${search_dir}/${name}.md"
       break
@@ -118,8 +132,8 @@ cmd_install() {
   local source="${1}"
   [ -n "${source}" ] || err "Usage: bin/agent-manager install <url-or-path>"
 
-  # Ensure user agents dir exists
-  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+  # Ensure personal agents dir exists
+  USER_AGENTS_DIR="${HOME}/.claude/agents"
   mkdir -p "${USER_AGENTS_DIR}"
 
   # Determine if source is a URL or local path
@@ -173,23 +187,26 @@ cmd_create() {
 
   # Determine output path
   local out_file=""
-  # Ask whether to put in repo agents/ or user agents/
-  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+  # Project agents dir (.claude/agents/ relative to CWD)
+  PROJECT_AGENTS_DIR="${PWD}/.claude/agents"
+  USER_AGENTS_DIR="${HOME}/.claude/agents"
 
   if [ -t 0 ]; then
     echo "Where should the agent be created?"
-    echo "  [1] ${AGENTS_DIR}/${name}.md  (project agents — tracked in git)"
-    echo "  [2] ${USER_AGENTS_DIR}/${name}.md  (user agents — personal)"
+    echo "  [1] ${PROJECT_AGENTS_DIR}/${name}.md  (project agents — tracked in git)"
+    echo "  [2] ${USER_AGENTS_DIR}/${name}.md  (personal agents — available everywhere)"
     read -r -p "Choice [1/2]: " choice
     if [ "${choice}" = "2" ]; then
       mkdir -p "${USER_AGENTS_DIR}"
       out_file="${USER_AGENTS_DIR}/${name}.md"
     else
-      out_file="${AGENTS_DIR}/${name}.md"
+      mkdir -p "${PROJECT_AGENTS_DIR}"
+      out_file="${PROJECT_AGENTS_DIR}/${name}.md"
     fi
   else
     # Non-interactive: default to project agents/
-    out_file="${AGENTS_DIR}/${name}.md"
+    mkdir -p "${PROJECT_AGENTS_DIR}"
+    out_file="${PROJECT_AGENTS_DIR}/${name}.md"
   fi
 
   if [ -f "${out_file}" ]; then
@@ -259,7 +276,7 @@ cmd_remove() {
   [ -n "${name}" ] || err "Usage: bin/agent-manager remove <name>"
 
   # Only allow removing user-installed agents (not built-ins)
-  USER_AGENTS_DIR="${HOME}/.omni-skills/agents"
+  USER_AGENTS_DIR="${HOME}/.claude/agents"
   local agent_file="${USER_AGENTS_DIR}/${name}.md"
 
   if [ ! -f "${agent_file}" ]; then
@@ -267,7 +284,7 @@ cmd_remove() {
     if [ -f "${AGENTS_DIR}/${name}.md" ]; then
       err "Cannot remove built-in agent '${name}'. Built-in agents are part of the superomni framework."
     else
-      err "Agent '${name}' not found in user agents (~/.omni-skills/agents/)."
+      err "Agent '${name}' not found in personal agents (~/.claude/agents/)."
     fi
   fi
 

@@ -86,8 +86,7 @@ Use the scan results to locate the current pipeline stage (priority-ordered, fir
 | `plan-*.md` exists, no matching `review-*.md` | REVIEW | `plan-review` |
 | Plan reviewed, has open items (`- [ ]`) | BUILD | `executing-plans` or `subagent-development` |
 | Plan all checked (`- [x]`), no `evaluation-*.md` | VERIFY | `code-review` → `qa` → `verification` |
-| `evaluation-*.md` exists | SHIP | `ship` → `finishing-branch` |
-| Shipped (tagged/merged), no `improvement-*.md` | REFLECT | `self-improvement` (retro scope) |
+| `evaluation-*.md` exists | RELEASE | `release` → `document-release` |
 
 ### Step 3 — Announce continuity
 Before handling the user's new request, say:
@@ -107,6 +106,26 @@ If the user's message is clearly unrelated to the prior session (e.g. an entirel
 - Only skip sub-agents for trivially small tasks (< 5 min, single file, single concern)
 - Sub-agent sessions, code reviews, and execution results are **always saved as Markdown documents** in `docs/superomni/` for the user to review
 - Internal state (improvements, evaluations, harness audits) stays in `.superomni/`
+
+## Available Sub-Agents
+
+The following agents are pre-installed and dispatched automatically by skills.
+They are located in `.claude/agents/` (project-level) or `~/.claude/agents/` (global).
+Use the **Task tool** to invoke them — skills handle dispatch; you do not need to call agents manually.
+
+| Agent | Purpose | Auto-dispatched by |
+|-------|---------|-------------------|
+| `architect` | System design, architectural review, and technical decisions | `plan-review` (REVIEW stage) |
+| `ceo-advisor` | Product strategy, business alignment, and stakeholder priorities | `plan-review` (REVIEW stage) |
+| `code-reviewer` | Code quality, security, and best-practice review | `code-review` (VERIFY stage) |
+| `debugger` | Root-cause analysis and systematic bug fixing | `systematic-debugging` |
+| `designer` | UX design, information architecture, and UI specification | `plan-review`, `executing-plans` (UI steps) |
+| `doc-writer` | Technical documentation generation and updates | `document-release` (RELEASE stage) |
+| `evaluator` | Objective quality-gate evaluation | `executing-plans` (wave gates), `verification` |
+| `planner` | Task decomposition and implementation planning | `writing-plans` (PLAN stage) |
+| `refactoring-agent` | Safe refactoring and technical-debt reduction | `refactoring`, `executing-plans` (debt cleanup) |
+| `security-auditor` | Security auditing, OWASP checks, and dependency scanning | `code-review` (security mode), `production-readiness` |
+| `test-writer` | Test suite creation and coverage improvement | `test-driven-development`, `qa` |
 
 ## Document Output Convention
 
@@ -163,22 +182,23 @@ It is always OK — and expected — to stop and say "this is too hard for me."
 | Working on multiple features at once | `git-worktrees` |
 | Finishing and merging a branch | `finishing-branch` |
 | Weekly engineering summary | `self-improvement` (`retro` scope) |
-| Deploying/releasing software | `ship` |
-| Creating a new skill | `writing-skills` |
+| Releasing / shipping software | `release` |
+| Creating or managing skills/agents | `framework-management` |
 | Exploratory investigation | `investigate` |
 | Responding to review feedback | `code-review` (`receiving` mode) |
 | Auditing for security vulnerabilities | `code-review` (`security` mode) |
 | Quality assurance and testing | `qa` |
 | Safety guardrails for high-risk operations | `careful` |
 | Sprint pipeline orchestration | `workflow` |
-| Managing, installing, searching for online, or creating agents | `agent-management` |
 | Product discovery and idea validation | `office-hours` |
 | Automated full plan review pipeline | `plan-review` (auto mode) |
-| Restrict edits to a directory (built into `systematic-debugging`) | `systematic-debugging` |
 | Update docs after shipping | `document-release` |
 | Verifying production readiness before deploy | `production-readiness` |
 | Post-task performance evaluation and improvement | `self-improvement` |
 | Audit and maintain the agent harness health | `harness-engineering` |
+| Dependency and security scan | `dependency-audit` |
+| Code refactoring and debt reduction | `refactoring` |
+| Frontend UI design and optimization | `frontend-design` |
 
 ## Project-First Tool Selection
 

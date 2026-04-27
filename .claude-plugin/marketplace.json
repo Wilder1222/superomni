@@ -27,7 +27,13 @@
                 "code-review",
                 "productivity",
                 "ai-assistant"
-            ]
+            ],
+            "skillsDir": "./skills",
+            "agentsDir": "./agents",
+            "commandsDir": "./commands",
+            "install": {
+                "script": "./setup"
+            }
         }
     ]
 }

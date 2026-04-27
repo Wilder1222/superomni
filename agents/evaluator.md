@@ -1,3 +1,8 @@
+---
+name: evaluator
+description: Use for objective quality-gate evaluation of agent output. Handles catching errors, inconsistencies, and quality regressions before they reach production.
+---
+
 # evaluator
 
 **Specialty:** Systematic evaluation of agent output quality — catching errors, inconsistencies, and quality regressions before they reach production.

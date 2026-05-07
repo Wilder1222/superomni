@@ -380,6 +380,7 @@ Generate exactly **3 concrete improvement actions** for the next sprint:
 **Format for each action:**
 ```
 ACTION [N]: [TITLE]
+Priority:   P0 — blocks process quality / P1 — degrades output quality / P2 — nice to have
 Problem:  [what went wrong or what was missing]
 Root cause: [which of the 3 root causes — process drift / evidence gap / scope creep]
 Fix:      [specific, actionable change to process or behavior]
@@ -389,11 +390,31 @@ Verify:   [how to confirm this improvement was applied in the next session]
 **Example:**
 ```
 ACTION 1: WRITE SPEC BEFORE IMPLEMENTATION
+Priority:   P0 — blocks process quality
 Problem:  Started coding directly from the issue title without a spec
 Root cause: Process drift — skipped THINK stage under time pressure
 Fix:      Before any implementation task, spend 5 minutes writing docs/superomni/specs/spec-[branch]-[session]-[date].md with problem, goals, non-goals, acceptance criteria
 Verify:   Next session starts with `ls docs/superomni/specs/spec-*.md` — must exist before first code change
 ```
+
+## Phase 6.5: Loop Back to Next Plan
+
+Before closing, reference any unresolved P0/P1 action items from the **previous** improvement report, so they are not forgotten:
+
+```bash
+# Find the most recent prior improvement report (not the one just written)
+PREV_IMPROVE=$(find docs/superomni/improvements -name "improvement-*.md" -type f 2>/dev/null | sort | tail -2 | head -1)
+if [ -n "$PREV_IMPROVE" ]; then
+  echo "=== Prior improvement actions ==="
+  grep -A4 "^### ACTION" "$PREV_IMPROVE" 2>/dev/null | head -30
+fi
+```
+
+For each prior P0/P1 action:
+- **If applied this session:** note `✓ resolved` in the Gap Analysis (Phase 5).
+- **If still open:** carry it forward as ACTION [N] in the current report (do not silently drop it).
+
+This creates an explicit improvement loop: prior actions appear in the next plan until resolved.
 
 ## Phase 7: Save Improvement Report
 
@@ -467,18 +488,21 @@ Tacit gaps file: [path or "not generated"]
 ## Action Items (Phase 6)
 
 ### ACTION 1: [TITLE]
+Priority: P0/P1/P2
 Problem: ...
 Root cause: ...
 Fix: ...
 Verify: ...
 
 ### ACTION 2: [TITLE]
+Priority: P0/P1/P2
 Problem: ...
 Root cause: ...
 Fix: ...
 Verify: ...
 
 ### ACTION 3: [TITLE]
+Priority: P0/P1/P2
 Problem: ...
 Root cause: ...
 Fix: ...

@@ -7,6 +7,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.9] — 2026-05-07
+
+### Added
+- **Unified KPI schema** — new `docs/superomni/style-profiles/evaluation-kpi-schema.md` defining 6 measurement dimensions: gate pass rate, evaluation coverage, agent performance score, skill effectiveness score, Iron Law compliance rate, and context efficiency (preamble size).
+- **Missing output directories** — bootstrapped `docs/superomni/{evaluations,improvements,releases,harness-audits,reviews,executions,subagents,production-readiness}/` with `.gitkeep` so all artifact paths exist before any skill writes to them.
+
+### Changed
+- **`lib/check-workflow-contract.js`** — extended artifact recognition: `release` and `harness-audit` types now parsed; date pattern updated to accept both `YYYYMMDD` (session artifacts) and `YYYY-MM-DD-HHmmss` (runtime-generated artifacts); added content validation: release files must contain both `## Release` and `## Retrospective`; evaluation files must carry a `**Status:**` field.
+- **`lib/score-workflow.js`** — added evaluator verdict parsing (`APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED`), gate pass rate calculation, Iron Law compliance rate, and preamble line-count efficiency metric; output now includes a top-level `kpi` summary block.
+- **`skills/self-improvement/SKILL.md.tmpl`** — ACTION items now carry a `Priority: P0/P1/P2` field; new **Phase 6.5 — Loop Back to Next Plan** explicitly carries forward unresolved P0/P1 actions from the prior improvement report to prevent silent drop.
+- **`CLAUDE.md`** — removed deprecated `retros/` row from Document Output Convention (standalone retro files deprecated in v0.5.8; retrospective content now lives inside release artifacts).
+
+---
+
 ## [0.5.8] — 2026-04-20
 
 ### Changed

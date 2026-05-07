@@ -2,7 +2,7 @@
 
 > **Plan Lean, Execute Complete** — A fused AI coding skill framework for Claude Code, Codex, Gemini CLI, and GitHub Copilot.
 
-Current stable version: 0.5.8
+Current stable version: 0.5.9
 
 superomni is an opinionated AI coding skill framework for Claude Code, Codex, Gemini CLI, and GitHub Copilot.
 

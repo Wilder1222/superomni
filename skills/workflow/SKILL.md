@@ -242,15 +242,20 @@ Output:
 
 ## Stage 6: RELEASE - Ship and Retrospective
 
-Skills: `release` (combines ship + retrospective in one step), `finishing-branch`, `careful`
+Skills: `release`, `document-release`, `finishing-branch`, `careful`
 
 Input: verified and ready code from Stage 5.
 
 Process:
 1. Prepare branch for merge (`finishing-branch`, `careful` for risky ops)
 2. Version bump, changelog update, tag and publish
-3. Write `## Release` section of release artifact (deployment evidence, rollback plan)
+3. Write `## Release` section of release artifact (deployment evidence, rollback plan, commit evidence)
 4. Write `## Retrospective` section of release artifact (tacit gap mining, what went well/slow, process changes)
+5. Run `document-release` post-ship documentation updates
+6. Run conditional auto-commit at the end of RELEASE:
+   - Commit only when `git status --porcelain` reports changes
+   - Skip when no changes (no empty commits)
+   - If commit fails when changes exist, report non-DONE status
 
 Output: `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain both `## Release` and `## Retrospective` sections)
 

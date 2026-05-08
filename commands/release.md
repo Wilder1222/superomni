@@ -13,9 +13,14 @@ Combined **RELEASE** stage — ship the software and capture retrospective in on
 1. Pre-release assessment (branch, tests, blockers)
 2. Version bump, changelog, tag & publish
 3. Retrospective: tacit gap mining, sprint analysis, process improvements
-4. Writes a single artifact: `docs/superomni/releases/release-[branch]-[session]-[date].md`
-   - `## Release` section: version, changelog, deployment evidence, rollback plan
-   - `## Retrospective` section: what went well, slowdowns, process changes, next sprint
+4. Run `document-release` updates, then conditional auto-commit:
+   - commit only if release flow produced changes
+   - skip when no changes (no empty commit)
+   - commit failure when changes exist => non-DONE release status
+5. Writes a single artifact: `docs/superomni/releases/release-[branch]-[session]-[date].md`
+    - `## Release` section: version, changelog, deployment evidence, rollback plan
+     - includes commit evidence: committed hash or skipped reason
+    - `## Retrospective` section: what went well, slowdowns, process changes, next sprint
 
 ## Pipeline Position
 

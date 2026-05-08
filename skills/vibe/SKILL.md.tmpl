@@ -299,6 +299,8 @@ Stage reference table:
 | VERIFY  | `code-review` → `qa` → `verification` → `dependency-audit` | `code-reviewer`, `security-auditor` (auto on security-sensitive diffs, includes OWASP A06 dependency scan), `test-writer` (qa gap fill), `evaluator` (final gate) | `docs/superomni/evaluations/evaluation-*.md` |
 | RELEASE | `release` → `document-release` | `doc-writer` (post-ship documentation)    | `docs/superomni/releases/release-*.md` |
 
+RELEASE expectation: after `release` and `document-release` complete, run a conditional auto-commit for release changes (commit when dirty, skip when clean, non-DONE on commit failure).
+
 Example output when entering REVIEW stage:
 
 ```

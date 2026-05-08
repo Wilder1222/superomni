@@ -27,7 +27,7 @@ git stash list
 ```
 
 Confirm:
-- [ ] On correct branch, no uncommitted changes
+- [ ] On correct branch; working tree is clean before entering RELEASE
 - [ ] All tests pass (check CI or run locally)
 - [ ] No open P0 blockers
 
@@ -141,6 +141,11 @@ Write `$_REL_FILE` with this structure:
 ### Deployment Evidence
 [tag created, release URL, health check result]
 
+### Commit Evidence
+- Status: [committed | skipped]
+- Commit: [hash if committed]
+- Reason: [why skipped, if skipped]
+
 ### Rollback Plan
 [how to revert if needed]
 
@@ -162,7 +167,29 @@ Write `$_REL_FILE` with this structure:
 - [actionable item]
 ```
 
-## Phase 5: Report
+## Phase 5: Finalize Release Changes (Conditional Auto-Commit)
+
+Run this only after release actions and `document-release` updates are complete.
+
+```bash
+# Commit only if release workflow produced changes
+if [ -n "$(git status --porcelain)" ]; then
+  git add -A
+  git commit -m "release: finalize release artifacts and docs"
+  RELEASE_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "")
+  RELEASE_COMMIT_STATUS="committed"
+else
+  RELEASE_COMMIT=""
+  RELEASE_COMMIT_STATUS="skipped"
+fi
+```
+
+Rules:
+- If commit succeeds -> continue.
+- If no changes are present -> skip commit and record the skip reason.
+- If commit is required but fails -> report `BLOCKED` (do not report `DONE`).
+
+## Phase 6: Report
 
 ```
 RELEASE COMPLETE
@@ -171,8 +198,9 @@ Version:      [vX.Y.Z]
 Artifact:     [release file path]
 ## Release:   [populated ✓]
 ## Retro:     [populated ✓]
+Commit:       [committed: <hash> | skipped: no changes]
 
-Status: DONE | DONE_WITH_CONCERNS
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 Concerns:
   - [any post-release concerns]
 ════════════════════════════════════════

@@ -51,6 +51,9 @@ Never replace the quality gate with brand-specific rules.
 2. Select exactly one brand from `design-md-whitelist.md`.
 3. Load only 1-2 core reference files required by the task.
 4. If context pressure rises, summarize brand rules into a concise shortlist (for example, 3-8 transferable constraints based on task complexity) and unload raw brand text.
+   - Simple task (single component polish, one viewport focus): 3-4 constraints
+   - Medium task (single page with multiple states): 4-6 constraints
+   - Complex task (multi-page flow or design system alignment): 6-8 constraints
 
 ## Anti-Copy Guardrails
 

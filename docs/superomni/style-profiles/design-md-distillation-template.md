@@ -71,4 +71,3 @@ Short prompt block:
 - Typography rules:
 - Interaction constraints:
 - Accessibility constraints:
-

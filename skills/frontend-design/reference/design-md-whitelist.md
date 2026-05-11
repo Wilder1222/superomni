@@ -27,4 +27,3 @@ Use this list for controlled adoption. Start with these references before expand
 - Pair with **1-2** core references from `skills/frontend-design/reference/`.
 - If a user asks for a non-whitelist brand, ask for explicit approval before use.
 - Do not auto-expand this list without quality-gate stability checks.
-

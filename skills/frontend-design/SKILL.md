@@ -266,6 +266,7 @@ After implementing with one brand reference, distill reusable style guidance:
 - Keep output file names as `design-md-<brand>.md` and `prompt-design-md-<brand>.md`.
 - Structure fallback output into these blocks: `Metadata`, `Transferable Rules`, `Quality Gate Mapping`, `Anti-Copy Constraints`, `Prompt Fragment`.
 - Fallback extraction guidance: `Transferable Rules` uses Positioning + Section Mapping + Loading Protocol; `Quality Gate Mapping` uses the same section table; `Anti-Copy Constraints` uses Anti-Copy Guardrails.
+- Fallback conflict rule: if fallback source sections and target schema differ, normalize content to the target block names above and prioritize explicit quality-gate/accessibility constraints over brand-style phrasing.
 
 Distillation rule:
 - Keep only transferable tokens/rules (typography scale, spacing rhythm, color roles, state behavior, motion principles)

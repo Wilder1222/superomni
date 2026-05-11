@@ -262,6 +262,7 @@ After implementing with one brand reference, distill reusable style guidance:
 - Create/update `docs/superomni/style-profiles/design-md-<brand>.md`
 - Create/update `docs/superomni/style-profiles/prompt-design-md-<brand>.md`
 - Use `docs/superomni/style-profiles/design-md-distillation-template.md` as the schema
+- If the template file is unavailable, fallback to sections in `reference/design-md-adaptation.md` (Positioning, Quality Gate Mapping, Anti-Copy Guardrails) and keep the same output file names.
 
 Distillation rule:
 - Keep only transferable tokens/rules (typography scale, spacing rhythm, color roles, state behavior, motion principles)

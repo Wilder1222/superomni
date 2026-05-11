@@ -50,7 +50,7 @@ Never replace the quality gate with brand-specific rules.
 1. Load this adaptation guide first.
 2. Select exactly one brand from `design-md-whitelist.md`.
 3. Load only 1-2 core reference files required by the task.
-4. If context pressure rises, summarize brand rules into 5 transferable constraints and unload raw brand text.
+4. If context pressure rises, summarize brand rules into a concise shortlist (typically 3-5 transferable constraints) and unload raw brand text.
 
 ## Anti-Copy Guardrails
 

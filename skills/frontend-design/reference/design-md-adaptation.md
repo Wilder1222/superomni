@@ -63,3 +63,28 @@ Do not reproduce:
 Acceptable:
 - Transferable structure (hierarchy, spacing cadence, role-based color usage, interaction patterns)
 
+## Style Management + Impact Scope Example
+
+When multiple brand styles are available, organize and apply them with a single-brand-per-task rule.
+
+### Example scenario
+
+- User goal: "Build a dashboard UI and let me choose the style"
+- Offered options (from whitelist): `Linear` / `Notion` / `Stripe`
+- User selection: `Linear`
+
+### Impact scope identification
+
+| Scope | Typical changes | Constraint |
+|---|---|---|
+| High | typography scale, spacing rhythm, color role mapping, motion tone | Must still satisfy accessibility and responsive rules |
+| Medium | button/card/forms visual defaults, hover/focus expression, microcopy tone | Must keep complete state coverage and error recovery |
+| Low / blocked | logos, trademark graphics, proprietary slogans, unique hero composition | Do not clone; replace with project-owned assets |
+
+### Deep adaptation fusion checklist
+
+1. Load adaptation layer + selected brand + 1-2 core references.
+2. Distill brand input into transferable rules (not direct copies).
+3. Apply style across layout/components/states consistently.
+4. Verify affected quality dimensions and run the existing 10-dimension gate.
+5. Save distilled profile for reuse in `docs/superomni/style-profiles/`.

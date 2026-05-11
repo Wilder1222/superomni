@@ -33,6 +33,27 @@ Supported modes: `audit`, `critique`, `polish`, `distill`, `clarify`, `animate`,
 5. Improvements are applied in a priority sequence, not a fixed single-mode path
 6. A quality gate verifies affected dimensions before completion
 
+## Brand-Style Guided Example
+
+Use brand-style references in a controlled way so users can choose UI direction without cloning brand assets.
+
+Example flow:
+
+1. Offer style choices from the whitelist (for example: `Linear`, `Notion`, `Stripe`)
+2. User picks one style direction
+3. Load:
+   - `skills/frontend-design/reference/design-md-adaptation.md`
+   - one brand from `skills/frontend-design/reference/design-md-whitelist.md`
+   - 1-2 principle references (typography/color/layout/etc.)
+4. Identify impact scope before implementation:
+   - **High impact:** color roles, typography hierarchy, spacing rhythm, motion tone
+   - **Medium impact:** component styling defaults, interaction micro-patterns
+   - **Low impact / protected:** branding assets, legal identity elements, proprietary copy
+5. Execute deep adaptation fusion:
+   - Keep transferable style language
+   - Preserve existing engineering/accessibility constraints
+   - Pass the existing 10-dimension quality gate
+
 ## Output
 
 A focused frontend improvement result chosen automatically from your context, with one or more targeted enhancements applied.

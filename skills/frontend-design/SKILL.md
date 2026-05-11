@@ -234,6 +234,40 @@ cat skills/frontend-design/reference/typography.md  # only when needed
 
 If the user requests a reference not yet loaded, load it. If context pressure is high, summarize the current reference into 5 key rules and unload the raw content.
 
+### DESIGN.md Adaptation Layer (awesome-design-md compatible)
+
+External site `DESIGN.md` files are treated as **brand style input**, not as implementation truth. Engineering and accessibility rules must still come from the core references.
+
+Load order for brand-guided work:
+1. Load `reference/design-md-adaptation.md` (mapping layer)
+2. Load **one** brand file from `reference/design-md-whitelist.md`
+3. Load **1-2** core reference files from the matrix above
+
+Hard limits:
+- Never load more than **one** brand `DESIGN.md` in a session
+- Never replace quality gate dimensions with brand rules
+- Keep total active references to 2-3 files
+
+Governance and legal boundary:
+- Borrow style system patterns, not proprietary identity assets
+- Do **not** replicate logos, trademarks, unique illustrations, proprietary copy, or exact layout signatures
+- Target: "same design language", never "1:1 visual clone"
+
+Naming boundary:
+- This project already has `docs/DESIGN.md` (architecture). Keep external style references under `skills/frontend-design/reference/` and distilled outputs under `docs/superomni/style-profiles/`.
+
+### Phase 3.5: Style Distillation Output (for reuse and audit)
+
+After implementing with one brand reference, distill reusable style guidance:
+- Create/update `docs/superomni/style-profiles/design-md-<brand>.md`
+- Create/update `docs/superomni/style-profiles/prompt-design-md-<brand>.md`
+- Use `docs/superomni/style-profiles/design-md-distillation-template.md` as the schema
+
+Distillation rule:
+- Keep only transferable tokens/rules (typography scale, spacing rhythm, color roles, state behavior, motion principles)
+- Remove brand-locked identity elements and copyrighted copy
+- Keep the profile concise and implementation-oriented
+
 ---
 
 ## Phase 4: Implementation

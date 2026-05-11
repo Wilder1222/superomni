@@ -262,7 +262,7 @@ After implementing with one brand reference, distill reusable style guidance:
 - Create/update `docs/superomni/style-profiles/design-md-<brand>.md`
 - Create/update `docs/superomni/style-profiles/prompt-design-md-<brand>.md`
 - Use `docs/superomni/style-profiles/design-md-distillation-template.md` as the schema
-- If the template file is unavailable, fallback to sections in `reference/design-md-adaptation.md` (Positioning, Quality Gate Mapping, Anti-Copy Guardrails).
+- If the template file is unavailable, fallback to sections in `reference/design-md-adaptation.md` (Positioning, Section Mapping, Quality Gate Mapping, Loading Protocol, Anti-Copy Guardrails).
 - Keep output file names as `design-md-<brand>.md` and `prompt-design-md-<brand>.md`.
 - Structure fallback output into these blocks: `Metadata`, `Transferable Rules`, `Quality Gate Mapping`, `Anti-Copy Constraints`, `Prompt Fragment`.
 

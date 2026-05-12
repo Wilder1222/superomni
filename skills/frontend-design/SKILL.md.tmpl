@@ -127,11 +127,7 @@ After implementing with one brand reference, distill reusable style guidance:
 - Create/update `docs/superomni/style-profiles/design-md-<brand>.md`
 - Create/update `docs/superomni/style-profiles/prompt-design-md-<brand>.md`
 - Use `docs/superomni/style-profiles/design-md-distillation-template.md` as the schema
-- If the template file is unavailable, fallback to sections in `reference/design-md-adaptation.md` (Positioning, Section Mapping, Quality Gate Mapping, Loading Protocol, Anti-Copy Guardrails).
-- Keep output file names as `design-md-<brand>.md` and `prompt-design-md-<brand>.md`.
-- Structure fallback output into these blocks: `Metadata`, `Transferable Rules`, `Quality Gate Mapping`, `Anti-Copy Constraints`, `Prompt Fragment`.
-- Fallback extraction guidance: `Transferable Rules` uses Positioning + Section Mapping + Loading Protocol; `Quality Gate Mapping` uses the same section table; `Anti-Copy Constraints` uses Anti-Copy Guardrails.
-- Fallback conflict rule: if fallback source sections and target schema differ, normalize content to the target block names above and prioritize explicit quality-gate/accessibility constraints over brand-style phrasing.
+- If the template file is unavailable, fallback to sections in `reference/design-md-adaptation.md` and structure output into: `Metadata`, `Transferable Rules`, `Quality Gate Mapping`, `Anti-Copy Constraints`, `Prompt Fragment`; prioritize quality-gate/accessibility constraints over brand-style phrasing.
 
 Distillation rule:
 - Keep only transferable tokens/rules (typography scale, spacing rhythm, color roles, state behavior, motion principles)
@@ -231,7 +227,7 @@ When invoked via a steering command:
    - `Tip: run /front-design (auto) or /front-design mode:<supported-mode>`
 4. Skip Phases 1-2 **only when context is already established**, meaning at least one is true:
    - A prior response in the same session already captured target audience, brand personality, use context, design-system reuse, and constraints
-   - A project design config file (`.impeccable.md` or `.design-config.md`) exists with all five required inputs
+   - A project design config file (`.impeccable.md` or `.design-config.md`) exists covering the five inputs in the Phase 1 checklist
    - User explicitly instructs to skip discovery and provides constraints inline
 5. Resolve brand input with single-brand rule:
    - If brand is not in whitelist, STOP and request approval + local vendoring + whitelist update

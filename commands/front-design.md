@@ -79,14 +79,12 @@ Brand boundary enforcement:
 - Reject multi-brand requests in a single execution (one brand only).
 
 Missing-file fallback:
-- For brand-guided runs, if **any required file** is missing, degrade to core references only and keep standard 10-dimension quality gate.
+- For brand-guided runs, if **any required file** is missing, degrade to core references only and run the full 10-dimension quality gate unchanged (all 10 dimensions defined in `skills/frontend-design/SKILL.md` under the Quality Gate section).
 - Required files to check:
   - `skills/frontend-design/reference/design-md-adaptation.md`
   - `skills/frontend-design/reference/design-md-whitelist.md`
   - selected brand file under `skills/frontend-design/reference/design-md-library/<brand>/DESIGN.md`
 - Record fallback in output receipts.
-- `keep standard 10-dimension quality gate` means preserve full 10-dimension validation authority and strictness unchanged.
-- 10 dimensions are defined in `skills/frontend-design/SKILL.md` under the Quality Gate section.
 
 ## Output
 

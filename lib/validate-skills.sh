@@ -31,6 +31,9 @@ fail()    { echo -e "${RED}  [FAIL]${RESET} $1"; ERRORS=$((ERRORS+1)); }
 warn()    { echo -e "${YELLOW}  [WARN]${RESET} $1"; WARNINGS=$((WARNINGS+1)); }
 pass()    { echo -e "${GREEN}  [PASS]${RESET} $1"; }
 
+# Only a subset of skills uses Iron Law sections as a teaching mechanism where
+# concrete good/bad examples materially improve the skill's usability. Other
+# skills may still declare an Iron Law, but we do not warn on missing examples.
 requires_iron_law_examples() {
   case "$1" in
     skills/dependency-audit/SKILL.md.tmpl|\
@@ -99,7 +102,10 @@ validate_tmpl() {
     pass "status protocol keywords found"
   fi
 
-  # 7. Structural flow (phase/step/stage/mode/workflow/checklist headings)
+  # 7. Structural flow headings accepted by the validator:
+  #    - Phase/Step/Stage/Mode headings at ## or ### level
+  #    - Nested numbered headings such as "### 1. Verify ..."
+  #    - Workflow/Checklist headings used by operational skills
   if ! grep -qE '^#{2,3} ((Phase|Step|Stage|Mode)( [0-9]+)?|[0-9]+\.|.*Workflow|.*Checklist)' "$tmpl"; then
     warn "$rel_tmpl: no structural flow headings found — skills should expose phases, steps, modes, workflows, or checklists"
   else

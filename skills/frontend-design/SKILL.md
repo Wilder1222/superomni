@@ -358,11 +358,49 @@ Use a single command to invoke frontend-design with automatic mode detection:
 ### Steering Command Protocol
 
 When invoked via a steering command:
-1. Skip Phases 1-2 (assume context already established)
-2. Load the relevant reference file(s) for the command mode
-3. Analyze the current implementation through the command's lens
-4. Apply fixes
-5. Run the quality gate on affected dimensions only
+1. Validate `mode:*` against the allowed set: `audit`, `critique`, `polish`, `distill`, `clarify`, `animate`, `colorize`, `harden`, `arrange`, `typeset`
+2. If no mode is provided, enter auto mode and echo `mode=auto`
+3. If mode is invalid, STOP and return fixed correction:
+   - `Invalid mode: <value>`
+   - `Supported modes: audit, critique, polish, distill, clarify, animate, colorize, harden, arrange, typeset`
+   - `Tip: run /front-design (auto) or /front-design mode:<supported-mode>`
+4. Skip Phases 1-2 **only when context is already established**, meaning at least one is true:
+   - A prior response in the same session already captured target audience, brand personality, use context, design-system reuse, and constraints
+   - A project design config file (`.impeccable.md` or `.design-config.md`) exists with all five required inputs
+   - User explicitly instructs to skip discovery and provides constraints inline
+5. Resolve brand input with single-brand rule:
+   - If brand is not in whitelist, STOP and request approval + local vendoring + whitelist update
+   - If multiple brands are requested, STOP and ask user to choose one
+6. Load references in order:
+   - `reference/design-md-adaptation.md`
+   - exactly one whitelist brand DESIGN.md (if requested)
+   - 1-2 core references selected by mode:
+     - `audit` -> `color-and-contrast.md` + `responsive-design.md`
+     - `critique` -> `typography.md` + `spatial-design.md`
+     - `polish` -> `interaction-design.md` + `motion-design.md`
+     - `distill` -> `ux-writing.md` (+ `typography.md` if wording+hierarchy both change)
+     - `clarify` -> `ux-writing.md` (+ `interaction-design.md` when state copy is affected)
+     - `animate` -> `motion-design.md` (+ `responsive-design.md` when motion differs by viewport)
+     - `colorize` -> `color-and-contrast.md` (+ `typography.md` when color alters hierarchy)
+     - `harden` -> `interaction-design.md` + `responsive-design.md`
+     - `arrange` -> `spatial-design.md` + `responsive-design.md`
+     - `typeset` -> `typography.md` (+ `ux-writing.md` when readability copy tuning is needed)
+7. If adaptation/whitelist/brand files are missing, degrade to core references only
+8. Analyze current implementation through the command lens
+9. Apply fixes
+10. Run the quality gate on affected dimensions only
+
+### Execution Receipts (mandatory)
+
+Always emit these receipt flags in output:
+- `adaptation loaded`
+- `brand loaded`
+- `core refs loaded`
+- `quality gate authority kept`
+
+If fallback was used, include:
+- `fallback: core-references-only`
+- `missing files: [list]`
 
 ---
 
@@ -386,9 +424,29 @@ Quality Gate:
   Result: PASS | ESCALATED
   Overall score: [N]/10
 
+Execution Receipts:
+  mode: [auto|audit|critique|polish|distill|clarify|animate|colorize|harden|arrange|typeset]
+  brand: [name|none]
+  loaded refs: [list]
+  adaptation loaded: [yes|no]
+  brand loaded: [yes|no]
+  core refs loaded: [yes|no]
+  quality gate authority kept: yes
+  fallback: [none|core-references-only]
+  gate result: PASS | RETRY | ESCALATE
+
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
 ```
+
+### Command-Level Acceptance Checklist
+
+- [ ] Valid mode executes normally
+- [ ] Invalid mode returns fixed correction text
+- [ ] Non-whitelist brand request is blocked with approval + vendor guidance
+- [ ] Multi-brand request is blocked
+- [ ] Missing adaptation/whitelist/brand files trigger core-references-only fallback
+- [ ] After two auto-fix retries, failed gate escalates with options A/B/C
 
 Report status using the completion protocol. After DONE, suggest next steps:
 - "Run `/front-design mode:polish` for a final refinement pass"

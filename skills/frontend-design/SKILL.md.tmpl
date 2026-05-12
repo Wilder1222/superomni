@@ -229,14 +229,27 @@ When invoked via a steering command:
    - `Invalid mode: <value>`
    - `Supported modes: audit, critique, polish, distill, clarify, animate, colorize, harden, arrange, typeset`
    - `Tip: run /front-design (auto) or /front-design mode:<supported-mode>`
-4. Skip Phases 1-2 **only when context is already established**
+4. Skip Phases 1-2 **only when context is already established**, meaning at least one is true:
+   - A prior response in the same session already captured target audience, brand personality, use context, design-system reuse, and constraints
+   - A project design config file (`.impeccable.md` or `.design-config.md`) exists with all five required inputs
+   - User explicitly instructs to skip discovery and provides constraints inline
 5. Resolve brand input with single-brand rule:
    - If brand is not in whitelist, STOP and request approval + local vendoring + whitelist update
    - If multiple brands are requested, STOP and ask user to choose one
 6. Load references in order:
    - `reference/design-md-adaptation.md`
    - exactly one whitelist brand DESIGN.md (if requested)
-   - 1-2 core references
+   - 1-2 core references selected by mode:
+     - `audit` -> `color-and-contrast.md` + `responsive-design.md`
+     - `critique` -> `typography.md` + `spatial-design.md`
+     - `polish` -> `interaction-design.md` + `motion-design.md`
+     - `distill` -> `ux-writing.md` (+ `typography.md` if wording+hierarchy both change)
+     - `clarify` -> `ux-writing.md` (+ `interaction-design.md` when state copy is affected)
+     - `animate` -> `motion-design.md` (+ `responsive-design.md` when motion differs by viewport)
+     - `colorize` -> `color-and-contrast.md` (+ `typography.md` when color alters hierarchy)
+     - `harden` -> `interaction-design.md` + `responsive-design.md`
+     - `arrange` -> `spatial-design.md` + `responsive-design.md`
+     - `typeset` -> `typography.md` (+ `ux-writing.md` when readability copy tuning is needed)
 7. If adaptation/whitelist/brand files are missing, degrade to core references only
 8. Analyze current implementation through the command lens
 9. Apply fixes

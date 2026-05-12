@@ -31,6 +31,23 @@ fail()    { echo -e "${RED}  [FAIL]${RESET} $1"; ERRORS=$((ERRORS+1)); }
 warn()    { echo -e "${YELLOW}  [WARN]${RESET} $1"; WARNINGS=$((WARNINGS+1)); }
 pass()    { echo -e "${GREEN}  [PASS]${RESET} $1"; }
 
+requires_iron_law_examples() {
+  case "$1" in
+    skills/dependency-audit/SKILL.md.tmpl|\
+    skills/framework-management/SKILL.md.tmpl|\
+    skills/refactoring/SKILL.md.tmpl|\
+    skills/style-capture/SKILL.md.tmpl|\
+    skills/systematic-debugging/SKILL.md.tmpl|\
+    skills/test-driven-development/SKILL.md.tmpl|\
+    skills/verification/SKILL.md.tmpl)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 validate_tmpl() {
   local tmpl="$1"
   local rel_tmpl="${tmpl#$ROOT_DIR/}"
@@ -82,17 +99,19 @@ validate_tmpl() {
     pass "status protocol keywords found"
   fi
 
-  # 7. Phase structure (at least one ## Phase or ## Step or ## Stage)
-  if ! grep -qE '^## (Phase|Step|Stage|Phase [0-9]|Step [0-9])' "$tmpl"; then
-    warn "$rel_tmpl: no Phase/Step/Stage sections found — skills should have numbered phases"
+  # 7. Structural flow (phase/step/stage/mode/workflow/checklist headings)
+  if ! grep -qE '^#{2,3} ((Phase|Step|Stage|Mode)( [0-9]+)?|[0-9]+\.|.*Workflow|.*Checklist)' "$tmpl"; then
+    warn "$rel_tmpl: no structural flow headings found — skills should expose phases, steps, modes, workflows, or checklists"
   else
-    pass "phase/step structure present"
+    pass "structural flow headings present"
   fi
 
   # 9. Iron Law example blocks (recommended for core skills)
   if grep -q '## Iron Law' "$tmpl"; then
     if ! grep -qE '### .*(Good|Bad|Correct|Incorrect|Compliant|Violat|Example)' "$tmpl"; then
-      warn "$rel_tmpl: Iron Law present but no example blocks found (recommended: add good/bad examples)"
+      if requires_iron_law_examples "$rel_tmpl"; then
+        warn "$rel_tmpl: Iron Law present but no example blocks found (recommended: add good/bad examples)"
+      fi
     else
       pass "Iron Law example blocks present"
     fi

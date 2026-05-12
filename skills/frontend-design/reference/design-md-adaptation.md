@@ -1,7 +1,7 @@
 <!--
 Adaptation guide for integrating external DESIGN.md style references.
 Primary external corpus: VoltAgent/awesome-design-md (MIT)
-Source: https://github.com/VoltAgent/awesome-design-md
+Source content is vendored locally under `reference/design-md-library/`.
 -->
 
 # DESIGN.md Adaptation Guide
@@ -48,7 +48,7 @@ Never replace the quality gate with brand-specific rules.
 ## Loading Protocol
 
 1. Load this adaptation guide first.
-2. Select exactly one brand from `design-md-whitelist.md`.
+2. Select exactly one brand from `design-md-whitelist.md` and load its local file from `design-md-library/<brand>/DESIGN.md`.
 3. Load only 1-2 core reference files required by the task.
 4. If context pressure rises, summarize brand rules into a concise shortlist (for example, 3-8 transferable constraints based on task complexity) and unload raw brand text.
    - Simple task (single component polish, one viewport focus): 3-4 constraints

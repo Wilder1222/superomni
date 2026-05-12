@@ -276,3 +276,13 @@ Main Agent  → worktree: ../project (main, for integration)
 ```
 
 See `subagent-development` skill for coordinating parallel sub-agents (includes wave planning).
+
+## Completion Status
+
+When the requested worktree setup or cleanup is complete, report:
+
+```
+Status: DONE | DONE_WITH_CONCERNS | BLOCKED
+Concern:
+  - [path conflict, missing branch, or follow-up needed]
+```

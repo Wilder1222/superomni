@@ -15,4 +15,11 @@ This skill adapts content from the following sources:
 - **Content:** Core skill philosophy and structure
 - **Author:** Anthropic
 
+## VoltAgent/awesome-design-md
+
+- **Source:** https://github.com/VoltAgent/awesome-design-md
+- **License:** MIT
+- **Content:** DESIGN.md corpus vendored locally under `reference/design-md-library/` and used as optional brand-style reference input via adaptation layer and pilot whitelist
+- **Author:** VoltAgent contributors
+
 All adapted content retains original licensing terms. See individual reference files for per-file attribution headers.

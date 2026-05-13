@@ -7,6 +7,59 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.0] — 2026-05-13
+
+### Added
+- **`/vibe auto` subcommand** — single-command end-to-end pipeline. Chains `brainstorm → writing-plans → plan-review → executing-plans → code-review → qa → verification → release` with only the THINK spec-approval human gate. Documented in `commands/vibe.md` + new mode section in `skills/vibe/SKILL.md` Phase 3. See flow diagram and "when NOT to use" guidance in `commands/vibe.md`.
+- **2-tier preamble (progressive disclosure)** — `lib/preamble-core.md` (15 lines, inlined into every SKILL.md via `{{PREAMBLE_CORE}}`) + `lib/preamble-ref.md` (127 lines, loaded on demand via `{{PREAMBLE_REF_LINK}}` markdown link). Matches Anthropic's official skill guideline: skill body loads only when invoked, long reference loads on demand. Legacy `{{PREAMBLE}}` kept as deprecated alias with build-time warning.
+- **Canonical frontmatter fields on all 28 skills** — every skill now declares `when_to_use`, `produces`, `consumes`, optional `dispatch-agent`. All 28 frontmatters parse as valid YAML. Enables machine-checkable stage linkage.
+- **Produces/consumes linkage validation** — `lib/check-workflow-contract.js` gained Section 1: builds a graph of `produces` → `consumes` across all skills and fails when a `consumes` target matches no `produces` pattern. Legacy sessions predating `20260513` are exempted via `CONTRACT_CUTOFF_YYYYMMDD` constant.
+- **`agents/explorer.md`** — new read-only isolated-context exploration agent. Tools: Read / Grep / Glob / safe read-only Bash. Dispatched by `investigate`, `systematic-debugging` (debug evidence), and `executing-plans` (cross-file surveys on ≥5-step waves). Absorbs the Phase-2 evidence-gathering role of the retired `debugger` agent.
+- **`lib/frontmatter-map.json` + `lib/apply-frontmatter.js`** — tooling used during the v0.6.0 migration to rewrite frontmatter consistently across 28 skills. Block-scalar YAML form used for descriptions containing `:` / `→` / quotes to avoid parse errors.
+
+### Changed
+- **Agent consolidation: 11 → 5.** `planner-reviewer` (renamed from `architect`) absorbs the retired `planner`, `ceo-advisor`, `evaluator`, `security-auditor`, `code-reviewer` agents via mode selector (planning / strategy / engineering / evaluation / security / code-review). `frontend-designer` (renamed from `designer`). `explorer` (new). `refactoring-agent` and `doc-writer` unchanged. Surviving 5 agents all have ≥ 4 skill dispatchers (fan-in).
+- **Pipeline stage→agent routing** in `skills/vibe/SKILL.md` fully remapped to the 5 canonical agents. All 13 skill bodies that referenced retired agent names were updated (exception: `debugger` as JS keyword in lint-grep patterns is preserved in `code-review`/`verification`/`finishing-branch`).
+- **Cross-platform generator parity enforced** — `lib/gen-skill-docs.{js,sh,ps1}` normalized to strip a single trailing newline from preamble content before token interpolation. Verified byte-identical output across all three generators on a `brainstorm` fixture.
+- **`skills/workflow/SKILL.md` demoted to 50-line stub** — operational pipeline logic now lives in exactly two places (`vibe` runtime + `using-skills` routing). Body is a pointer table to `/vibe auto`, `using-skills` Quick Reference, and `check:workflow-contract`. Eliminates prior 3-way drift between workflow/vibe/using-skills descriptions.
+- **Trigger-conflict disambiguation** in `CLAUDE.md` — sharpened trigger column for 5 conflict pairs: `executing-plans` vs `test-driven-development`, `code-review` vs `plan-review`, `workflow` vs `vibe`, `release` vs `ship`, `refactoring` vs `code-review`.
+- **`lib/validate-skills.sh`** updated to accept either `{{PREAMBLE_CORE}}` + `{{PREAMBLE_REF_LINK}}` (new, canonical) or `{{PREAMBLE}}` (legacy, deprecated warning). SKILL.md expansion check now accepts either the new `Preamble (Core)` marker or the legacy `Completion Status Protocol` header.
+- **`framework-management/SKILL.md.tmpl`** — scaffolding example now teaches the new 2-token pattern and the 3 required frontmatter fields (`when_to_use`, `produces`, `consumes`). Newly-authored skills inherit the progressive-disclosure convention from day one.
+- **`CLAUDE.md`** — added "Agents Available" table between the Skills and Commands sections, describing the 5 canonical agents + their dispatchers.
+
+### Removed
+- **7 retired agent files**: `ceo-advisor.md`, `code-reviewer.md`, `debugger.md`, `evaluator.md`, `planner.md`, `security-auditor.md`, `test-writer.md`. Each agent's unique content was absorbed into its parallel skill before deletion (zero knowledge loss). History preserved in git; `git show <old-commit>:agents/X.md` still works.
+
+### Migration notes
+
+**If you have your own skills or scripts that reference retired agent names, remap as follows:**
+
+| Retired agent | Replacement | Notes |
+|---------------|-------------|-------|
+| `planner` | `planner-reviewer` (planning mode) | Mode specified in dispatch prompt |
+| `architect` | `planner-reviewer` (engineering mode) | Renamed |
+| `ceo-advisor` | `planner-reviewer` (strategy mode) | Absorbed |
+| `evaluator` | `planner-reviewer` (evaluation mode) OR `verification` skill | Most use cases covered by `verification` in main context |
+| `code-reviewer` | `planner-reviewer` (code-review mode) | Absorbed |
+| `security-auditor` | `planner-reviewer` (security audit mode) | Absorbed; dependency sub-mode for OWASP A06 |
+| `test-writer` | `test-driven-development` skill | No longer an agent — runs in main context |
+| `debugger` | `explorer` (Phase-2 evidence) OR `systematic-debugging` skill | Debug protocol moved into skill; `explorer` provides isolated-context survey |
+| `designer` | `frontend-designer` | Renamed; same responsibilities |
+
+**If you copy `SKILL.md.tmpl` patterns from this repo:**
+Replace `{{PREAMBLE}}` with `{{PREAMBLE_CORE}}` + `{{PREAMBLE_REF_LINK}}`. The legacy token still works but emits a build-time warning.
+
+### Results
+
+- 9,947 → 6,793 skill lines (−3,154, −31.7 %)
+- 4 → 0 skills over Anthropic's 500-line guideline
+- 11 → 5 agents (−54 %)
+- 0/28 → 28/28 frontmatter coverage on `when_to_use` / `produces` / `consumes`
+- New CI invariant: `gen-skill-docs.{js,sh,ps1}` produce byte-identical output
+- New CI invariant: `consumes` must resolve to some skill's `produces`
+
+---
+
 ## [0.5.9] — 2026-05-07
 
 ### Added

@@ -55,5 +55,8 @@
     "homepage": "https://github.com/Wilder1222/superomni#readme",
     "bugs": {
         "url": "https://github.com/Wilder1222/superomni/issues"
+    },
+    "devDependencies": {
+        "js-yaml": "^4.1.1"
     }
 }

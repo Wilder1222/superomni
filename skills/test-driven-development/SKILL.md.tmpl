@@ -1,15 +1,18 @@
 ---
 name: test-driven-development
 description: |
-  Use when writing any new code, fixing bugs, or refactoring.
-  Globally enforced: this skill is MANDATORY whenever code is written.
-  Enforces Red-Green-Refactor cycle and the Delete Untested Code rule.
-  Triggers: any code writing task, "implement", "add feature", "fix bug",
-  any step in executing-plans that touches source code.
+  Globally enforced Red-Green-Refactor for WRITING NEW CODE. Triggers on: "implement", "add feature", "fix bug", any code-writing step. NOT for task decomposition — use subagent-development for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use whenever new code is being written. Mandatory — this skill is a gate on all code-writing activities.
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Test-Driven Development
 

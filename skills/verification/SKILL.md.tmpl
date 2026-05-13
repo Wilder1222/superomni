@@ -1,13 +1,19 @@
 ---
 name: verification
 description: |
-  Use before claiming any task is complete.
-  Performs a structured self-check to ensure all acceptance criteria are met.
-  Triggers: "I'm done", "that's complete", "finished", before reporting DONE.
+  Structured self-check against acceptance criteria BEFORE claiming DONE. Triggers: "I'm done", "verify this", "finished". NOT for sprint retrospection — use self-improvement for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use immediately before reporting DONE on any substantive task. Writes an evaluation artifact that finishing-branch / release consume.
+produces: "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/executions/execution-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Verification Before Completion
 
@@ -160,21 +166,21 @@ git diff HEAD | grep "console.log\|debugger\|TODO\|FIXME\|print(" | head -10
 - [ ] If >5 files: was this flagged to the user?
 - [ ] Any unexpected files in the diff?
 
-## Independent Gate: Dispatch `evaluator` Agent
+## Independent Gate: `planner-reviewer` Agent (Evaluation Mode)
 
-After completing the checklist, **dispatch the `evaluator` agent** with:
+For a context-isolated independent verdict (recommended on ≥5-step waves, any `DONE_WITH_CONCERNS` step, or the final wave), **dispatch the `planner-reviewer` agent** in **evaluation mode** with:
 - The spec/plan acceptance criteria (from `docs/superomni/specs/spec-*.md` or `docs/superomni/plans/plan-*.md`)
 - All checklist results from above
 - Test output
 - Files changed
 
-The evaluator provides an independent EVALUATION REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Incorporate its TOP FINDING into the Verification Report below.
+The agent provides an independent EVALUATION REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Incorporate its TOP FINDING into the Verification Report below. (Evaluation content was consolidated from the retired `evaluator` agent into `planner-reviewer` evaluation mode.)
 
-**If the evaluator returns `CHANGES_REQUIRED`**: set status to `BLOCKED` and do NOT advance to RELEASE until the flagged issues are resolved.
+**If the agent returns `CHANGES_REQUIRED`**: set status to `BLOCKED` and do NOT advance to RELEASE until the flagged issues are resolved.
 
 ## Verification Report
 
-After completing the checklist and receiving the evaluator's verdict:
+After completing the checklist and receiving the independent verdict:
 
 ```
 VERIFICATION REPORT

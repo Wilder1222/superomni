@@ -1,13 +1,18 @@
 ---
 name: vibe
 description: |
-  Unified entry point for the superomni framework.
-  Activates all skills, detects current pipeline stage, and launches the guided workflow.
-  Triggers: "/vibe", "activate framework", "start workflow", "what's next".
+  Unified entry point: detect current pipeline stage, launch guided workflow, auto-delegate to next skill. Triggers: "/vibe", "activate framework", "start workflow". NOT a reference document — use workflow for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use to enter the framework, resume mid-sprint work, or auto-chain through stages. The primary user-facing entry command.
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Vibe - Framework Entry Point
 
@@ -221,6 +226,57 @@ Suggested next step -> [skill-name]: [reason based on detected stage]
 
 ## Phase 3: Handle Subcommands
 
+### `/vibe auto`
+
+Runs the full pipeline end-to-end. Only human gate is spec approval at THINK; every other stage auto-advances on `DONE`.
+
+**Protocol:**
+
+1. **If no spec exists** (THINK stage): dispatch `brainstorm` skill. It produces `spec-[branch]-[session]-[date].md` and stops at the approval gate. User reviews and approves (single human interaction). Once approved (marker file `.approved-spec-*` written), continue.
+2. **Chain the rest:** dispatch each stage's skill in order, passing the upstream artifact as context. After each `DONE`, check the next stage's `consumes:` (from the skill's frontmatter) is satisfied, then invoke the next skill.
+3. **Respect the status protocol strictly.** Any status other than `DONE` stops the chain:
+   - `DONE_WITH_CONCERNS` → surface concerns, stop and wait for user decision
+   - `BLOCKED` → report blocker, stop
+   - `NEEDS_CONTEXT` → request missing info, stop
+4. **Enforce the artifact contract.** After each skill reports `DONE`, verify the declared `produces:` artifact exists on disk. If missing, treat as `DONE_WITH_CONCERNS` and stop.
+
+**Stage dispatch sequence:**
+
+```
+THINK    brainstorm
+         └─ STOP at approval gate, resume on marker .approved-spec-*
+PLAN     writing-plans            (consumes spec, produces plan)
+REVIEW   plan-review              (consumes plan, produces review)
+BUILD    executing-plans          (consumes plan + review, produces execution)
+         └─ delegates to: subagent-development, test-driven-development,
+            frontend-design, refactoring, systematic-debugging as needed
+VERIFY   code-review → qa → verification
+         └─ produces evaluation artifact
+RELEASE  release                  (consumes evaluation, produces release)
+```
+
+**Termination:**
+- On `release` DONE → print summary of all artifacts produced and exit.
+- On any non-DONE → print current stage, the non-DONE reason, and which skill/agent is holding the chain.
+
+**Output format after completion:**
+
+```
+PIPELINE COMPLETE (auto mode)
+════════════════════════════════════════
+Branch:   [branch]
+Session:  [session]
+Artifacts produced:
+  ✓ spec:       [path]
+  ✓ plan:       [path]
+  ✓ review:     [path]
+  ✓ execution:  [path]
+  ✓ evaluation: [path]
+  ✓ release:    [path]
+Total human interactions: 1 (spec approval)
+════════════════════════════════════════
+```
+
 ### `/vibe status`
 
 Run stage detection from Phase 1 and display:
@@ -293,10 +349,10 @@ Stage reference table:
 | Stage   | Skill              | Agents                                    | Output artifact |
 |---------|--------------------|-------------------------------------------|-----------------|
 | THINK   | `brainstorm`       | none                                      | `docs/superomni/specs/spec-*.md` |
-| PLAN    | `writing-plans`    | `planner`                                 | `docs/superomni/plans/plan-*.md` |
-| REVIEW  | `plan-review`      | `ceo-advisor`, `architect` (+ `designer` if UI) | `docs/superomni/reviews/plan-review-*.md` |
-| BUILD   | `executing-plans` / `subagent-development` / `refactoring` | `test-writer` (code steps), `evaluator` (wave gates: ≥5 steps or DONE_WITH_CONCERNS or final wave), `designer` (UI steps), `refactoring-agent` (debt cleanup) | `docs/superomni/executions/execution-*.md` |
-| VERIFY  | `code-review` → `qa` → `verification` → `dependency-audit` | `code-reviewer`, `security-auditor` (auto on security-sensitive diffs, includes OWASP A06 dependency scan), `test-writer` (qa gap fill), `evaluator` (final gate) | `docs/superomni/evaluations/evaluation-*.md` |
+| PLAN    | `writing-plans`    | `planner-reviewer`                        | `docs/superomni/plans/plan-*.md` |
+| REVIEW  | `plan-review`      | `planner-reviewer` (+ `frontend-designer` if UI) | `docs/superomni/reviews/plan-review-*.md` |
+| BUILD   | `executing-plans` / `subagent-development` / `refactoring` | `frontend-designer` (UI steps), `refactoring-agent` (debt cleanup), `explorer` (cross-file survey for ≥5-step waves) | `docs/superomni/executions/execution-*.md` |
+| VERIFY  | `code-review` → `qa` → `verification` → `dependency-audit` | `planner-reviewer` (code/architecture review in isolated context, includes security-sensitive diffs & OWASP A06 dependency scan) | `docs/superomni/evaluations/evaluation-*.md` |
 | RELEASE | `release` → `document-release` | `doc-writer` (post-ship documentation)    | `docs/superomni/releases/release-*.md` |
 
 Example output when entering REVIEW stage:
@@ -305,7 +361,7 @@ Example output when entering REVIEW stage:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ▶ Entering REVIEW stage
   Skill  : plan-review
-  Agents : ceo-advisor, architect
+  Agents : planner-reviewer
   Output : docs/superomni/reviews/plan-review-[branch]-[session]-[date].md
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

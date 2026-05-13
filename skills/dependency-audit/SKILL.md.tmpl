@@ -6,9 +6,16 @@ description: |
   Triggers: "dependency audit", "check dependencies", "npm audit", "security scan",
   "check for vulnerabilities", "outdated packages", "license check".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use when auditing dependencies for security (npm audit), outdated packages, or license compliance. Triggers: "dependency audit", "npm audit", "security scan", "outdated packages", "license check". Complements code-review (which audits application code, not deps).
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Dependency Audit
 
@@ -75,9 +82,9 @@ java:   [manifest files found | none]
 ────────────────────────────────────────
 ```
 
-## Phase 2: Dispatch `security-auditor` Agent (Dependency Mode)
+## Phase 2: Dispatch `planner-reviewer` Agent (Security Audit, Dependency Mode)
 
-**Dispatch the `security-auditor` agent** with:
+**Dispatch the `planner-reviewer` agent** in **security audit mode (dependency sub-mode)** with:
 - The list of all package manifests found in Phase 1
 - Explicit instruction to run **Phase 4: Dependency Audit (OWASP A06)** and skip code scanning
 - The production context (pre-deploy or routine audit?)

@@ -1,145 +1,36 @@
 ---
 name: workflow
 description: |
-  Documents the end-to-end sprint workflow and inter-skill data flow.
-  Use to understand which skills to use, in what order, and how data flows between them.
-  Triggers: "workflow", "sprint", "pipeline", "what's next", "how do skills connect".
-allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+  Reference stub pointing to using-skills and vibe auto. The pipeline's operational logic now lives in `vibe` (runtime) and `using-skills` (routing + decision principles). Triggers: "workflow", "pipeline", "what runs at which stage".
+allowed-tools: [Read]
+when_to_use: |
+  Use as a quick lookup when you need to remember which skill runs at which stage or what artifact each stage produces. For running the pipeline, use `vibe auto` (or plain `/vibe`).
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
 
-# Workflow - Sprint Pipeline
+{{PREAMBLE_CORE}}
 
-**Goal:** Guide a complete feature from idea to shipped code by orchestrating the right skills in the right order, with clear data handoffs between each stage.
+{{PREAMBLE_REF_LINK}}
 
-## The Pipeline
 
-```
-THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
-  |        |       |        |       |       |
-  v        v       v        v       v       v
-spec-*   plan-*  approved  code   green  release+retro
-```
+# Workflow — Pipeline Reference
 
-THINK has exactly one human gate: spec review approval.
+Static pointer. Operational pipeline logic lives in `vibe` (runtime) and `using-skills` (routing).
 
-- `brainstorm` runs without manual gate.
-- After spec generation, user approves `spec-[branch]-[session]-[date].md`.
-- After that approval, all stages auto-advance in wave mode on DONE.
+## 6-Stage Pipeline
 
-Each stage uses specific skills and produces artifacts consumed by the next stage.
+`THINK → PLAN → REVIEW → BUILD → VERIFY → RELEASE`
 
-## Stage 1: THINK - Define the Problem
+## Where to Look
 
-Skills: `brainstorm`, `investigate`
+| Question | Answer |
+|----------|--------|
+| Run the pipeline end-to-end | `/vibe auto` |
+| Run step-by-step | plain `/vibe` |
+| Which skill handles each stage | `using-skills` Quick Reference + `skills/vibe/SKILL.md` |
+| Artifact each stage produces | Skill frontmatter `produces:` + CLAUDE.md output convention |
+| Validate artifact contract | `npm run check:workflow-contract` |
 
-Input: fuzzy idea, user request, bug report, or feature ask.
-
-Process:
-1. If the problem space is unclear -> use `investigate` to map the system
-2. Use `brainstorm` to crystallize the problem and explore solutions
-3. Generate 3 candidate approaches and evaluate tradeoffs
-4. Produce a spec document
-
-Output: `docs/superomni/specs/spec-[branch]-[session]-[date].md`
-
-## Stage 2: PLAN - Break It Down
-
-Skills: `writing-plans`
-
-Input: latest spec from Stage 1.
-
-Process:
-1. Use `writing-plans` to decompose the spec into ordered, testable steps
-2. Each step must include description, files to touch, and verification criterion
-
-Output: `docs/superomni/plans/plan-[branch]-[session]-[date].md`
-
-## Stage 3: REVIEW - Validate the Plan
-
-Skills: `plan-review` (full auto mode)
-
-Input: plan from Stage 2.
-
-Process:
-1. Validate through strategy, design (if UI), and engineering lenses
-2. Auto-resolve decisions using the 6 decision principles
-3. Log decision rationale in the review document
-4. If issues are found, auto-revise the plan and re-review
-
-Output: reviewed plan + `docs/superomni/reviews/review-[branch]-[session]-[date].md`
-
-## Stage 4: BUILD - Execute the Plan
-
-Skills: `executing-plans`, `test-driven-development`, `careful`, `subagent-development`
-
-Input: reviewed plan from Stage 3.
-
-Process:
-1. Execute the plan step by step
-2. Apply TDD (Red -> Green -> Refactor) for each step
-3. Activate `careful` automatically for high-risk operations
-4. Use sub-agents for independent parallelizable steps
-5. Verify each step before moving to the next
-
-Output: code + tests + `docs/superomni/executions/execution-[branch]-[session]-[date].md`
-Alternative output when using sub-agents: `docs/superomni/subagents/subagent-[branch]-[session]-[date].md`
-
-## Stage 5: VERIFY - Code Review, QA, Readiness
-
-Required skills: `code-review`, `qa`, `verification`
-Optional skills by context: `code-review` (`security`/`receiving` modes), `production-readiness`
-
-Input: code changes from Stage 4.
-
-Process:
-1. Run structured code review
-2. Run QA and fill test gaps
-3. Run verification against acceptance criteria
-4. Run security audit when security-relevant
-5. Run production-readiness when deploying
-6. Process external review feedback when present
-
-Output:
-- `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md`
-- `docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md` when deploying
-
-## Stage 6: RELEASE - Ship and Retrospective
-
-Skills: `release` (combines ship + retrospective in one step), `finishing-branch`, `careful`
-
-Input: verified and ready code from Stage 5.
-
-Process:
-1. Prepare branch for merge (`finishing-branch`, `careful` for risky ops)
-2. Version bump, changelog update, tag and publish
-3. Write `## Release` section of release artifact (deployment evidence, rollback plan)
-4. Write `## Retrospective` section of release artifact (tacit gap mining, what went well/slow, process changes)
-
-Output: `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain both `## Release` and `## Retrospective` sections)
-
-## Stage Artifact Gates (Auto-Advance Preconditions)
-
-Wave auto-advance requires stage artifact evidence:
-
-| Stage | Artifact gate |
-|-------|----------------|
-| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` approved by user |
-| PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
-| REVIEW | `docs/superomni/reviews/plan-review-[branch]-[session]-[date].md` |
-| BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
-| VERIFY | `docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md` (+ production readiness report when deploying) |
-| RELEASE | `docs/superomni/releases/release-[branch]-[session]-[date].md` (must contain `## Release` and `## Retrospective`) |
-
-Missing artifact => do not auto-advance. Report `DONE_WITH_CONCERNS` and request artifact completion.
-
-## Report
-
-```
-Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
-Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | executions [N] | reviews [N] | prod-readiness [N] | releases [N]
-Next -> [skill-name]: [reason]
-Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-```
+Status: DONE

@@ -4,9 +4,17 @@ description: |
   Use when turning a spec or idea into a concrete, executable implementation plan.
   Triggers: "write a plan", "plan this out", "create implementation plan", "how should we implement".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use after a spec is approved to turn it into an executable plan. Consumes the spec, produces the plan that plan-review and executing-plans will consume.
+produces: "docs/superomni/plans/plan-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/specs/spec-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Writing Implementation Plans
 
@@ -42,16 +50,16 @@ Apply the **Completeness is Cheap** principle. Before writing the plan, list:
 
 **For UI work, also include:**
 - [ ] Design direction defined (aesthetic, key visual elements, target references)
-- [ ] Acceptance criterion: "passes designer agent review at 7+/10 on all dimensions"
+- [ ] Acceptance criterion: "passes frontend-designer agent review at 7+/10 on all dimensions"
 
-## Phase 3: Generate Plan — Dispatch `planner` Agent
+## Phase 3: Generate Plan — Dispatch `planner-reviewer` Agent (Planning Mode)
 
-**Dispatch the `planner` agent** with the following inputs:
+**Dispatch the `planner-reviewer` agent** in **planning mode** with the following inputs:
 - The spec document (if available): `docs/superomni/specs/spec-*.md`
 - The scope summary and constraints from Phase 1
 - The completeness checklist from Phase 2
 
-The `planner` agent applies its 4-phase process (Understand → Decompose → Risk Assessment → Write Plan), outputs a `PLAN COMPLETE` block, and writes the plan file to `docs/superomni/plans/plan-[branch]-[session]-[date].md`.
+The agent applies the 4-phase process (Understand → Decompose → Risk Assessment → Write Plan), outputs a `PLAN COMPLETE` block, and writes the plan file to `docs/superomni/plans/plan-[branch]-[session]-[date].md`. (Plan authoring was consolidated from the retired `planner` agent into `planner-reviewer` planning mode.)
 
 ```bash
 mkdir -p docs/superomni/plans
@@ -61,9 +69,9 @@ _DATE=$(date +%Y%m%d)
 _PLAN_FILE="docs/superomni/plans/plan-${_BRANCH}-${_SESSION}-${_DATE}.md"
 ```
 
-After the `planner` agent returns its `PLAN COMPLETE` output, confirm:
+After the agent returns its `PLAN COMPLETE` output, confirm:
 - [ ] Plan file written to `docs/superomni/plans/`
-- [ ] ≤ 7 milestones (planner Iron Law)
+- [ ] ≤ 7 milestones (planning-mode Iron Law)
 - [ ] P0 risks listed or explicitly stated as "none"
 - [ ] Each milestone has measurable acceptance criteria
 

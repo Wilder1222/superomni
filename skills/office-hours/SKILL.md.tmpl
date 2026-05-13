@@ -1,16 +1,18 @@
 ---
 name: office-hours
 description: |
-  superomni Office Hours — product discovery and validation. Two modes:
-  Startup mode: six forcing questions that expose demand reality, the narrowest
-  wedge, and implementation alternatives. Builder mode: design thinking for
-  side projects and open source. Saves a design doc.
-  Triggers: "brainstorm this idea", "office hours", "validate my idea",
-  "think about this product", "I want to build", "help me think through".
+  Product discovery and idea validation (startup/builder modes). Outputs a design-doc for product decisions, NOT a sprint spec. Triggers: "office hours", "validate my idea", "help me think through a product".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use for product-market validation, narrow-wedge discovery, side-project design thinking. NOT for sprint-pipeline features — use brainstorm for those.
+produces: "docs/superomni/specs/spec-[branch]-[session]-[date].md"
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # /office-hours — Product Discovery
 

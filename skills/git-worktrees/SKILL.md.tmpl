@@ -5,9 +5,16 @@ description: |
   Git worktrees allow multiple branches to be checked out at the same time.
   Triggers: "work on multiple features", "parallel branches", "worktree".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use when working on multiple branches in parallel. Sets up isolated worktrees so concurrent sub-agents can work without stepping on each other.
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Git Worktrees
 

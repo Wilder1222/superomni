@@ -6,9 +6,17 @@ description: |
   The gate between "tests pass" and "safe to deploy".
   Triggers: "production ready", "ready to deploy", "pre-deploy check", before using ship skill.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use before deploying to production. Verifies observability, reliability, operability, security, goal alignment. The gate between "tests pass" and "safe to deploy".
+produces: "docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Production Readiness Gate
 
@@ -132,7 +140,7 @@ Confirm security review has been done (or is not required).
 - [ ] **Dependencies clean** — no new CVEs in added dependencies?
 - [ ] **Secrets management** — no hardcoded credentials, all secrets via env/vault?
 
-**Dispatch the `security-auditor` agent** in **dependency audit mode** (Phase 4: OWASP A06) to scan all package manifests for CVEs, license issues, and stale packages. The agent returns a SECURITY AUDIT REPORT with the `DEPENDENCIES` section and an overall verdict. Any `CHANGES_REQUIRED` verdict is a deploy blocker.
+**Dispatch the `planner-reviewer` agent** in **security audit mode (dependency sub-mode)** (OWASP A06) to scan all package manifests for CVEs, license issues, and stale packages. The agent returns a SECURITY AUDIT REPORT with the `DEPENDENCIES` section and an overall verdict. Any `CHANGES_REQUIRED` verdict is a deploy blocker.
 
 ```bash
 # Quick secrets scan (dependency-auditor handles the full vulnerability scan)

@@ -88,11 +88,17 @@ validate_tmpl() {
     pass "frontmatter 'allowed-tools' field present"
   fi
 
-  # 5. {{PREAMBLE}} macro
-  if ! grep -q '{{PREAMBLE}}' "$tmpl"; then
-    fail "$rel_tmpl: missing {{PREAMBLE}} macro — all skills must include the shared preamble"
+  # 5. Preamble macro — accept either new {{PREAMBLE_CORE}} (with {{PREAMBLE_REF_LINK}})
+  #    or the legacy {{PREAMBLE}} form (which emits a deprecation warning at build time).
+  if grep -q '{{PREAMBLE_CORE}}' "$tmpl"; then
+    pass "{{PREAMBLE_CORE}} macro present (2-tier preamble)"
+    if ! grep -q '{{PREAMBLE_REF_LINK}}' "$tmpl"; then
+      warn "$rel_tmpl: {{PREAMBLE_CORE}} present but {{PREAMBLE_REF_LINK}} missing — include both for full preamble reference"
+    fi
+  elif grep -q '{{PREAMBLE}}' "$tmpl"; then
+    warn "$rel_tmpl: using deprecated {{PREAMBLE}} macro — migrate to {{PREAMBLE_CORE}} + {{PREAMBLE_REF_LINK}}"
   else
-    pass "{{PREAMBLE}} macro present"
+    fail "$rel_tmpl: missing preamble macro — all skills must include {{PREAMBLE_CORE}} (+ {{PREAMBLE_REF_LINK}}) or the deprecated {{PREAMBLE}}"
   fi
 
   # 6. Status protocol keywords
@@ -127,14 +133,15 @@ validate_tmpl() {
   if [ ! -f "$md" ]; then
     fail "$rel_tmpl: built $rel_md does not exist — run 'bash lib/gen-skill-docs.sh'"
   else
-    # Check that SKILL.md contains preamble content (sanity check for expansion)
-    # We check for preamble content presence rather than {{PREAMBLE}} absence,
-    # because skills like writing-skills intentionally show {{PREAMBLE}} in
-    # code-block examples to teach users how to author new skills.
-    if ! grep -q 'Completion Status Protocol' "$md"; then
-      fail "$rel_md: SKILL.md does not contain expanded preamble content — run 'bash lib/gen-skill-docs.sh'"
-    else
+    # Check that SKILL.md contains expanded preamble content. Accept either the
+    # new 2-tier core marker ("Preamble (Core)") or the legacy expanded header
+    # ("Completion Status Protocol"). Skills like framework-management may have
+    # {{PREAMBLE}} inside code-block examples teaching the template syntax;
+    # those are always accompanied by the real expanded preamble at the top.
+    if grep -q 'Preamble (Core)' "$md" || grep -q 'Completion Status Protocol' "$md"; then
       pass "SKILL.md built and expanded"
+    else
+      fail "$rel_md: SKILL.md does not contain expanded preamble content — run 'bash lib/gen-skill-docs.sh'"
     fi
   fi
 

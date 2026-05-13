@@ -1,0 +1,187 @@
+{
+  "_comment": "Canonical frontmatter map for Phase 1 Step 9. Maps each skill to when_to_use / produces / consumes / dispatch-agent. name/description/allowed-tools are kept from existing frontmatter unless a description_override is provided for trigger-conflict disambiguation.",
+
+  "brainstorm": {
+    "description_override": "Turn a fuzzy idea into a concrete, reviewable spec via structured dialogue. THINK stage entry. Triggers: \"brainstorm\", \"design\", \"spec this out\", \"let's think through\".",
+    "when_to_use": "Use at the start of any new feature, project, or design decision. Produces a spec document that is the single input to writing-plans. NOT for product-market validation — use office-hours for that (its design-doc output is for product discovery, not sprint pipeline).",
+    "produces": "docs/superomni/specs/spec-[branch]-[session]-[date].md",
+    "consumes": []
+  },
+  "careful": {
+    "when_to_use": "Activate before destructive or irreversible operations: delete, overwrite, force-push, drop tables, rm -rf. Complements TACIT-DENSE (which is knowledge-focused, not blast-radius-focused).",
+    "produces": null,
+    "consumes": null
+  },
+  "code-review": {
+    "description_override": "Structured P0/P1/P2 code review of WRITTEN CODE (not plans). Three modes: giving / receiving / security. Triggers: \"review this code\", \"ready for PR\", \"address review\", \"security audit\". NOT for reviewing plans — use plan-review for that.",
+    "when_to_use": "Use after code is written to review changes, address review feedback, or audit for security. NOT for reviewing implementation plans before build — that is plan-review's job.",
+    "produces": "docs/superomni/reviews/review-[branch]-[session]-[date].md",
+    "consumes": [
+      "docs/superomni/executions/execution-[branch]-[session]-[date].md"
+    ],
+    "dispatch-agent": "planner-reviewer"
+  },
+  "dependency-audit": {
+    "when_to_use": "Use when auditing dependencies for security (npm audit), outdated packages, or license compliance. Triggers: \"dependency audit\", \"npm audit\", \"security scan\", \"outdated packages\", \"license check\". Complements code-review (which audits application code, not deps).",
+    "produces": null,
+    "consumes": null
+  },
+  "document-release": {
+    "when_to_use": "Post-ship only. Use after code has shipped to sync README, CHANGELOG, ARCHITECTURE with the diff. Optional — triggers: \"update docs\", \"sync documentation\".",
+    "produces": null,
+    "consumes": [
+      "docs/superomni/releases/release-[branch]-[session]-[date].md"
+    ],
+    "dispatch-agent": "doc-writer"
+  },
+  "executing-plans": {
+    "description_override": "Execute a WRITTEN PLAN step-by-step with verification gates and wave-based sub-agent dispatch. BUILD stage orchestrator. Triggers: \"execute plan\", \"run the plan\", \"start executing\". NOT for writing new code from scratch — use test-driven-development for that.",
+    "when_to_use": "Use after plan-review approves a plan. Walks the plan step-by-step with verification gates. Dispatches sub-agents in waves when steps are parallelizable.",
+    "produces": "docs/superomni/executions/execution-[branch]-[session]-[date].md",
+    "consumes": [
+      "docs/superomni/plans/plan-[branch]-[session]-[date].md",
+      "docs/superomni/reviews/review-[branch]-[session]-[date].md"
+    ]
+  },
+  "finishing-branch": {
+    "when_to_use": "Use when a feature branch is complete and ready to merge: final cleanup, sync with main, squash, and PR creation. NOT for authoring the full release — use release for that.",
+    "produces": null,
+    "consumes": [
+      "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"
+    ]
+  },
+  "framework-management": {
+    "when_to_use": "Unified entry for creating, installing, listing, and managing both skills and agents (absorbed agent-management + writing-skills). Use it to scaffold a new skill, install from URL, or list built-ins.",
+    "produces": null,
+    "consumes": null
+  },
+  "frontend-design": {
+    "when_to_use": "Use when building UI, pages, or components. Guides context gathering → implementation → designer-agent quality gate at 7+/10. Triggers: \"frontend design\", \"build UI\", \"design page\".",
+    "produces": null,
+    "consumes": [
+      "docs/superomni/specs/spec-[branch]-[session]-[date].md"
+    ],
+    "dispatch-agent": "frontend-designer"
+  },
+  "git-worktrees": {
+    "when_to_use": "Use when working on multiple branches in parallel. Sets up isolated worktrees so concurrent sub-agents can work without stepping on each other.",
+    "produces": null,
+    "consumes": null
+  },
+  "harness-engineering": {
+    "when_to_use": "Use to audit or improve the agent harness: context efficiency, tool space, evaluation gates, feedback loops. Triggers on 3-strike agent failure signal or explicit harness audit request.",
+    "produces": "docs/superomni/harness-audits/harness-audit-[branch]-[session]-[date].md",
+    "consumes": []
+  },
+  "investigate": {
+    "when_to_use": "Use for open-ended exploration of unfamiliar code: \"how does X work\", \"map this system\". Complements systematic-debugging (which requires a known error). NOT for known bugs — use systematic-debugging.",
+    "produces": null,
+    "consumes": null,
+    "dispatch-agent": "explorer"
+  },
+  "office-hours": {
+    "description_override": "Product discovery and idea validation (startup/builder modes). Outputs a design-doc for product decisions, NOT a sprint spec. Triggers: \"office hours\", \"validate my idea\", \"help me think through a product\".",
+    "when_to_use": "Use for product-market validation, narrow-wedge discovery, side-project design thinking. NOT for sprint-pipeline features — use brainstorm for those.",
+    "produces": "docs/superomni/specs/spec-[branch]-[session]-[date].md",
+    "consumes": null
+  },
+  "plan-review": {
+    "description_override": "Multi-lens auto-review of an IMPLEMENTATION PLAN (not code). Strategy → Design (if UI) → Engineering phases. All decisions auto-resolved via 6 Decision Principles. Triggers: \"review plan\", \"autoplan\".",
+    "when_to_use": "Use automatically after writing-plans completes. NOT for reviewing code — use code-review for that.",
+    "produces": "docs/superomni/reviews/review-[branch]-[session]-[date].md",
+    "consumes": [
+      "docs/superomni/plans/plan-[branch]-[session]-[date].md"
+    ],
+    "dispatch-agent": "planner-reviewer"
+  },
+  "production-readiness": {
+    "when_to_use": "Use before deploying to production. Verifies observability, reliability, operability, security, goal alignment. The gate between \"tests pass\" and \"safe to deploy\".",
+    "produces": "docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md",
+    "consumes": [
+      "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"
+    ]
+  },
+  "qa": {
+    "when_to_use": "Use during VERIFY stage for test coverage, edge cases, auto-fix. Complements verification (which checks acceptance criteria).",
+    "produces": null,
+    "consumes": [
+      "docs/superomni/executions/execution-[branch]-[session]-[date].md"
+    ]
+  },
+  "refactoring": {
+    "description_override": "Systematic, behavior-preserving code refactoring with safety gates. Dispatches refactoring-agent. Triggers: \"refactor\", \"clean up code\", \"reduce tech debt\", \"extract method\", \"rename\". NOT for reactive PR feedback — use code-review for that.",
+    "when_to_use": "Use for proactive tech-debt reduction or structural code improvement. Pair with test-driven-development (tests-first, one-change-at-a-time).",
+    "produces": null,
+    "consumes": null,
+    "dispatch-agent": "refactoring-agent"
+  },
+  "release": {
+    "description_override": "Combined RELEASE stage (ship + retrospective) in a single artifact. Triggers: \"/release\", \"end sprint\", \"ship and reflect\". Replaces the retired ship skill.",
+    "when_to_use": "Use to close a sprint: version bump, changelog, tag, push, publish, and retrospective — all in one artifact.",
+    "produces": "docs/superomni/releases/release-[branch]-[session]-[date].md",
+    "consumes": [
+      "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md",
+      "docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md"
+    ]
+  },
+  "self-improvement": {
+    "when_to_use": "Use for process retrospection (three scopes: process / retro / harness). NOT for checking whether a specific task is done — use verification for that.",
+    "produces": "docs/superomni/improvements/improvement-[branch]-[session]-[date].md",
+    "consumes": []
+  },
+  "style-capture": {
+    "when_to_use": "Use on project initialization or when asked to capture style preferences. Output feeds brainstorm, executing-plans, code-review, self-improvement to keep outputs stylistically consistent.",
+    "produces": "docs/superomni/style-profiles/<scope>.md",
+    "consumes": []
+  },
+  "subagent-development": {
+    "description_override": "Default working mode for non-trivial tasks. Decompose into waves of 5-10 parallel sub-agents. Triggers: any multi-file / multi-concern task, \"use subagents\", \"parallel implementation\".",
+    "when_to_use": "Use whenever a task spans multiple files, multiple concerns, or benefits from parallel execution. Complementary to executing-plans (which is sequential-with-waves). NOT for writing tests — use test-driven-development for that.",
+    "produces": "docs/superomni/subagents/subagent-[branch]-[session]-[date].md",
+    "consumes": []
+  },
+  "systematic-debugging": {
+    "when_to_use": "Use for KNOWN errors, test failures, or unexpected behavior. Iron Law: no fix without root-cause investigation. NOT for open exploration — use investigate for that.",
+    "produces": null,
+    "consumes": null,
+    "dispatch-agent": "explorer"
+  },
+  "test-driven-development": {
+    "description_override": "Globally enforced Red-Green-Refactor for WRITING NEW CODE. Triggers on: \"implement\", \"add feature\", \"fix bug\", any code-writing step. NOT for task decomposition — use subagent-development for that.",
+    "when_to_use": "Use whenever new code is being written. Mandatory — this skill is a gate on all code-writing activities.",
+    "produces": null,
+    "consumes": null
+  },
+  "using-skills": {
+    "when_to_use": "Always active — the meta-skill that teaches the framework. Read first on session start. Not invoked explicitly.",
+    "produces": null,
+    "consumes": null
+  },
+  "verification": {
+    "description_override": "Structured self-check against acceptance criteria BEFORE claiming DONE. Triggers: \"I'm done\", \"verify this\", \"finished\". NOT for sprint retrospection — use self-improvement for that.",
+    "when_to_use": "Use immediately before reporting DONE on any substantive task. Writes an evaluation artifact that finishing-branch / release consume.",
+    "produces": "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md",
+    "consumes": [
+      "docs/superomni/executions/execution-[branch]-[session]-[date].md"
+    ]
+  },
+  "vibe": {
+    "description_override": "Unified entry point: detect current pipeline stage, launch guided workflow, auto-delegate to next skill. Triggers: \"/vibe\", \"activate framework\", \"start workflow\". NOT a reference document — use workflow for that.",
+    "when_to_use": "Use to enter the framework, resume mid-sprint work, or auto-chain through stages. The primary user-facing entry command.",
+    "produces": null,
+    "consumes": null
+  },
+  "workflow": {
+    "description_override": "Reference document describing the 6-stage pipeline and skill data flow. Triggers: \"workflow\", \"pipeline\". NOT an action — use vibe to run the pipeline.",
+    "when_to_use": "Use as a lookup when you need to know which skill runs at which stage or what artifact each stage produces. Does not produce artifacts itself.",
+    "produces": null,
+    "consumes": null
+  },
+  "writing-plans": {
+    "when_to_use": "Use after a spec is approved to turn it into an executable plan. Consumes the spec, produces the plan that plan-review and executing-plans will consume.",
+    "produces": "docs/superomni/plans/plan-[branch]-[session]-[date].md",
+    "consumes": [
+      "docs/superomni/specs/spec-[branch]-[session]-[date].md"
+    ]
+  }
+}

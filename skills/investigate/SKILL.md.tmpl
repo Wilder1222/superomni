@@ -6,9 +6,17 @@ description: |
   Use investigate when: "how does X work", "understand this codebase", "map this system".
   Triggers: "investigate", "explore", "understand how", "map the codebase".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use for open-ended exploration of unfamiliar code: "how does X work", "map this system". Complements systematic-debugging (which requires a known error). NOT for known bugs — use systematic-debugging.
+produces: ~
+consumes: ~
+dispatch-agent: explorer
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Investigate
 

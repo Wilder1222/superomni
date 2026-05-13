@@ -7,9 +7,16 @@ description: |
   "create agent", "write an agent", "install agent", "list agents",
   "new skill", "new agent", "add skill", "add agent", "manage framework".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Unified entry for creating, installing, listing, and managing both skills and agents (absorbed agent-management + writing-skills). Use it to scaffold a new skill, install from URL, or list built-ins.
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Framework Management
 
@@ -23,8 +30,8 @@ allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 
 ```
 Need: "I need something that audits performance"
-Step 1: bin/agent-manager list → found: architect (Phase 7: Performance Analysis)
-Action: Use the built-in architect agent
+Step 1: bin/agent-manager list → found: planner-reviewer (engineering mode includes performance analysis)
+Action: Use the built-in planner-reviewer agent
 Result: No new agent needed — DONE
 ```
 
@@ -33,7 +40,7 @@ Result: No new agent needed — DONE
 ```
 Need: "I need something that checks security"
 Action: Immediately create agents/my-security-checker.md from scratch
-[VIOLATED: security-auditor already exists — checked built-ins first]
+[VIOLATED: planner-reviewer (security audit mode) already exists — checked built-ins first]
 ```
 
 ---
@@ -74,21 +81,15 @@ grep -rn "name:" skills/*/SKILL.md.tmpl | grep -i "<your-keyword>" | head -10
 grep -l "<your-keyword>" agents/*.md | head -5
 ```
 
-**Current built-in agents:**
+**Current built-in agents (5 canonical, after consolidation):**
 
-| Agent | Specialty |
-|-------|-----------|
-| `code-reviewer` | Structured code review (P0/P1/P2) |
-| `planner` | Strategic decomposition and plan writing |
-| `debugger` | Root-cause analysis and bug resolution |
-| `test-writer` | Behavior-verifying test suites with TDD |
-| `security-auditor` | OWASP-aware vulnerability + dependency CVE audit |
-| `architect` | System design, architectural review, performance analysis |
-| `ceo-advisor` | Product strategy, scope, demand validation |
-| `designer` | UX design, missing states, AI slop detection |
-| `evaluator` | Independent verdict gate (APPROVED / CHANGES_REQUIRED) |
-| `refactoring-agent` | Behavior-preserving code refactoring |
-| `doc-writer` | Diff-driven documentation generation |
+| Agent | Specialty | Modes / consolidated responsibilities |
+|-------|-----------|----------------------------------------|
+| `planner-reviewer` | Plan authoring + multi-lens review (strategy / engineering / evaluation / security / code-review) | absorbs retired planner, architect, ceo-advisor, evaluator, code-reviewer, security-auditor |
+| `frontend-designer` | UX review: 10-dimension scoring, AI slop detection, impeccable check | renamed from designer |
+| `explorer` | Read-only isolated-context repo exploration (debug evidence, code survey) | absorbs retired debugger (Phase 2: trace evidence) |
+| `refactoring-agent` | Behavior-preserving code refactoring | unchanged |
+| `doc-writer` | Diff-driven documentation generation | unchanged |
 
 **Gate:** If a built-in component fits → use or extend it. **Stop here.**
 If none fits → proceed to Phase 3.
@@ -165,8 +166,8 @@ Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ```
 
 ```bash
-# Scaffold
-cp agents/evaluator.md agents/<new-name>.md
+# Scaffold (copy any canonical agent as a starting template)
+cp agents/planner-reviewer.md agents/<new-name>.md
 # Edit to match new specialty
 ```
 
@@ -181,9 +182,15 @@ description: |
   [2-3 sentences].
   Triggers: "keyword 1", "keyword 2".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  [When this skill applies + boundary vs. peer skills. Include NOT-for-X clauses.]
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # [Skill Title]
 
@@ -215,7 +222,8 @@ bin/build-skills skills/${SKILL_NAME}/SKILL.md.tmpl
 
 ### Quality Checklist (Skills)
 
-- [ ] `{{PREAMBLE}}` is present
+- [ ] `{{PREAMBLE_CORE}}` (inline core) and `{{PREAMBLE_REF_LINK}}` (ref link) are both present. The legacy single-token form is deprecated and emits a build-time warning.
+- [ ] `when_to_use`, `produces`, `consumes` are declared in frontmatter (Anthropic-spec compliance)
 - [ ] YAML has `name`, `description` (with trigger phrases), `allowed-tools`
 - [ ] At least one Iron Law with Good/Bad examples
 - [ ] Phase structure (numbered phases)

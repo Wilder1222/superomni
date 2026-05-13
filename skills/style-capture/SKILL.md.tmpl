@@ -6,9 +6,16 @@ description: |
   Triggers: "/style-capture", "capture style", "show me your preferences",
   "style profile", project initialization (new project detected by vibe).
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use on project initialization or when asked to capture style preferences. Output feeds brainstorm, executing-plans, code-review, self-improvement to keep outputs stylistically consistent.
+produces: "docs/superomni/style-profiles/<scope>.md"
+consumes: []
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Style Capture — Learn From Examples
 

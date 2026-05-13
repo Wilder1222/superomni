@@ -6,9 +6,17 @@ description: |
   Four phases: Investigate → Analyze → Hypothesize → Implement.
   Triggers: any error, test failure, "it's broken", "why isn't X working".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use for KNOWN errors, test failures, or unexpected behavior. Iron Law: no fix without root-cause investigation. NOT for open exploration — use investigate for that.
+produces: ~
+consumes: ~
+dispatch-agent: explorer
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Systematic Debugging
 

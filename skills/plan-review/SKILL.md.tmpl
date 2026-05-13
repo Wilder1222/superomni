@@ -1,13 +1,20 @@
 ---
 name: plan-review
 description: |
-  Multi-stage plan review pipeline: Strategy (CEO) → Design (if UI) → Engineering.
-  Applies 6 decision principles. Auto-resolves ALL decisions (mechanical and taste) without user input.
-  Triggers: "review this plan", "autoplan", "auto review", "is this plan good", before executing any plan.
+  Multi-lens auto-review of an IMPLEMENTATION PLAN (not code). Strategy → Design (if UI) → Engineering phases. All decisions auto-resolved via 6 Decision Principles. Triggers: "review plan", "autoplan".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use automatically after writing-plans completes. NOT for reviewing code — use code-review for that.
+produces: "docs/superomni/reviews/review-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/plans/plan-[branch]-[session]-[date].md"
+dispatch-agent: planner-reviewer
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Plan Review Pipeline
 

@@ -1,13 +1,19 @@
 ---
 name: verification
 description: |
-  Use before claiming any task is complete.
-  Performs a structured self-check to ensure all acceptance criteria are met.
-  Triggers: "I'm done", "that's complete", "finished", before reporting DONE.
+  Structured self-check against acceptance criteria BEFORE claiming DONE. Triggers: "I'm done", "verify this", "finished". NOT for sprint retrospection — use self-improvement for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use immediately before reporting DONE on any substantive task. Writes an evaluation artifact that finishing-branch / release consume.
+produces: "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/executions/execution-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Verification Before Completion
 

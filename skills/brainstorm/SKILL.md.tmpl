@@ -1,13 +1,18 @@
 ---
 name: brainstorm
 description: |
-  Use when starting a new feature, project, or design decision.
-  Guides from fuzzy idea to concrete spec through structured dialogue.
-  Triggers: "brainstorm", "design", "spec this out", "let's think through".
+  Turn a fuzzy idea into a concrete, reviewable spec via structured dialogue. THINK stage entry. Triggers: "brainstorm", "design", "spec this out", "let's think through".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebSearch]
+when_to_use: |
+  Use at the start of any new feature, project, or design decision. Produces a spec document that is the single input to writing-plans. NOT for product-market validation — use office-hours for that (its design-doc output is for product discovery, not sprint pipeline).
+produces: "docs/superomni/specs/spec-[branch]-[session]-[date].md"
+consumes: []
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Brainstorming & Specification
 

@@ -6,9 +6,18 @@ description: |
   Guides from context gathering through implementation to quality gate.
   Triggers: "frontend design", "build UI", "design this page", "make it look good"
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebFetch, Agent]
+when_to_use: |
+  Use when building UI, pages, or components. Guides context gathering → implementation → designer-agent quality gate at 7+/10. Triggers: "frontend design", "build UI", "design page".
+produces: ~
+consumes:
+  - "docs/superomni/specs/spec-[branch]-[session]-[date].md"
+dispatch-agent: frontend-designer
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Frontend Design
 

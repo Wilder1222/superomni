@@ -1,15 +1,20 @@
 ---
 name: code-review
 description: |
-  Canonical review skill for code quality workflows.
-  Modes: giving (review code), receiving (address review feedback), security (security-focused review).
-  Triggers: "review this", "code review", "ready for PR", "check this code",
-  "address review", "fix review comments", "respond to feedback",
-  "security audit", "security review", "threat model", "vulnerability scan".
+  Structured P0/P1/P2 code review of WRITTEN CODE (not plans). Three modes: giving / receiving / security. Triggers: "review this code", "ready for PR", "address review", "security audit". NOT for reviewing plans — use plan-review for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use after code is written to review changes, address review feedback, or audit for security. NOT for reviewing implementation plans before build — that is plan-review's job.
+produces: "docs/superomni/reviews/review-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/executions/execution-[branch]-[session]-[date].md"
+dispatch-agent: planner-reviewer
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Code Review
 

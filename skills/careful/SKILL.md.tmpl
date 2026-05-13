@@ -5,9 +5,16 @@ description: |
   Prevents destructive, irreversible, or security-sensitive changes without explicit confirmation.
   Triggers: destructive operations, production configs, database migrations, security-sensitive files, "be careful", "careful mode".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Activate before destructive or irreversible operations: delete, overwrite, force-push, drop tables, rm -rf. Complements TACIT-DENSE (which is knowledge-focused, not blast-radius-focused).
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Careful — Safety Guardrails
 

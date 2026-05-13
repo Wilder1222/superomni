@@ -7,9 +7,16 @@ description: |
   Triggers: "harness", "harness audit", "improve harness", "agent environment",
   "context management", "evaluation gates", "feedback loop", "harness engineering".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use to audit or improve the agent harness: context efficiency, tool space, evaluation gates, feedback loops. Triggers on 3-strike agent failure signal or explicit harness audit request.
+produces: "docs/superomni/harness-audits/harness-audit-[branch]-[session]-[date].md"
+consumes: []
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Harness Engineering
 

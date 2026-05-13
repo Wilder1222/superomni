@@ -6,9 +6,16 @@ description: |
   Triggers: "dependency audit", "check dependencies", "npm audit", "security scan",
   "check for vulnerabilities", "outdated packages", "license check".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use when auditing dependencies for security (npm audit), outdated packages, or license compliance. Triggers: "dependency audit", "npm audit", "security scan", "outdated packages", "license check". Complements code-review (which audits application code, not deps).
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Dependency Audit
 

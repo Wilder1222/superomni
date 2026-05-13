@@ -1,13 +1,18 @@
 ---
 name: vibe
 description: |
-  Unified entry point for the superomni framework.
-  Activates all skills, detects current pipeline stage, and launches the guided workflow.
-  Triggers: "/vibe", "activate framework", "start workflow", "what's next".
+  Unified entry point: detect current pipeline stage, launch guided workflow, auto-delegate to next skill. Triggers: "/vibe", "activate framework", "start workflow". NOT a reference document — use workflow for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use to enter the framework, resume mid-sprint work, or auto-chain through stages. The primary user-facing entry command.
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Vibe - Framework Entry Point
 

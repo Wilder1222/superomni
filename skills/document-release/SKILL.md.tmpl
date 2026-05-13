@@ -8,9 +8,18 @@ description: |
   "update the readme", "document what shipped".
   Proactively suggest after a PR is merged or code is shipped.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Post-ship only. Use after code has shipped to sync README, CHANGELOG, ARCHITECTURE with the diff. Optional — triggers: "update docs", "sync documentation".
+produces: ~
+consumes:
+  - "docs/superomni/releases/release-[branch]-[session]-[date].md"
+dispatch-agent: doc-writer
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # /document-release — Post-Ship Documentation Update
 

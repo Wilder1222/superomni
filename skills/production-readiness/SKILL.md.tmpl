@@ -6,9 +6,17 @@ description: |
   The gate between "tests pass" and "safe to deploy".
   Triggers: "production ready", "ready to deploy", "pre-deploy check", before using ship skill.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use before deploying to production. Verifies observability, reliability, operability, security, goal alignment. The gate between "tests pass" and "safe to deploy".
+produces: "docs/superomni/production-readiness/production-readiness-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Production Readiness Gate
 

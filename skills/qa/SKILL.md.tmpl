@@ -5,9 +5,17 @@ description: |
   Identifies test gaps, writes missing tests, explores edge cases, and auto-fixes with caution.
   Triggers: "QA", "quality check", "test coverage", "run QA", "check quality".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use during VERIFY stage for test coverage, edge cases, auto-fix. Complements verification (which checks acceptance criteria).
+produces: ~
+consumes:
+  - "docs/superomni/executions/execution-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Quality Assurance
 

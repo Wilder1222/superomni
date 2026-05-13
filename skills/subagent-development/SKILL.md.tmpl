@@ -1,14 +1,18 @@
 ---
 name: subagent-development
 description: |
-  Default working mode for all non-trivial tasks.
-  Decompose any task that benefits from specialization, parallelism, or independent verification into sub-agents.
-  Use sub-agents by default unless the task is trivially small (< 5 min, single file).
-  Triggers: any implementation, review, or analysis task; "use subagents", "parallel implementation", "too complex for one pass".
+  Default working mode for non-trivial tasks. Decompose into waves of 5-10 parallel sub-agents. Triggers: any multi-file / multi-concern task, "use subagents", "parallel implementation".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use whenever a task spans multiple files, multiple concerns, or benefits from parallel execution. Complementary to executing-plans (which is sequential-with-waves). NOT for writing tests — use test-driven-development for that.
+produces: "docs/superomni/subagents/subagent-[branch]-[session]-[date].md"
+consumes: []
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Sub-Agent Development
 

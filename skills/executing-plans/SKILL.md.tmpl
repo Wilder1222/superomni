@@ -1,13 +1,20 @@
 ---
 name: executing-plans
 description: |
-  Use when executing an implementation plan step by step.
-  Triggers: "execute plan", "implement this plan", "start executing", "run the plan".
-  Requires: a docs/superomni/plans/plan-*.md or similar plan document to exist.
+  Execute a WRITTEN PLAN step-by-step with verification gates and wave-based sub-agent dispatch. BUILD stage orchestrator. Triggers: "execute plan", "run the plan", "start executing". NOT for writing new code from scratch — use test-driven-development for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use after plan-review approves a plan. Walks the plan step-by-step with verification gates. Dispatches sub-agents in waves when steps are parallelizable.
+produces: "docs/superomni/executions/execution-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/plans/plan-[branch]-[session]-[date].md"
+  - "docs/superomni/reviews/review-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Executing Plans
 

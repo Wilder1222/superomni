@@ -1,13 +1,18 @@
 ---
 name: workflow
 description: |
-  Documents the end-to-end sprint workflow and inter-skill data flow.
-  Use to understand which skills to use, in what order, and how data flows between them.
-  Triggers: "workflow", "sprint", "pipeline", "what's next", "how do skills connect".
+  Reference document describing the 6-stage pipeline and skill data flow. Triggers: "workflow", "pipeline". NOT an action — use vibe to run the pipeline.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use as a lookup when you need to know which skill runs at which stage or what artifact each stage produces. Does not produce artifacts itself.
+produces: ~
+consumes: ~
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Workflow - Sprint Pipeline
 

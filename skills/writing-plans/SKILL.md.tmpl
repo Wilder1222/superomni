@@ -4,9 +4,17 @@ description: |
   Use when turning a spec or idea into a concrete, executable implementation plan.
   Triggers: "write a plan", "plan this out", "create implementation plan", "how should we implement".
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use after a spec is approved to turn it into an executable plan. Consumes the spec, produces the plan that plan-review and executing-plans will consume.
+produces: "docs/superomni/plans/plan-[branch]-[session]-[date].md"
+consumes:
+  - "docs/superomni/specs/spec-[branch]-[session]-[date].md"
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Writing Implementation Plans
 

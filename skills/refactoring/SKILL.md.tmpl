@@ -1,15 +1,19 @@
 ---
 name: refactoring
 description: |
-  Systematic code refactoring with safety gates.
-  Improves code structure without changing behavior.
-  Dispatches refactoring-agent for execution.
-  Triggers: "refactor", "clean up code", "reduce tech debt", "improve code quality",
-  "extract method", "rename", "make this cleaner".
+  Systematic, behavior-preserving code refactoring with safety gates. Dispatches refactoring-agent. Triggers: "refactor", "clean up code", "reduce tech debt", "extract method", "rename". NOT for reactive PR feedback — use code-review for that.
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
+when_to_use: |
+  Use for proactive tech-debt reduction or structural code improvement. Pair with test-driven-development (tests-first, one-change-at-a-time).
+produces: ~
+consumes: ~
+dispatch-agent: refactoring-agent
 ---
 
-{{PREAMBLE}}
+
+{{PREAMBLE_CORE}}
+
+{{PREAMBLE_REF_LINK}}
 
 # Refactoring
 

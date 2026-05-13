@@ -24,23 +24,23 @@ Philosophy: **Plan Lean, Execute Complete**
 | subagent-development | Default working mode — use for all non-trivial tasks | P0 |
 | brainstorm | "brainstorm", "design", "spec" | P0 |
 | writing-plans | "write plan", "plan this" | P0 |
-| executing-plans | "execute", "implement" | P0 |
+| executing-plans | "execute plan", "run the plan" (plan-executor, NOT for writing new code from scratch) | P0 |
 | systematic-debugging | Any bug/error | P0 |
-| test-driven-development | Writing code | P1 |
+| test-driven-development | "implement", "add feature", "fix bug" (writing new code; NOT for task decomposition — use subagent-development) | P1 |
 | verification | "verify", "done", "complete" | P1 |
-| code-review | "review", "PR ready", "address review", "security audit" (modes: giving/receiving/security) | P1 |
-| plan-review | "review plan", "autoplan", "auto review" | P1 |
+| code-review | "review this code", "PR ready", "address review", "security audit" (reviews CODE, not plans; NOT for plans — use plan-review) | P1 |
+| plan-review | "review plan", "autoplan", "auto review" (reviews plans, not code) | P1 |
 | qa | "qa", "quality assurance" | P1 |
 | careful | "careful", destructive operations | P1 |
-| workflow | "workflow", "sprint", "what's next" | P1 |
-| refactoring | "refactor", "clean up code", "reduce tech debt", "improve code quality" | P1 |
+| workflow | "workflow", "pipeline" (reference doc — NOT an action; use vibe to run the pipeline) | P1 |
+| refactoring | "refactor", "clean up code", "reduce tech debt", "improve code quality" (proactive tech-debt reduction; NOT for PR feedback — use code-review) | P1 |
 | dependency-audit | "dependency audit", "check dependencies", "npm audit", "security scan" | P1 |
 | office-hours | "office hours", "validate idea" (product discovery, not sprint pipeline) | P2 |
 | frontend-design | "frontend design", "build UI", "design page", "make it look good" | P1 |
 | git-worktrees | Parallel work | P2 |
 | finishing-branch | "finish branch", "merge" | P2 |
 | investigate | "investigate", "explore" | P2 |
-| release | "release", "ship and reflect", "end sprint" | P2 |
+| release | "/release", "end sprint", "ship and reflect" (ship + retrospective in one artifact; replaces retired ship skill) | P2 |
 | framework-management | "create skill", "write skill", "install skill", "list skills", "create agent", "install agent", "list agents", "new agent", "manage framework" | P2 |
 | document-release | "update docs", "sync docs" (optional post-ship) | P3 |
 | production-readiness | "production ready", "ready to deploy", "pre-deploy check" | P1 |

@@ -3,7 +3,12 @@ name: using-skills
 description: |
   Meta-skill: explains the superomni skill framework to the AI agent.
   Always active. Read this first.
+when_to_use: |
+  Always active — the meta-skill that teaches the framework. Read first on session start. Not invoked explicitly.
+produces: ~
+consumes: ~
 ---
+
 
 # Using superomni Skills
 

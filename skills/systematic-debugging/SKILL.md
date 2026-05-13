@@ -110,19 +110,19 @@ git diff HEAD~5 HEAD -- <affected-area>
 Required output: **"Root cause hypothesis: ..."** — a specific, testable claim.
 Example: "Root cause hypothesis: The `authenticate()` function returns `null` when the JWT is expired, but the caller doesn't handle `null` and passes it directly to `getUserData()`, causing a NullPointerException at line 47."
 
-## Dispatch: `debugger` Agent
+## Dispatch: `explorer` Agent (Evidence Gathering)
 
-After completing Phase 1 (scope locked, initial evidence gathered), **dispatch the `debugger` agent** with:
+After completing Phase 1 (scope locked, initial evidence gathered), **dispatch the `explorer` agent** with:
 - Bug statement: *"When [X], [Y] happens instead of [Z]."*
 - All Phase 1 evidence: error messages, stack traces, `git log` output
 - The scope-locked directory path
 - Reproduction steps (if found)
 
-The `debugger` agent runs its Phases 2–5 (trace execution path → form hypotheses → verify root cause → write fix) and returns a DEBUG REPORT block.
+The `explorer` agent surveys the scope-locked area in isolated context, returns a DEBUG EVIDENCE REPORT (execution path trace, candidate hypothesis list, and pointers to the likely failure site). This skill's Phases 2-4 then pick up with the agent's evidence to form and verify hypotheses. (Debugging protocol content was consolidated from the retired `debugger` agent into this skill; `explorer` provides the isolated-context survey.)
 
 **Handoff protocol:**
-- `DONE` → incorporate root cause into Phase 2 pattern analysis; apply the agent's fix; proceed to Phase 5 Debug Report
-- `DONE_WITH_CONCERNS` → note concerns, apply fix, flag to user before closing
+- `DONE` → incorporate evidence into Phase 2 pattern analysis; run Phases 3-4 (hypothesis + fix) in main context; proceed to Phase 5 Debug Report
+- `DONE_WITH_CONCERNS` → note concerns, continue to Phase 3, flag to user before closing
 - `BLOCKED` (3 failed hypotheses) → apply the 3-Strike Rule in Phase 3 and escalate with full evidence
 
 The skill's Phases 2–4 may also run inline as a fallback when the debugging session is simple.

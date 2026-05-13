@@ -1,6 +1,10 @@
 ---
 name: doc-writer
-description: Use for technical documentation generation and updates. Handles README files, API docs, changelogs, and keeping docs in sync with code changes.
+description: Diff-driven technical documentation generation and updates. Reads actual code changes and keeps README, CHANGELOG, ARCHITECTURE in sync.
+tools: [Read, Grep, Glob, Write, Bash]
+when_to_invoke: |
+  Dispatched by the `document-release` skill after code has shipped.
+  Also dispatch manually when README/docs drift from code has accumulated.
 ---
 
 # Doc Writer Agent

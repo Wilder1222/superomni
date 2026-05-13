@@ -312,10 +312,10 @@ Stage reference table:
 | Stage   | Skill              | Agents                                    | Output artifact |
 |---------|--------------------|-------------------------------------------|-----------------|
 | THINK   | `brainstorm`       | none                                      | `docs/superomni/specs/spec-*.md` |
-| PLAN    | `writing-plans`    | `planner`                                 | `docs/superomni/plans/plan-*.md` |
-| REVIEW  | `plan-review`      | `ceo-advisor`, `architect` (+ `designer` if UI) | `docs/superomni/reviews/plan-review-*.md` |
-| BUILD   | `executing-plans` / `subagent-development` / `refactoring` | `test-writer` (code steps), `evaluator` (wave gates: ≥5 steps or DONE_WITH_CONCERNS or final wave), `designer` (UI steps), `refactoring-agent` (debt cleanup) | `docs/superomni/executions/execution-*.md` |
-| VERIFY  | `code-review` → `qa` → `verification` → `dependency-audit` | `code-reviewer`, `security-auditor` (auto on security-sensitive diffs, includes OWASP A06 dependency scan), `test-writer` (qa gap fill), `evaluator` (final gate) | `docs/superomni/evaluations/evaluation-*.md` |
+| PLAN    | `writing-plans`    | `planner-reviewer`                        | `docs/superomni/plans/plan-*.md` |
+| REVIEW  | `plan-review`      | `planner-reviewer` (+ `frontend-designer` if UI) | `docs/superomni/reviews/plan-review-*.md` |
+| BUILD   | `executing-plans` / `subagent-development` / `refactoring` | `frontend-designer` (UI steps), `refactoring-agent` (debt cleanup), `explorer` (cross-file survey for ≥5-step waves) | `docs/superomni/executions/execution-*.md` |
+| VERIFY  | `code-review` → `qa` → `verification` → `dependency-audit` | `planner-reviewer` (code/architecture review in isolated context, includes security-sensitive diffs & OWASP A06 dependency scan) | `docs/superomni/evaluations/evaluation-*.md` |
 | RELEASE | `release` → `document-release` | `doc-writer` (post-ship documentation)    | `docs/superomni/releases/release-*.md` |
 
 Example output when entering REVIEW stage:
@@ -324,7 +324,7 @@ Example output when entering REVIEW stage:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ▶ Entering REVIEW stage
   Skill  : plan-review
-  Agents : ceo-advisor, architect
+  Agents : planner-reviewer
   Output : docs/superomni/reviews/plan-review-[branch]-[session]-[date].md
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

@@ -111,8 +111,8 @@ Involves code changes? [YES / NO]
 ```
 
 1. **Read** — understand what the step requires
-2. **TDD Check** — if this step involves writing or modifying source code: **dispatch the `test-writer` agent** (RED phase) with the step description, files to be modified, and expected behavior. The agent writes the failing test suite and returns a TEST REPORT block. Confirm the tests fail before writing any implementation. Then implement the minimum code to make tests pass (GREEN), and refactor as needed.
-3. **Frontend Check** — if this step involves UI files (`.html`, `.jsx`, `.tsx`, `.vue`, `.svelte`, `.css`, `.scss`): **apply the `frontend-design` skill** Phase 4 (Implementation) with the plan's design direction. After completing all UI steps in a wave, run the designer agent quality gate (Phase 5).
+2. **TDD Check** — if this step involves writing or modifying source code: **apply the `test-driven-development` skill** (RED phase) with the step description, files to be modified, and expected behavior. Write the failing test suite first, confirm the tests fail, then implement the minimum code to make tests pass (GREEN), and refactor as needed. (TDD runs in main context — it was consolidated from the retired `test-writer` agent into the `test-driven-development` skill.)
+3. **Frontend Check** — if this step involves UI files (`.html`, `.jsx`, `.tsx`, `.vue`, `.svelte`, `.css`, `.scss`): **apply the `frontend-design` skill** Phase 4 (Implementation) with the plan's design direction. After completing all UI steps in a wave, run the frontend-designer agent quality gate (Phase 5).
 4. **Do** — make the minimum change needed for this step only
 5. **Verify** — run the step's verification criterion
 6. **Report** — confirm step complete or blocked
@@ -126,7 +126,7 @@ Step involves code? ─── NO ──→ Execute directly
         │
         YES
         ↓
-Dispatch `test-writer` agent (RED) → failing tests written → confirm they fail
+Apply test-driven-development skill (RED) → failing tests written → confirm they fail
         ↓
 Write minimum implementation (GREEN) → confirm test passes
         ↓
@@ -149,7 +149,7 @@ Load design direction from plan (## Design Direction section)
 Apply frontend-design Phase 4 (Implementation) rules
         ↓
 After all UI steps in wave complete:
-  Run designer agent quality gate (7+/10 on all dimensions)
+  Run frontend-designer agent quality gate (7+/10 on all dimensions)
         ↓
 Gate PASS → continue | Gate FAIL → fix and re-run (2 retries)
 ```
@@ -196,12 +196,12 @@ If the gate **FAILS**:
 2. Determine if this is a harness signal (update plan/skill) or an implementation error (fix and re-run)
 3. Do NOT advance to the next wave until the gate passes
 
-Spawn the `evaluator` agent when **any** of these conditions apply:
+Apply the `verification` skill as an independent wave-evaluation gate when **any** of these conditions apply:
 - The wave contains **≥ 5 steps**
 - Any step in the wave reported `DONE_WITH_CONCERNS`
 - This is the **final wave** of the plan
 
-Dispatch with: the wave's acceptance criteria, all step completion blocks, and test output. The agent returns an EVALUATION REPORT with one of four verdicts: `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Do NOT advance to the next wave if the verdict is `CHANGES_REQUIRED` — return to the failing step(s) with the evaluator's specific findings.
+Apply with: the wave's acceptance criteria, all step completion blocks, and test output. The skill returns an EVALUATION REPORT with one of four verdicts: `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Do NOT advance to the next wave if the verdict is `CHANGES_REQUIRED` — return to the failing step(s) with the verification findings. (Evaluation content was consolidated from the retired `evaluator` agent into the `verification` skill.)
 
 ## Phase 5: Mid-Plan Check-ins
 

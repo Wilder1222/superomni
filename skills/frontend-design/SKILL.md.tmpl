@@ -7,7 +7,7 @@ description: |
   Triggers: "frontend design", "build UI", "design this page", "make it look good"
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebFetch, Agent]
 when_to_use: |
-  Use when building UI, pages, or components. Guides context gathering → implementation → designer-agent quality gate at 7+/10. Triggers: "frontend design", "build UI", "design page".
+  Use when building UI, pages, or components. Guides context gathering → implementation → frontend-designer-agent quality gate at 7+/10. Triggers: "frontend design", "build UI", "design page".
 produces: ~
 consumes:
   - "docs/superomni/specs/spec-[branch]-[session]-[date].md"
@@ -25,7 +25,7 @@ dispatch-agent: frontend-designer
 
 ## Iron Law: Never Ship UI Without the Quality Gate
 
-No frontend code ships without running the designer agent quality gate. A passing score on all 10 dimensions (7+/10 each) is required. Two auto-retry attempts are allowed before escalating to the user.
+No frontend code ships without running the frontend-designer agent quality gate. A passing score on all 10 dimensions (7+/10 each) is required. Two auto-retry attempts are allowed before escalating to the user.
 
 ## The Core Problem
 
@@ -170,21 +170,21 @@ Build with the loaded reference guidance active. Every implementation must:
 
 ## Phase 5: Quality Gate
 
-Run the **designer agent** for a full design review.
+Run the **frontend-designer agent** for a full design review.
 
 ### Gate Protocol
 
-1. Invoke the designer agent with the implementation
+1. Invoke the frontend-designer agent with the implementation
 2. Receive scores on all 10 dimensions
 3. **If all dimensions >= 7/10:** PASS — proceed to completion
 4. **If any dimension < 7/10 (attempt 1):**
-   - Read the designer's feedback for the failing dimensions
+   - Read the frontend-designer's feedback for the failing dimensions
    - Load the relevant reference file(s) for guidance
    - Apply specific fixes
-   - Re-run the designer agent
+   - Re-run the frontend-designer agent
 5. **If still < 7/10 (attempt 2):**
    - Apply different approach to failing dimensions
-   - Re-run the designer agent
+   - Re-run the frontend-designer agent
 6. **If still < 7/10 (attempt 3):**
    - STOP — escalate to user
    - Present: "Design quality gate failed on [dimensions] after 2 auto-fix attempts. Scores: [list]. Options: A) Continue with current quality, B) Provide design guidance, C) Skip quality gate"
@@ -321,4 +321,4 @@ Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 Report status using the completion protocol. After DONE, suggest next steps:
 - "Run `/front-design mode:polish` for a final refinement pass"
 - "Run `/front-design mode:audit` to verify accessibility compliance"
-- "Ready for code review — the designer agent will run automatically for UI changes"
+- "Ready for code review — the frontend-designer agent will run automatically for UI changes"

@@ -62,7 +62,7 @@ AUTO-DECISION LOG ([Phase])
 
 ## Phase 1: Strategy Review (CEO Lens)
 
-**Dispatch the `ceo-advisor` agent** with the plan document as input. The agent will run its full process (problem extraction, scope review, strategic questions) and return a CEO ADVISOR REVIEW block. Incorporate its findings into the strategy section below.
+**Dispatch the `planner-reviewer` agent** in **strategy mode** with the plan document as input. The agent will run the full process (problem extraction, scope review, strategic questions) and return a CEO ADVISOR REVIEW block. Incorporate its findings into the strategy section below. (Strategy-review content was consolidated from the retired `ceo-advisor` agent into `planner-reviewer`.)
 
 Questions:
 1. **Premise validity** — are assumptions stated or just assumed?
@@ -79,7 +79,7 @@ STRATEGY REVIEW
   Alternatives: [considered | not documented]
   DRY:      [reuses existing | reinvents wheel]
   Risks:    [list top 3]
-  ceo-advisor: [Mode chosen: EXPANSION | SELECTIVE EXPANSION | HOLD SCOPE | REDUCTION]
+  Strategy mode: [Mode chosen: EXPANSION | SELECTIVE EXPANSION | HOLD SCOPE | REDUCTION]
 ```
 
 **Auto-resolve:** Verify premises against the spec and existing codebase. If premises are valid, proceed silently. If premises are questionable, log the concern and apply Principle 6 (bias toward action) to proceed.
@@ -90,7 +90,7 @@ STRATEGY REVIEW
 
 **Only run this phase if the plan includes UI or user-facing changes.**
 
-**Dispatch the `designer` agent** with the plan document and any relevant UI context as input. The agent will rate all 10 design dimensions (0-10), run its AI Slop detection checklist, edit the plan to add missing design requirements, and return a DESIGN REVIEW block. Incorporate its findings and any plan edits directly into the review output.
+**Dispatch the `frontend-designer` agent** with the plan document and any relevant UI context as input. The agent will rate all 10 design dimensions (0-10), run its AI Slop detection checklist, edit the plan to add missing design requirements, and return a DESIGN REVIEW block. Incorporate its findings and any plan edits directly into the review output.
 
 Check:
 - [ ] **Information hierarchy** — is the most important thing most prominent?
@@ -110,7 +110,7 @@ DESIGN REVIEW (if applicable)
 
 ## Phase 3: Engineering Review
 
-**Dispatch the `architect` agent** with the plan document and any relevant source files as input. The agent will run its full architecture review process (layer audit, coupling check, tech choices, scalability) and return an ARCHITECTURE REVIEW block. Incorporate its P0/P1 findings below.
+**Dispatch the `planner-reviewer` agent** in **engineering mode** with the plan document and any relevant source files as input. The agent will run the full architecture review process (layer audit, coupling check, tech choices, scalability) and return an ARCHITECTURE REVIEW block. Incorporate its P0/P1 findings below.
 
 Check:
 - [ ] **Architecture soundness** — appropriate layers, minimal coupling?
@@ -123,7 +123,7 @@ Check:
 
 ```
 ENGINEERING REVIEW
-  Architecture: [sound | concerns: ...]  (from architect agent)
+  Architecture: [sound | concerns: ...]  (from planner-reviewer engineering mode)
   Test plan:    [comprehensive | gaps: ...]
   Performance:  [no risks | risks: ...]
   Security:     [clean | concerns: ...]

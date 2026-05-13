@@ -164,10 +164,10 @@ Map every major workflow transition and verify an evaluation gate exists:
 
 | Transition | Evaluation gate | Present? |
 |-----------|----------------|---------|
-| Spec → Plan | plan-review skill or planner agent | |
+| Spec → Plan | plan-review skill or planner-reviewer agent (planning mode) | |
 | Plan → Execution | dependency analysis wave plan | |
 | Execution Wave → Next Wave | wave verification step | |
-| Implementation → Review | code-review skill or code-reviewer agent | |
+| Implementation → Review | code-review skill or planner-reviewer agent | |
 | Review → Ship | production-readiness skill | |
 | Ship → Done | verification skill | |
 | Sprint → Next Sprint | self-improvement skill | |

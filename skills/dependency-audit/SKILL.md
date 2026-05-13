@@ -96,9 +96,9 @@ java:   [manifest files found | none]
 ────────────────────────────────────────
 ```
 
-## Phase 2: Dispatch `security-auditor` Agent (Dependency Mode)
+## Phase 2: Dispatch `planner-reviewer` Agent (Security Audit, Dependency Mode)
 
-**Dispatch the `security-auditor` agent** with:
+**Dispatch the `planner-reviewer` agent** in **security audit mode (dependency sub-mode)** with:
 - The list of all package manifests found in Phase 1
 - Explicit instruction to run **Phase 4: Dependency Audit (OWASP A06)** and skip code scanning
 - The production context (pre-deploy or routine audit?)

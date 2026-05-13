@@ -180,21 +180,21 @@ git diff HEAD | grep "console.log\|debugger\|TODO\|FIXME\|print(" | head -10
 - [ ] If >5 files: was this flagged to the user?
 - [ ] Any unexpected files in the diff?
 
-## Independent Gate: Dispatch `evaluator` Agent
+## Independent Gate: `planner-reviewer` Agent (Evaluation Mode)
 
-After completing the checklist, **dispatch the `evaluator` agent** with:
+For a context-isolated independent verdict (recommended on ≥5-step waves, any `DONE_WITH_CONCERNS` step, or the final wave), **dispatch the `planner-reviewer` agent** in **evaluation mode** with:
 - The spec/plan acceptance criteria (from `docs/superomni/specs/spec-*.md` or `docs/superomni/plans/plan-*.md`)
 - All checklist results from above
 - Test output
 - Files changed
 
-The evaluator provides an independent EVALUATION REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Incorporate its TOP FINDING into the Verification Report below.
+The agent provides an independent EVALUATION REPORT with verdict `APPROVED` / `APPROVED_WITH_NOTES` / `CHANGES_REQUIRED` / `EVALUATION_INCOMPLETE`. Incorporate its TOP FINDING into the Verification Report below. (Evaluation content was consolidated from the retired `evaluator` agent into `planner-reviewer` evaluation mode.)
 
-**If the evaluator returns `CHANGES_REQUIRED`**: set status to `BLOCKED` and do NOT advance to RELEASE until the flagged issues are resolved.
+**If the agent returns `CHANGES_REQUIRED`**: set status to `BLOCKED` and do NOT advance to RELEASE until the flagged issues are resolved.
 
 ## Verification Report
 
-After completing the checklist and receiving the evaluator's verdict:
+After completing the checklist and receiving the independent verdict:
 
 ```
 VERIFICATION REPORT

@@ -120,17 +120,11 @@ Use the **Task tool** to invoke them — skills handle dispatch; you do not need
 
 | Agent | Purpose | Auto-dispatched by |
 |-------|---------|-------------------|
-| `architect` | System design, architectural review, and technical decisions | `plan-review` (REVIEW stage) |
-| `ceo-advisor` | Product strategy, business alignment, and stakeholder priorities | `plan-review` (REVIEW stage) |
-| `code-reviewer` | Code quality, security, and best-practice review | `code-review` (VERIFY stage) |
-| `debugger` | Root-cause analysis and systematic bug fixing | `systematic-debugging` |
-| `designer` | UX design, information architecture, and UI specification | `plan-review`, `executing-plans` (UI steps) |
+| `planner-reviewer` | Multi-mode agent: planning · strategy · engineering · evaluation · security audit · code review (absorbs retired planner, architect, ceo-advisor, evaluator, code-reviewer, security-auditor) | `writing-plans` (PLAN), `plan-review` (REVIEW), `code-review` (VERIFY), `verification` (wave gates), `production-readiness` (security/dependency audit), `dependency-audit` |
+| `frontend-designer` | UX review: 10-dimension scoring, AI slop detection, impeccable check (renamed from designer) | `plan-review` (if UI), `executing-plans` (UI steps), `frontend-design` (quality gate) |
+| `explorer` | Read-only isolated-context repo exploration; debug evidence gathering (absorbs retired debugger Phase 2) | `systematic-debugging`, `investigate`, `executing-plans` (cross-file survey on ≥5-step waves) |
+| `refactoring-agent` | Safe refactoring and technical-debt reduction | `refactoring`, `executing-plans` (debt cleanup), `code-review` (on ≥3 structural findings) |
 | `doc-writer` | Technical documentation generation and updates | `document-release` (RELEASE stage) |
-| `evaluator` | Objective quality-gate evaluation | `executing-plans` (wave gates), `verification` |
-| `planner` | Task decomposition and implementation planning | `writing-plans` (PLAN stage) |
-| `refactoring-agent` | Safe refactoring and technical-debt reduction | `refactoring`, `executing-plans` (debt cleanup) |
-| `security-auditor` | Security auditing, OWASP checks, and dependency scanning | `code-review` (security mode), `production-readiness` |
-| `test-writer` | Test suite creation and coverage improvement | `test-driven-development`, `qa` |
 
 ## Document Output Convention
 

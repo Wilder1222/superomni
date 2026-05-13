@@ -48,6 +48,16 @@ Philosophy: **Plan Lean, Execute Complete**
 | harness-engineering | "harness", "harness audit", "improve harness", "agent environment", "evaluation gates", "feedback loop" | P1 |
 | style-capture | "/style-capture", project init | P1 |
 
+## Agents Available
+
+| Agent | Purpose | Auto-dispatched by |
+|-------|---------|--------------------|
+| `planner-reviewer` | Canonical multi-mode review agent — modes: planning, strategy, engineering, evaluation, security, code-review. Absorbs retired planner / architect / ceo-advisor / evaluator / security-auditor / code-reviewer. | `writing-plans`, `plan-review`, `code-review`, `verification`, `production-readiness`, `dependency-audit` |
+| `frontend-designer` | UX review: 10-dimension scoring, AI slop detection, accessibility (renamed from designer). | `frontend-design`, `plan-review` (if UI), `executing-plans` (UI steps), `code-review` (UI diffs) |
+| `explorer` | Read-only isolated-context repo exploration + debug evidence gathering (absorbs retired debugger Phase 2). | `systematic-debugging`, `investigate`, `executing-plans` (cross-file survey on ≥5-step waves) |
+| `refactoring-agent` | Safe behavior-preserving code refactoring with tests-first protocol. | `refactoring`, `executing-plans` (debt cleanup), `code-review` (on ≥3 structural findings) |
+| `doc-writer` | Diff-driven technical documentation generation. | `document-release` (RELEASE stage) |
+
 ## Commands
 
 | Command | Description |

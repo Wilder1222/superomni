@@ -44,8 +44,8 @@ _See [preamble-ref.md](../../lib/preamble-ref.md) for detailed protocols._
 
 ```
 Need: "I need something that audits performance"
-Step 1: bin/agent-manager list → found: architect (Phase 7: Performance Analysis)
-Action: Use the built-in architect agent
+Step 1: bin/agent-manager list → found: planner-reviewer (engineering mode includes performance analysis)
+Action: Use the built-in planner-reviewer agent
 Result: No new agent needed — DONE
 ```
 
@@ -54,7 +54,7 @@ Result: No new agent needed — DONE
 ```
 Need: "I need something that checks security"
 Action: Immediately create agents/my-security-checker.md from scratch
-[VIOLATED: security-auditor already exists — checked built-ins first]
+[VIOLATED: planner-reviewer (security audit mode) already exists — checked built-ins first]
 ```
 
 ---
@@ -95,21 +95,15 @@ grep -rn "name:" skills/*/SKILL.md.tmpl | grep -i "<your-keyword>" | head -10
 grep -l "<your-keyword>" agents/*.md | head -5
 ```
 
-**Current built-in agents:**
+**Current built-in agents (5 canonical, after consolidation):**
 
-| Agent | Specialty |
-|-------|-----------|
-| `code-reviewer` | Structured code review (P0/P1/P2) |
-| `planner` | Strategic decomposition and plan writing |
-| `debugger` | Root-cause analysis and bug resolution |
-| `test-writer` | Behavior-verifying test suites with TDD |
-| `security-auditor` | OWASP-aware vulnerability + dependency CVE audit |
-| `architect` | System design, architectural review, performance analysis |
-| `ceo-advisor` | Product strategy, scope, demand validation |
-| `designer` | UX design, missing states, AI slop detection |
-| `evaluator` | Independent verdict gate (APPROVED / CHANGES_REQUIRED) |
-| `refactoring-agent` | Behavior-preserving code refactoring |
-| `doc-writer` | Diff-driven documentation generation |
+| Agent | Specialty | Modes / consolidated responsibilities |
+|-------|-----------|----------------------------------------|
+| `planner-reviewer` | Plan authoring + multi-lens review (strategy / engineering / evaluation / security / code-review) | absorbs retired planner, architect, ceo-advisor, evaluator, code-reviewer, security-auditor |
+| `frontend-designer` | UX review: 10-dimension scoring, AI slop detection, impeccable check | renamed from designer |
+| `explorer` | Read-only isolated-context repo exploration (debug evidence, code survey) | absorbs retired debugger (Phase 2: trace evidence) |
+| `refactoring-agent` | Behavior-preserving code refactoring | unchanged |
+| `doc-writer` | Diff-driven documentation generation | unchanged |
 
 **Gate:** If a built-in component fits → use or extend it. **Stop here.**
 If none fits → proceed to Phase 3.
@@ -186,8 +180,8 @@ Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ```
 
 ```bash
-# Scaffold
-cp agents/evaluator.md agents/<new-name>.md
+# Scaffold (copy any canonical agent as a starting template)
+cp agents/planner-reviewer.md agents/<new-name>.md
 # Edit to match new specialty
 ```
 

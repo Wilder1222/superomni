@@ -207,9 +207,9 @@ Wave 1 (8 agents):
   Agent 3: [spec-reviewer] — [spec for task C]
   Agent 4: [implementer] — [task D] (independent of A, B)
   Agent 5: [implementer] — [task E]
-  Agent 6: [code-reviewer] — [review module X]
+  Agent 6: [planner-reviewer] — [review module X]
   Agent 7: [implementer] — [task F]
-  Agent 8: [test-writer] — [tests for module Y]
+  Agent 8: [implementer + TDD] — [tests for module Y]
 
 Synchronization point: After all Wave 1 agents report DONE
 Wave 2 tasks (unblocked by Wave 1): [list]

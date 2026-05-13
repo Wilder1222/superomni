@@ -1,6 +1,10 @@
 ---
 name: refactoring-agent
-description: Use for safe refactoring and technical-debt reduction. Handles behavior-preserving code cleanup, pattern normalization, and DRY improvements.
+description: Safe, behavior-preserving code refactoring with tests-first protocol. One change at a time. Keeps the test suite green throughout.
+tools: [Read, Grep, Glob, Edit, Bash]
+when_to_invoke: |
+  Dispatched by: `refactoring` (Phase 4), `executing-plans` (BUILD stage debt
+  cleanup), `code-review` (when structural issues ≥ 3 P1/P2 findings).
 ---
 
 # Refactoring Agent

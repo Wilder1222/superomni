@@ -54,11 +54,11 @@ Questions to answer before reviewing:
 - What spec/ticket does this implement?
 - What is the blast radius of this change?
 
-**Dispatch the `code-reviewer` agent** with the diff and relevant source files as input. The agent will perform a full P0/P1/P2 layered review (correctness, security, tests, quality, blast radius, architecture) applying the 6 Decision Principles. Incorporate the CODE REVIEW block it returns as the primary review output.
+**Dispatch the `planner-reviewer` agent** with the diff and relevant source files as input. The agent will perform a full P0/P1/P2 layered review (correctness, security, tests, quality, blast radius, architecture) applying the 6 Decision Principles. Incorporate the CODE REVIEW block it returns as the primary review output.
 
-### Auto-Dispatch: `security-auditor` on Security-Sensitive Diffs
+### Auto-Dispatch: `planner-reviewer` (security mode) on Security-Sensitive Diffs
 
-Before or alongside `code-reviewer`, detect security-sensitive changes:
+Before or alongside the main code review dispatch, detect security-sensitive changes:
 
 ```bash
 git diff main...HEAD -- . | grep -iE \
@@ -68,9 +68,9 @@ git diff main...HEAD -- . | grep -iE \
   | grep -v "^Binary\|^---\|^+++" | head -20
 ```
 
-**If any security-sensitive patterns are found**, also dispatch the `security-auditor` agent with the diff and relevant source files. Do NOT require an explicit `security` mode request — trigger it automatically.
+**If any security-sensitive patterns are found**, also dispatch the `planner-reviewer` agent in **security audit mode** with the diff and relevant source files. Do NOT require an explicit `security` mode request — trigger it automatically. (Security audit content was consolidated from the retired `security-auditor` agent into `planner-reviewer`.)
 
-**Auto-trigger `security-auditor` when the diff touches:**
+**Auto-trigger the security-mode dispatch when the diff touches:**
 - Authentication or authorization logic
 - Input validation, parsing, or sanitization
 - Cryptographic operations (hashing, encryption, tokens, keys)
@@ -131,7 +131,7 @@ grep -r "from './changedModule'" . --include="*.ts" --include="*.js" -l
 ### UI Change Detection
 
 If the diff includes files matching `*.html`, `*.jsx`, `*.tsx`, `*.vue`, `*.svelte`, `*.css`, `*.scss`, or `*.less`:
-- Invoke the **designer agent** for a full design review
+- Invoke the **frontend-designer agent** for a full design review
 - Include all 10 dimension scores in the review output
 - Flag any dimension scoring < 7 as a P1 issue
 - Apply the AI Slop detection checklist
@@ -226,9 +226,9 @@ Ready for re-review: YES | NO
 
 ## Mode: Security (Merged)
 
-For security-focused reviews, **dispatch the `security-auditor` agent** with the diff and relevant source files as input. The agent will run its full OWASP Top 10 / STRIDE audit process and return a SECURITY AUDIT REPORT block. Incorporate its findings directly into the review output.
+For security-focused reviews, **dispatch the `planner-reviewer` agent** in **security audit mode** with the diff and relevant source files as input. The agent will run the full OWASP Top 10 / STRIDE audit process and return a SECURITY AUDIT REPORT block. Incorporate its findings directly into the review output.
 
-The security-auditor agent covers:
+The planner-reviewer security audit mode covers:
 1. Attack surface map (entry points, auth boundaries, sensitive data paths).
 2. OWASP Top 10 checklist pass.
 3. STRIDE-oriented threat notes for high-risk flows.

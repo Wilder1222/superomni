@@ -6,6 +6,7 @@ Activate the full **superomni** skill framework and launch the default guided wo
 
 ```
 /vibe              — activate framework, detect stage, and continue workflow
+/vibe auto         — run the full pipeline end-to-end with only the THINK gate
 /vibe status       — show which skills are active and pipeline position
 /vibe reset        — restart the guided workflow from the beginning
 ```
@@ -43,6 +44,40 @@ Every stage must leave document evidence before advancing:
 | RELEASE | `docs/superomni/releases/release-[branch]-[session]-[date].md` |
 
 If the stage artifact is missing, do not auto-advance.
+
+## /vibe auto — Single-Command End-to-End Pipeline
+
+`/vibe auto` chains every pipeline stage into a single invocation. Useful when you have a clear feature idea and want to hand the full sprint to the framework with minimum interaction.
+
+### Flow
+
+```
+User → /vibe auto "feature description"
+         ↓
+THINK    brainstorm          → spec-*.md
+         ↓ ── HUMAN GATE: approve spec ──
+PLAN     writing-plans       → plan-*.md       → auto-advance on DONE
+REVIEW   plan-review         → review-*.md     → auto-advance on DONE
+BUILD    executing-plans     → execution-*.md  → auto-advance on DONE
+                              (dispatches subagent-development, test-driven-development,
+                               frontend-design, refactoring as needed)
+VERIFY   code-review → qa → verification       → auto-advance on DONE
+                              → evaluation-*.md
+RELEASE  release             → release-*.md    → end of pipeline
+```
+
+### Rules
+
+- **Only one human gate:** spec approval at THINK. Everything else runs hands-free.
+- **Any non-DONE status stops the pipeline.** `BLOCKED`, `DONE_WITH_CONCERNS`, or `NEEDS_CONTEXT` surfaces to the user before the next stage starts. This is by design — safety beats autonomy.
+- **Stage artifact contract is enforced.** If a stage reports DONE but the expected artifact is missing, `/vibe auto` stops and flags the harness deficiency.
+- **Skill frontmatter `produces:` / `consumes:` is validated** by `npm run check:workflow-contract`. Run the contract checker in CI to catch drift.
+
+### When NOT to use /vibe auto
+
+- You want step-by-step human oversight → use plain `/vibe` (which stops at every stage).
+- The task is exploratory / research-only → use `investigate` skill directly.
+- You already have a spec and want to skip THINK → invoke `/write-plan` directly.
 
 ## All Available Commands
 

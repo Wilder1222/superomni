@@ -222,6 +222,54 @@ Then `npm run gen-skills`.
   3. Every agent file's first line is `---` (YAML frontmatter present).
 **Effort:** L
 
+### Step 14.5: Rewrite pipeline stage→agent mapping (ADDED 20260513 post-careful-assessment)
+
+**Why this step was added:** The `careful` skill assessment after Phase 1 commit revealed the retired agents (`planner`, `evaluator`, `code-reviewer`, `security-auditor`, `test-writer`, `designer`, `architect`, `ceo-advisor`, `debugger`) are referenced 78 times across 13 skill files including the **core pipeline stage→agent routing table in `skills/vibe/SKILL.md.tmpl` (lines 300-305)**. A simple grep-delete would leave the table pointing at dead files. Step 14.5 defines the concrete remap.
+
+**What:** Rewrite the stage→agent table in `vibe/SKILL.md.tmpl` and update every other skill that references retired agent names to use the 5 canonical surviving agents. This step MUST run BEFORE Step 14's `git rm` so the table is always self-consistent.
+
+**Files:** `skills/vibe/SKILL.md.tmpl`, `skills/plan-review/SKILL.md.tmpl`, `skills/frontend-design/SKILL.md.tmpl`, `skills/code-review/SKILL.md.tmpl`, `skills/executing-plans/SKILL.md.tmpl`, `skills/harness-engineering/SKILL.md.tmpl`, `skills/writing-plans/SKILL.md.tmpl`, `skills/framework-management/SKILL.md.tmpl`, `skills/using-skills/SKILL.md`, `skills/brainstorm/SKILL.md.tmpl` (+ any other file grep finds)
+
+**How — concrete remap table:**
+
+| Stage    | Retired agents today              | Remapped to (5 canonical)                                  | Rationale |
+|----------|-----------------------------------|------------------------------------------------------------|-----------|
+| THINK    | (none)                            | (none)                                                     | brainstorm runs in main context |
+| PLAN     | `planner`                         | `planner-reviewer` (renamed from `architect`)              | planner-reviewer absorbs planner+evaluator+architect |
+| REVIEW   | `ceo-advisor`, `architect`, `designer` | `planner-reviewer` (+ `frontend-designer` if UI)       | CEO-forcing-questions merge into plan-review skill body; architect → planner-reviewer |
+| BUILD    | `test-writer`, `evaluator`, `designer`, `refactoring-agent` | `frontend-designer` (UI steps), `refactoring-agent` (debt), `explorer` (cross-file survey). test-writing folded into `test-driven-development` skill (runs in main context); evaluation folded into `verification` skill | test-writer + evaluator had no context-isolation benefit |
+| VERIFY   | `code-reviewer`, `security-auditor`, `test-writer`, `evaluator` | `planner-reviewer` (code/architecture review in isolated context). Security audit, test-gap, final eval fold into `code-review` / `qa` / `verification` skills (main context) | security-auditor / code-reviewer / test-writer / evaluator overlap 1:1 with the skill they "support" |
+| RELEASE  | `doc-writer` (kept)               | `doc-writer` (unchanged)                                   | Already has dispatch path |
+
+**New vibe table (lines 300-305 after remap):**
+
+```markdown
+| Stage   | Skill              | Agents                                    | Output artifact |
+|---------|--------------------|-------------------------------------------|-----------------|
+| THINK   | `brainstorm`       | none                                      | `docs/superomni/specs/spec-*.md` |
+| PLAN    | `writing-plans`    | `planner-reviewer`                        | `docs/superomni/plans/plan-*.md` |
+| REVIEW  | `plan-review`      | `planner-reviewer` (+ `frontend-designer` if UI) | `docs/superomni/reviews/plan-review-*.md` |
+| BUILD   | `executing-plans` / `subagent-development` / `refactoring` | `frontend-designer` (UI steps), `refactoring-agent` (debt cleanup), `explorer` (cross-file survey) | `docs/superomni/executions/execution-*.md` |
+| VERIFY  | `code-review` → `qa` → `verification` → `dependency-audit` | `planner-reviewer` (code review in isolated context) | `docs/superomni/evaluations/evaluation-*.md` |
+| RELEASE | `release` → `document-release` | `doc-writer` (post-ship documentation)    | `docs/superomni/releases/release-*.md` |
+```
+
+**Sub-steps:**
+  1. Grep every file listed above for each retired agent name; replace per the mapping table.
+  2. For `frontend-design/SKILL.md.tmpl`, replace all `designer agent` → `frontend-designer agent` (same agent, new name).
+  3. For `plan-review/SKILL.md.tmpl`, replace `ceo-advisor` references with an inline section header "Strategy Review (CEO lens)" — the forcing questions already live in plan-review skill body.
+  4. For `systematic-debugging/SKILL.md.tmpl`, replace `debugger agent` references with `explorer` agent (for root-cause evidence-gathering in isolated context).
+  5. `npm run gen-skills && npm run verify:skill-docs`.
+
+**Verification:**
+  1. `grep -rE '\b(ceo-advisor|code-reviewer|debugger|evaluator|security-auditor|test-writer)\b' skills/` returns 0 matches (outside history/retired-content reference).
+  2. `grep -rE '\b(architect|designer|planner)\b\.md' skills/` returns 0 matches (renamed forms).
+  3. `grep -rnE '\b(architect|designer|planner)(-agent)?\b' skills/` shows only: `planner-reviewer`, `frontend-designer`, `refactoring-agent` (the 3 canonical renames/existing).
+  4. `vibe/SKILL.md.tmpl` stage table contains only the 5 canonical agents.
+  5. `npm run verify:skill-docs` passes.
+
+**Effort:** M (touches ~15 skill files; mechanical replace per mapping table)
+
 ### Step 15: Wire `dispatch-agent` references
 
 **What:** Skills that benefit from isolated context call the 5 canonical agents by name.

@@ -7,6 +7,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.2] — 2026-05-14
+
+### Added
+- **`disable-model-invocation: true` on 3 side-effect skills** — `release`, `finishing-branch`, `framework-management` now require explicit user invocation (typed `/release`, `/finishing-branch`, `/framework-management`). Prevents the LLM from auto-triggering side-effect or framework-mutating skills based on description-match alone.
+- **`user-invocable: false` on `using-skills`** — meta-skill is hidden from the `/` menu (LLM still loads it; users have no reason to type `/using-skills`).
+- **`argument-hint` on 3 skills** — `vibe` (`[idea-or-status-or-reset-or-auto]`), `brainstorm` (`[idea]`), `release` (`[version]`). Improves `/skill <args>` autocomplete UX.
+- **Anthropic `!`<command>`` dynamic context injection in `vibe` Phase 1** — current branch, git status, recent artifacts (latest spec/plan/evaluation/release) pre-resolved at skill-load time. Saves 1 Bash round-trip per `/vibe` invocation. Phase 1 still links to `reference/stage-detection.md` for the full session-aware bash; the auto-inject covers the high-signal subset.
+- **`npm run test:generators`** — multi-occurrence first-occurrence-only regression test. New `lib/templates/multi-occurrence-fixture.md.tmpl` has 2× `{{PREAMBLE_CORE}}` (canonical + code-fenced); `lib/test-generators.js` asserts that all 3 generators (js / sh / ps1) expand only the canonical occurrence (signature: exactly 1 `**Status protocol**` in output). Catches the v0.6.1 ps1 `[regex]::Replace(..., MatchEvaluator, count=1)` silent-failure regression class. Wired into `verify:skill-docs` umbrella.
+- **CRLF advisory in `lib/check-skill-docs.js`** — warns (stderr-only) if any committed `skills/**/SKILL.md` contains `\r\n`, indicating someone bypassed `npm run gen-skills` after a manual edit. Defense-in-depth on top of v0.6.1's `.gitattributes` LF-pin.
+
+### Changed
+- **`lib/validate-skills.sh` Iron Law examples check upgraded** — passes if EITHER inline example fences exist OR a `reference/<topic>.md` file exists. Fixes the post-v0.6.1 false positive on `test-driven-development` (which moved its Good/Bad examples to `reference/red-green-refactor.md`).
+- **`lib/check-workflow-contract.js` REFLECT gate** — now accepts `release-*.md` (which since v0.5.8 contains the `## Retrospective` section per the `self-improvement` skill's "retro merged into release" convention) as fulfilling the gate. Standalone `improvement-*.md` is still accepted. Removes the false error on v0.6.1's `main-skill-layering-anthropic` flow.
+- **`skills/using-skills/SKILL.md` line endings** — normalized from CRLF to LF (caught by the new CRLF advisory while testing it).
+
+### Deferred (v0.7.0+ backlog)
+- `context: fork` + `agent:` migration for the 7 dispatch-agent skills.
+- `!`<command>`` dynamic context injection in `verification` / `release` (extension of v0.6.2's vibe-only adoption).
+- `$ARGUMENTS` / `$N` substitution (depends on argument-hint signal first).
+- `model:` / `effort:` per-skill overrides.
+- `paths` glob auto-trigger review (probably not applicable).
+
+---
+
 ## [0.6.1] — 2026-05-14
 
 ### Added

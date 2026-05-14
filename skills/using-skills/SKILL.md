@@ -5,6 +5,7 @@ description: |
   Always active. Read this first.
 when_to_use: |
   Always active — the meta-skill that teaches the framework. Read first on session start. Not invoked explicitly.
+user-invocable: false
 produces: ~
 consumes: ~
 ---

@@ -5,6 +5,7 @@ description: |
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 when_to_use: |
   Use to enter the framework, resume mid-sprint work, or auto-chain through stages. The primary user-facing entry command.
+argument-hint: "[idea-or-status-or-reset-or-auto]"
 produces: ~
 consumes: ~
 ---
@@ -57,7 +58,15 @@ Always follow this skill's phases directly. Route all planning through superomni
 
 ## Phase 1: Detect Current Pipeline Stage
 
-Scan for existing artifacts to determine where the project is in the sprint pipeline. The full session-aware detection script + artifact-verification helper is in [reference/stage-detection.md](${CLAUDE_SKILL_DIR}/reference/stage-detection.md). Run it, then proceed with the matrix below.
+Scan for existing artifacts to determine where the project is in the sprint pipeline. The full session-aware detection script + artifact-verification helper is in [reference/stage-detection.md](${CLAUDE_SKILL_DIR}/reference/stage-detection.md). Run it for the full matrix; the high-signal subset is auto-injected below.
+
+### Current State (auto-injected at skill-load)
+
+The `!`<command>`` syntax is Anthropic's dynamic context injection — runtime resolves each command before the skill body reaches the LLM.
+
+- Branch / status: !`git branch --show-current && git status -s`
+- Recent commits: !`git log --oneline -5 2>/dev/null`
+- Latest spec / plan / evaluation: !`ls -t docs/superomni/specs/spec-*.md docs/superomni/plans/plan-*.md docs/superomni/evaluations/evaluation-*.md docs/superomni/releases/release-*.md 2>/dev/null | head -4`
 
 ### Stage Detection Matrix
 

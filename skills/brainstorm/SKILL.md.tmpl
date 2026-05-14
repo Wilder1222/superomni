@@ -5,6 +5,7 @@ description: |
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob, WebSearch]
 when_to_use: |
   Use at the start of any new feature, project, or design decision. Produces a spec document that is the single input to writing-plans. NOT for product-market validation — use office-hours for that (its design-doc output is for product discovery, not sprint pipeline).
+argument-hint: "[idea]"
 produces: "docs/superomni/specs/spec-[branch]-[session]-[date].md"
 consumes: []
 ---

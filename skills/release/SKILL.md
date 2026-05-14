@@ -5,6 +5,8 @@ description: |
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 when_to_use: |
   Use to close a sprint: version bump, changelog, tag, push, publish, and retrospective — all in one artifact.
+argument-hint: "[version]"
+disable-model-invocation: true
 produces: "docs/superomni/releases/release-[branch]-[session]-[date].md"
 consumes:
   - "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"

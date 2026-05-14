@@ -9,6 +9,7 @@ description: |
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 when_to_use: |
   Unified entry for creating, installing, listing, and managing both skills and agents (absorbed agent-management + writing-skills). Use it to scaffold a new skill, install from URL, or list built-ins.
+disable-model-invocation: true
 produces: ~
 consumes: ~
 ---

@@ -184,107 +184,17 @@ Build with the loaded reference guidance active. Every implementation must:
 
 ## Phase 5: Quality Gate
 
-Run the **frontend-designer agent** for a full design review.
+Run the **frontend-designer agent** for a full design review. Quality gate must clear all 10 dimensions at ≥7/10 (3-attempt auto-retry, then escalate).
 
-### Gate Protocol
-
-1. Invoke the frontend-designer agent with the implementation
-2. Receive scores on all 10 dimensions
-3. **If all dimensions >= 7/10:** PASS — proceed to completion
-4. **If any dimension < 7/10 (attempt 1):**
-   - Read the frontend-designer's feedback for the failing dimensions
-   - Load the relevant reference file(s) for guidance
-   - Apply specific fixes
-   - Re-run the frontend-designer agent
-5. **If still < 7/10 (attempt 2):**
-   - Apply different approach to failing dimensions
-   - Re-run the frontend-designer agent
-6. **If still < 7/10 (attempt 3):**
-   - STOP — escalate to user
-   - Present: "Design quality gate failed on [dimensions] after 2 auto-fix attempts. Scores: [list]. Options: A) Continue with current quality, B) Provide design guidance, C) Skip quality gate"
-
-### Quality Gate Output
-
-```
-FRONTEND DESIGN — QUALITY GATE
-════════════════════════════════════════
-Attempt: [1/2/3]
-Direction: [chosen aesthetic]
-
-Dimension Scores:
-  Information hierarchy:  [N]/10
-  Missing states:         [N]/10
-  Responsive strategy:    [N]/10
-  Accessibility:          [N]/10
-  Error recovery:         [N]/10
-  AI Slop detection:      [N]/10
-  Typography:             [N]/10
-  Color system:           [N]/10
-  Spatial rhythm:         [N]/10
-  Motion quality:         [N]/10
-  ─────────────────────────────────
-  Overall:               [N]/10
-
-Gate result: PASS | RETRY | ESCALATE
-════════════════════════════════════════
-```
+**Reference:** see [reference/quality-gate.md](${CLAUDE_SKILL_DIR}/reference/quality-gate.md) for full Gate Protocol (3-attempt retry policy + escalation message) and the canonical Quality Gate Output block.
 
 ---
 
 ## Steering Command
 
-Use a single command to invoke frontend-design with automatic mode detection:
+Single command `/front-design` invokes frontend-design with automatic mode detection (auto / audit / critique / polish / distill / clarify / animate / colorize / harden / arrange / typeset).
 
-| Command | Mode | What it does |
-|---------|------|-------------|
-| `/front-design` | Auto (or explicit mode hint) | Detects and applies one or more high-impact modes (audit, critique, polish, distill, clarify, animate, colorize, harden, arrange, typeset) |
-
-### Steering Command Protocol
-
-When invoked via a steering command:
-1. Validate `mode:*` against the allowed set: `audit`, `critique`, `polish`, `distill`, `clarify`, `animate`, `colorize`, `harden`, `arrange`, `typeset`
-2. If no mode is provided, enter auto mode and echo `mode=auto`
-3. If mode is invalid, STOP and return fixed correction:
-   - `Invalid mode: <value>`
-   - `Supported modes: audit, critique, polish, distill, clarify, animate, colorize, harden, arrange, typeset`
-   - `Tip: run /front-design (auto) or /front-design mode:<supported-mode>`
-4. Skip Phases 1-2 **only when context is already established**, meaning at least one is true:
-   - A prior response in the same session already captured target audience, brand personality, use context, design-system reuse, and constraints
-   - A project design config file (`.impeccable.md` or `.design-config.md`) exists covering the five inputs in the Phase 1 checklist
-   - User explicitly instructs to skip discovery and provides constraints inline
-5. Resolve brand input with single-brand rule:
-   - If brand is not in whitelist, STOP and request approval + local vendoring + whitelist update
-   - If multiple brands are requested, STOP and ask user to choose one
-6. Load references in order:
-   - `reference/design-md-adaptation.md`
-   - exactly one whitelist brand DESIGN.md (if requested)
-   - 1-2 core references selected by mode:
-     - `audit` -> `color-and-contrast.md` + `responsive-design.md`
-     - `critique` -> `typography.md` + `spatial-design.md`
-     - `polish` -> `interaction-design.md` + `motion-design.md`
-     - `distill` -> `ux-writing.md` (+ `typography.md` if wording+hierarchy both change)
-     - `clarify` -> `ux-writing.md` (+ `interaction-design.md` when state copy is affected)
-     - `animate` -> `motion-design.md` (+ `responsive-design.md` when motion differs by viewport)
-     - `colorize` -> `color-and-contrast.md` (+ `typography.md` when color alters hierarchy)
-     - `harden` -> `interaction-design.md` + `responsive-design.md`
-     - `arrange` -> `spatial-design.md` + `responsive-design.md`
-     - `typeset` -> `typography.md` (+ `ux-writing.md` when readability copy tuning is needed)
-7. If adaptation/whitelist/brand files are missing, degrade to core references only
-8. Analyze current implementation through the command lens
-9. Apply fixes
-10. Run the quality gate on affected dimensions only
-
-### Execution Receipts (mandatory)
-
-Always emit these receipt flags in output:
-- `adaptation loaded`
-- `brand loaded`
-- `core refs loaded`
-- `quality gate authority kept`
-
-If fallback was used, include:
-- `fallback: core-references-only`
-- `missing files: [list]`
+**Reference:** see [reference/reference-loading.md](${CLAUDE_SKILL_DIR}/reference/reference-loading.md) for: mode validation rules, brand-input single-brand rule, per-mode reference-loading order, fallback behavior, and the mandatory execution-receipt flags.
 
 ---
 

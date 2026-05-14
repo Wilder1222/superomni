@@ -110,20 +110,8 @@ Answer each with evidence from the sources above:
 - Manual output modification = Style mismatch between Agent and user
 
 ### Tacit Gap Output
-If any gaps are found, generate `docs/superomni/improvements/tacit-gaps-[date].md`:
 
-```markdown
-# Tacit Knowledge Gaps — [date]
-
-| Scenario | Agent Behavior | User Expected Behavior | Proposed Rule |
-|----------|---------------|----------------------|---------------|
-| [context] | [what Agent did] | [what user wanted] | [candidate rule to add] |
-
-## Recommendations
-- If a gap maps to a style preference: update docs/superomni/style-profiles/
-- If a gap maps to a process rule: propose new Iron Law or Gate Check
-- If a gap maps to domain knowledge: flag as permanent TACIT-DENSE category
-```
+If any gaps are found, generate `docs/superomni/improvements/tacit-gaps-[date].md`. Use the template in [reference/phase-templates.md § Phase 0](${CLAUDE_SKILL_DIR}/reference/phase-templates.md#phase-0--tacit-gap-output-template).
 
 If no gaps found, note: "No tacit gaps detected in available history — continue to Phase 1."
 
@@ -188,30 +176,7 @@ Answer each question with **YES / PARTIAL / NO + reason**:
 
 ## Phase 3: Agent Behavior Evaluation
 
-Evaluate the AI agent's performance on three dimensions:
-
-### Scope Management (1-5 scale)
-- **5**: Stayed strictly within task scope; zero unasked-for changes
-- **3**: Minor out-of-scope suggestions flagged, deferred
-- **1**: Significant scope creep; made changes beyond what was asked
-
-**Score: __ / 5** — Evidence: ___
-
-### Instruction Following (1-5 scale)
-- **5**: Followed every protocol exactly; no skipped phases
-- **3**: Mostly followed protocols; minor deviations with justification
-- **1**: Skipped phases or ignored Iron Laws without explanation
-
-**Score: __ / 5** — Evidence: ___
-
-### Escalation Behavior (1-5 scale)
-- **5**: Escalated correctly when hitting 3-strike limit; never guessed past uncertainty
-- **3**: Escalated once but only after extra attempts
-- **1**: Kept guessing past 3 failures; never escalated
-
-**Score: __ / 5** — Evidence: ___
-
-**Agent Performance Score: __ / 15**
+Evaluate the AI agent's performance on three 1-5 dimensions: Scope Management, Instruction Following, Escalation Behavior. Use the scoring rubrics in [reference/phase-templates.md § Phase 3](${CLAUDE_SKILL_DIR}/reference/phase-templates.md#phase-3--agent-behavior-scoring-rubrics) and record `Score __/5 — Evidence: ___` for each. Total: **__ / 15**.
 
 ## Phase 4: Skill Effectiveness Evaluation
 
@@ -247,27 +212,7 @@ Trace every deviation found back to a root cause category:
 
 ## Phase 6: Improvement Actions
 
-Generate exactly **3 concrete improvement actions** for the next sprint:
-
-**Format for each action:**
-```
-ACTION [N]: [TITLE]
-Priority:   P0 — blocks process quality / P1 — degrades output quality / P2 — nice to have
-Problem:  [what went wrong or what was missing]
-Root cause: [which of the 3 root causes — process drift / evidence gap / scope creep]
-Fix:      [specific, actionable change to process or behavior]
-Verify:   [how to confirm this improvement was applied in the next session]
-```
-
-**Example:**
-```
-ACTION 1: WRITE SPEC BEFORE IMPLEMENTATION
-Priority:   P0 — blocks process quality
-Problem:  Started coding directly from the issue title without a spec
-Root cause: Process drift — skipped THINK stage under time pressure
-Fix:      Before any implementation task, spend 5 minutes writing docs/superomni/specs/spec-[branch]-[session]-[date].md with problem, goals, non-goals, acceptance criteria
-Verify:   Next session starts with `ls docs/superomni/specs/spec-*.md` — must exist before first code change
-```
+Generate exactly **3 concrete improvement actions** for the next sprint, using the format and worked example in [reference/phase-templates.md § Phase 6](${CLAUDE_SKILL_DIR}/reference/phase-templates.md#phase-6--improvement-action-template).
 
 ## Phase 6.5: Loop Back to Next Plan
 
@@ -298,88 +243,7 @@ TIMESTAMP=$(date +%Y-%m-%d-%H%M%S)
 REPORT_FILE="$IMPROVE_DIR/improvement-${BRANCH}-${TIMESTAMP}.md"
 ```
 
-Save the **full** evaluation report to `$REPORT_FILE` using the following structure. All scores and tables from Phases 1–6 must be included — not just the action items:
-
-```markdown
-# Improvement Report: [branch]
-
-**Date:** [date]
-**Branch:** [branch]
-**Task description:** [what was worked on this session]
-
-## Tacit Gaps (Phase 0)
-
-| Scenario | Agent Behavior | User Expected | Proposed Rule |
-|----------|---------------|--------------|---------------|
-| [from Phase 0 output, or "None detected"] | | | |
-
-Tacit gaps file: [path or "not generated"]
-
-## Session Evidence (Phase 1)
-
-- Skills invoked: [list]
-- Artifacts produced: [list of files in .superomni/ and project root]
-- Tests outcome: [pass/fail counts]
-- Evaluation report referenced: [path or "none"]
-
-## Process Adherence (Phase 2)
-
-| Question | Answer | Evidence |
-|----------|--------|----------|
-| THINK→PLAN→REVIEW→BUILD→VERIFY→RELEASE followed | YES/PARTIAL/NO | |
-| Spec/plan created before implementation | YES/PARTIAL/NO | |
-| Skills used for intended triggers | YES/PARTIAL/NO | |
-| Session ended with status report | YES/PARTIAL/NO | |
-
-**Iron Law compliance:** [N/5 laws followed]
-
-## Agent Evaluation (Phase 3)
-
-| Dimension | Score | Evidence |
-|-----------|-------|---------|
-| Scope management | [N]/5 | |
-| Instruction following | [N]/5 | |
-| Escalation behavior | [N]/5 | |
-
-**Agent total: [N]/15**
-
-## Skill Effectiveness (Phase 4)
-
-| Skill | Right skill? | Phases done | Output quality | Score |
-|-------|-------------|-------------|---------------|-------|
-| [skill-1] | YES/NO | 100%/80%/<50% | clear/partial/missing | [N]/5 |
-
-**Skills avg: [N]/5**
-
-## Gap Analysis (Phase 5)
-
-| Deviation | Root cause | Principle violated |
-|-----------|-----------|-------------------|
-| [deviation] | [root cause] | [principle] |
-
-## Action Items (Phase 6)
-
-### ACTION 1: [TITLE]
-Priority: P0/P1/P2
-Problem: ...
-Root cause: ...
-Fix: ...
-Verify: ...
-
-### ACTION 2: [TITLE]
-Priority: P0/P1/P2
-Problem: ...
-Root cause: ...
-Fix: ...
-Verify: ...
-
-### ACTION 3: [TITLE]
-Priority: P0/P1/P2
-Problem: ...
-Root cause: ...
-Fix: ...
-Verify: ...
-```
+Save the **full** evaluation report to `$REPORT_FILE`. All scores and tables from Phases 1–6 must be included — not just the action items. Use the canonical structure in [reference/phase-templates.md § Phase 7](${CLAUDE_SKILL_DIR}/reference/phase-templates.md#phase-7--full-improvement-report-template).
 
 ```bash
 echo "Improvement report saved to $REPORT_FILE"
@@ -389,19 +253,4 @@ This report is the canonical record of agent and skill performance for this sess
 
 ## Report
 
-```
-SELF-IMPROVEMENT REPORT
-════════════════════════════════════════
-Session:            [branch / date / task description]
-Tacit gaps found:   [N gaps | none]
-Process adherence:  [N/N checks passed]
-Agent score:        [N/15] (scope: N/5 | instructions: N/5 | escalation: N/5)
-Skills evaluated:   [N skills] — avg [N]/5
-Top gap:            [single most important finding]
-Action 1:           [title]
-Action 2:           [title]
-Action 3:           [title]
-Report saved:       [docs/superomni/improvements/...]
-Status: DONE | DONE_WITH_CONCERNS
-════════════════════════════════════════
-```
+End the session with the `SELF-IMPROVEMENT REPORT` block defined in [reference/phase-templates.md § Final SELF-IMPROVEMENT REPORT Block](${CLAUDE_SKILL_DIR}/reference/phase-templates.md#final-self-improvement-report-block).

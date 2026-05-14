@@ -144,6 +144,8 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 
 **`[session]` naming rule:** Auto-generate a short, descriptive session identifier from the conversation context (e.g., `vibe-skill`, `auth-refactor`, `fix-login-bug`). Use kebab-case, max 30 chars. This enables agents to search and retrieve relevant prior sessions.
 
+**Skill supporting files:** when authoring a skill whose body grows large, extract reference material into `skills/<name>/reference/<topic>.md` (subdirectory always; flat `reference.md` is non-conforming). See `framework-management` skill § Supporting Files for the canonical pattern.
+
 ## Status Protocol
 
 Always end a skill session with one of these statuses:

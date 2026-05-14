@@ -7,6 +7,38 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.1] — 2026-05-14
+
+### Added
+- **`reference/<topic>.md` supporting-files convention** — Anthropic's progressive-disclosure pattern adopted as the single project-wide rule. Long reference material now lives at `skills/<name>/reference/<topic>.md` (subdirectory always; flat `reference.md` at skill root is non-conforming). Documented canonically in `framework-management` skill § Supporting Files.
+- **11 new `reference/<topic>.md` files** across 5 trimmed skills (`self-improvement`, `vibe`, `subagent-development`, `frontend-design`, `test-driven-development`) and `framework-management` itself (eat-our-own-dogfood pointer).
+- **`${CLAUDE_SKILL_DIR}` runtime token** — generators preserve the literal token in generated `SKILL.md`; Anthropic's skill runtime resolves it at load time. Used in 15 cross-skill link URLs across the 5 trimmed skills for plugin-portable references.
+- **Golden-fixture parity check (`npm run verify:fixture-parity`)** — closes v0.6.0 retro ACTION 1. `lib/templates/fixture.md.tmpl` exercises every substitution token; `lib/verify-fixture-parity.js` runs all 3 generators (js / sh / ps1) and asserts byte-identical output via `sha256` triple-equality. Wired into the `verify:skill-docs` umbrella script.
+- **Two advisory warnings in `lib/check-skill-docs.js`** — (1) `SKILL.md.tmpl ≥ 300 lines && no reference/ subdir`, (2) any flat `skills/<name>/reference.md` at skill root. Both are stderr-only and never fail CI; they're authoring nudges. `framework-management` skip-listed because it documents the rules literally.
+- **`.gitattributes` LF lock** — `skills/**/SKILL.md`, `skills/**/SKILL.md.tmpl`, `skills/**/reference/*.md`, `lib/templates/*.tmpl`, `lib/templates/*.md`, `lib/preamble*.md` all pinned to LF line endings so cross-platform `sha256sum` parity holds regardless of `core.autocrlf` settings.
+
+### Changed
+- **5 longest skill bodies trimmed** by extracting reference material into `reference/<topic>.md`:
+  - `self-improvement` 421 → 270 lines (-151) — Phases 0/3/6/7 templates + final block extracted to `reference/phase-templates.md`.
+  - `vibe` 382 → 275 lines (-107) — Phase 1 detection bash + dispatch-brief table extracted to `reference/stage-detection.md` and `reference/dispatch-brief.md`.
+  - `subagent-development` 356 → 213 lines (-143) — Wave Planning, Consensus Protocol, and report templates extracted to `reference/wave-planning.md`, `reference/consensus-protocol.md`, `reference/report-templates.md`.
+  - `frontend-design` 338 → 248 lines (-90) — Quality Gate scoring rubric and Steering Command Protocol extracted to `reference/quality-gate.md` and `reference/reference-loading.md` (alongside existing 9 design-principle siblings + `design-md-library/`, all unchanged).
+  - `test-driven-development` 316 → 205 lines (-111) — Iron Law worked examples + anti-patterns table + test organization extracted to `reference/red-green-refactor.md` and `reference/anti-patterns.md`.
+- **Total `SKILL.md` body lines: 6,793 → 6,181 (-612 lines, -9%)** — recurring per-session token cost reduced ~30% on the 5 worst-offender skills, freeing ~6k tokens of Anthropic's 25k cross-skill re-attach budget for `/vibe auto` runs.
+- **`framework-management/SKILL.md`** — added new § Supporting Files (with own `reference/supporting-files.md` for full convention details). Body net +13 lines.
+- **`using-skills/SKILL.md`** — 1-line pointer added to the Document Output Convention section, directing skill authors to framework-management § Supporting Files.
+- **Cross-platform generator parity hardened** — all 3 generators (`lib/gen-skill-docs.{js,sh,ps1}`) and `lib/check-skill-docs.js` now normalize CRLF/CR → LF on read and strip trailing newlines on write. `gen-skill-docs.ps1` Expand-Token rewritten to use `IndexOf` + `Substring` (the prior `[regex]::Replace(..., MatchEvaluator, count=1)` silently ignored the count argument with the evaluator overload).
+
+### Deferred (v4 backlog, user pre-authorized)
+- `disable-model-invocation: true` on `release` / `finishing-branch` / `framework-management`.
+- `user-invocable: false` on `using-skills`.
+- `context: fork` + `agent:` migration for the 7 dispatch-agent skills.
+- `!`<command>`` dynamic context injection in `vibe` / `verification` / `release`.
+- `argument-hint` / `$ARGUMENTS` field adoption.
+- `paths` glob auto-trigger review.
+
+---
+
 ## [0.6.0] — 2026-05-13
 
 ### Added

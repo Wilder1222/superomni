@@ -41,6 +41,10 @@ process_template() {
     echo "[deprecated] ${rel} uses {{PREAMBLE}}; migrate to {{PREAMBLE_CORE}} + {{PREAMBLE_REF_LINK}}" >&2
   fi
 
+  # Note: ${CLAUDE_SKILL_DIR} is intentionally NOT substituted here — Anthropic's
+  # skill runtime resolves it at load time. Keeping the literal token also avoids
+  # per-OS path divergence between js / sh / ps1 generators.
+
   awk \
     -v core="${PREAMBLE_CORE_CONTENT}" \
     -v ref_link="${PREAMBLE_REF_LINK_LINE}" \
@@ -62,6 +66,20 @@ process_template() {
     }
     { print }
   ' "${tmpl_file}" > "${out_file}"
+
+  # Strip the trailing newline awk's `print` adds, to match gen-skill-docs.js (which
+  # writes the file content verbatim without an implicit final newline).
+  if [ -s "${out_file}" ]; then
+    # Use perl for portable in-place trim of a single trailing newline.
+    perl -i -pe 'BEGIN { undef $/; } s/\n\z//' "${out_file}" 2>/dev/null || \
+      python3 -c "
+import sys
+p=sys.argv[1]
+with open(p,'rb') as f: b=f.read()
+if b.endswith(b'\n'): b=b[:-1]
+with open(p,'wb') as f: f.write(b)
+" "${out_file}" 2>/dev/null || true
+  fi
 
   echo "  ✓ ${tmpl_file} → ${out_file}"
 }

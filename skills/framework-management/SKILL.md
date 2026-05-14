@@ -280,3 +280,17 @@ Built-in skills:   [N]
 Status: DONE | DONE_WITH_CONCERNS | BLOCKED
 ════════════════════════════════════════
 ```
+
+## Supporting Files (Reference / Examples / Scripts)
+
+When a skill's `SKILL.md` body grows beyond ~280 lines, extract reference material into `skills/<name>/reference/<topic>.md` (subdirectory, kebab-case topic). This follows Anthropic's progressive-disclosure convention.
+
+Single project-wide rule:
+- **Reference**: `reference/<topic>.md` (one file per topic; never a flat `reference.md`).
+- **Examples**: `examples/<name>.md` (sample inputs/outputs Claude reads for shape).
+- **Scripts**: `scripts/<name>.{py,sh,js}` (executable code Claude runs; never loaded as text).
+- **Linking**: use `${CLAUDE_SKILL_DIR}/reference/<topic>.md` in URLs — runtime-resolved.
+
+Two advisory warnings in `lib/check-skill-docs.js` enforce this: (a) `SKILL.md ≥ 300 lines && no reference/ dir`, (b) any flat `reference.md` at a skill root.
+
+**Reference:** see [reference/supporting-files.md](${CLAUDE_SKILL_DIR}/reference/supporting-files.md) for the full convention, subdirectory semantics, and canonical examples from the 5 skills trimmed in sprint v3 (2026-05-14).

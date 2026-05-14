@@ -21,9 +21,9 @@ if (-not (Test-Path -LiteralPath $preambleLegacyPath)) {
     exit 1
 }
 
-# Strip single trailing newline to match gen-skill-docs.js/sh byte-for-byte.
-$preambleCore = (Get-Content -LiteralPath $preambleCorePath -Raw -Encoding UTF8) -replace "`r?`n$", ""
-$preambleLegacy = (Get-Content -LiteralPath $preambleLegacyPath -Raw -Encoding UTF8) -replace "`r?`n$", ""
+# Normalize line endings to LF, then strip a single trailing newline.
+$preambleCore = (Get-Content -LiteralPath $preambleCorePath -Raw -Encoding UTF8) -replace "`r`n", "`n" -replace "`r", "`n" -replace "`n$", ""
+$preambleLegacy = (Get-Content -LiteralPath $preambleLegacyPath -Raw -Encoding UTF8) -replace "`r`n", "`n" -replace "`r", "`n" -replace "`n$", ""
 
 function Expand-Token {
     param(
@@ -32,13 +32,12 @@ function Expand-Token {
         [string]$Replacement
     )
 
-    $pattern = [regex]::Escape($Token)
-    return [regex]::Replace(
-        $TemplateText,
-        $pattern,
-        [System.Text.RegularExpressions.MatchEvaluator] { param($m) $Replacement },
-        1
-    )
+    # Replace the FIRST occurrence only (parity with js/sh first-occurrence semantics).
+    $idx = $TemplateText.IndexOf($Token)
+    if ($idx -lt 0) {
+        return $TemplateText
+    }
+    return $TemplateText.Substring(0, $idx) + $Replacement + $TemplateText.Substring($idx + $Token.Length)
 }
 
 $templates = @()
@@ -54,19 +53,29 @@ else {
 
 $count = 0
 foreach ($tmpl in $templates) {
-    $content = Get-Content -LiteralPath $tmpl -Raw -Encoding UTF8
+    # Normalize CRLF/CR → LF on read so all three generators emit identical bytes.
+    $content = (Get-Content -LiteralPath $tmpl -Raw -Encoding UTF8) -replace "`r`n", "`n" -replace "`r", "`n"
 
     if ($content -match '\{\{PREAMBLE\}\}') {
         $rel = [System.IO.Path]::GetRelativePath($repoRoot, $tmpl).Replace('\', '/')
         Write-Warning "[deprecated] $rel uses {{PREAMBLE}}; migrate to {{PREAMBLE_CORE}} + {{PREAMBLE_REF_LINK}}"
     }
 
+    # Note: ${CLAUDE_SKILL_DIR} is intentionally NOT substituted here. Anthropic's
+    # skill runtime resolves it at load time; keeping the literal token avoids
+    # per-OS path divergence between js / sh / ps1 generators.
+
     $output = Expand-Token -TemplateText $content -Token '{{PREAMBLE_CORE}}' -Replacement $preambleCore
     $output = Expand-Token -TemplateText $output -Token '{{PREAMBLE_REF_LINK}}' -Replacement $preambleRefLinkLine
     $output = Expand-Token -TemplateText $output -Token '{{PREAMBLE}}' -Replacement $preambleLegacy
 
+    # Normalize: no trailing newline (parity with js / sh).
+    $output = $output -replace "`n+$", ""
+
+    # Write LF, UTF-8 without BOM, no implicit trailing newline.
     $target = $tmpl -replace "\.tmpl$", ""
-    Set-Content -LiteralPath $target -Value $output -Encoding UTF8 -NoNewline
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($target, $output, $utf8NoBom)
 
     $relTarget = [System.IO.Path]::GetRelativePath($repoRoot, $target).Replace('\', '/')
     $relTemplate = [System.IO.Path]::GetRelativePath($repoRoot, $tmpl).Replace('\', '/')

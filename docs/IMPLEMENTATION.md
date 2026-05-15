@@ -2,7 +2,8 @@
 
 ## superomni — Developer Reference
 
-**Version:** 0.3.0
+**Version:** 0.6.9
+**Last updated:** v0.6.9
 
 ---
 
@@ -456,31 +457,44 @@ A skill meets the quality bar when:
 
 ---
 
-## Roadmap
+## Version History & Backlog
 
-### v0.2.0 ✅ Completed
+For detailed per-version changes see [`CHANGELOG.md`](../CHANGELOG.md). Summary by minor:
 
-- [x] `/ship` command registration
-- [x] More commands (`/investigate`, `/review`, `/workflow`, `/qa`, `/security`)
-- [x] `code-review` merged mode — respond to review feedback (`receiving`)
-- [x] `code-review` merged mode — OWASP/STRIDE security review (`security`)
-- [x] `qa` skill — quality assurance with checklists
-- [x] `careful` skill — safety guardrails for destructive operations
-- [x] `workflow` skill — sprint pipeline orchestration
-- [x] Multi-platform support (Claude Code, Cursor, Codex, Gemini CLI, OpenCode)
-- [x] Review checklists (data vs logic separation)
-- [x] Platform detection in hooks
+### Version History
 
-### v0.3.0
+| Minor | Headline |
+|---|---|
+| **v0.2.0** | Foundational skill set: `/ship`, `/investigate`, `/review`, `/workflow`, `/qa`, `careful`, multi-platform support (Claude Code, Cursor, Codex, Gemini CLI, OpenCode) |
+| **v0.3.0** | Static validation harness; review checklist refinement |
+| **v0.4.0** | Harness engineering — agent / environment / evaluation gates as first-class concepts |
+| **v0.5.0–v0.5.8** | RELEASE-stage merge (ship + retrospective into one artifact); skill consolidation iterations |
+| **v0.6.0** | Major architectural sprint: agent consolidation 11→5 (`planner-reviewer`, `frontend-designer`, `explorer`, `doc-writer`, `refactoring-agent`); preamble diet (135 → 30 + 127 ref); `reference/<topic>.md` extraction; Anthropic frontmatter alignment |
+| **v0.6.1** | Skill layering — extract `reference/<topic>.md` from 5 long skills; `${CLAUDE_SKILL_DIR}` runtime token; golden-fixture parity |
+| **v0.6.2** | Anthropic frontmatter alignment: `disable-model-invocation`, `user-invocable`, `argument-hint`, `!\`<command>\`` dynamic context (vibe); 3 retro cleanups |
+| **v0.6.3** | Pre-Destructive Gate (template) in `writing-plans`; `bin/audit-repo-invariants`; dynamic context in verification + release |
+| **v0.6.4** | Token-literal advisory in `lib/check-skill-docs.js` |
+| **v0.6.5** | `lib/check-plugin-sync.js` (4 invariants); README version + claude-skill.json `style-capture` fix |
+| **v0.6.6** | CI gap close — wire 3 missing gates (`verify:fixture-parity`, `test:generators`, `check:plugin-sync`) into GitHub Actions; multi-doc `VERSION_DOCS`; `.approved-spec-*` marker mechanism removed |
+| **v0.6.7** | `lib/check-plan-content.js` — CI hard-gate for v0.6.3 Pre-Destructive Gate |
+| **v0.6.8** | `docs/AGENTS.md` rewrite (5 current agents); Invariant 5 (agent-doc heading sync) |
+| **v0.6.9** | `docs/IMPLEMENTATION.md` + `docs/COMPARISON.md` § 7.2 sync; VERSION_DOCS extension to 5 docs |
 
-- [ ] Dual Voices support (optional Claude + Codex consensus for plan review)
-- [ ] Static validation tests
-- [ ] Analytics dashboard (`bin/analytics-view`)
-- [ ] Skill dependency graph visualization
-- [ ] Auto-update mechanism
+### Current Backlog (v0.7.0+)
 
-### v1.0.0
+These are the items consistently deferred by v0.6.x sprint retros, awaiting future sprints:
 
-- [ ] Full test suite (static validation + behavioral tests)
-- [ ] Published npm package
-- [ ] GitHub Actions CI
+- **`context: fork` migration** — adopt Anthropic native `context: fork` + `agent:` for the 7 dispatch-agent skills. Architectural; needs runtime evidence first (a single skill tested in a real Claude Code session before bulk migration).
+- **`model:` / `effort:` per-skill overrides** — cost-optimization; needs per-skill quality validation before applying.
+- **`$ARGUMENTS` / `$N` substitution adoption** — argument-hint frontmatter exists since v0.6.2 but skill bodies don't yet use the substitution. Low signal so far (no observed argument usage); raise priority if signal changes.
+- **`paths` glob auto-trigger** — likely never; superomni skills are stage-triggered, not file-pattern-triggered.
+- **Live `/vibe` E2E test** — sandbox required to validate `!\`<command>\`` runtime resolution end-to-end.
+- **CHANGELOG auto-generation from commits** — currently manual; could template-extract `feat:`/`fix:`/etc.
+- **Windows job fixture-parity** — currently ubuntu-only; verify bash-via-Git availability on `windows-latest` runners.
+- **`bin/audit-repo-invariants` data-driven exclude list** — hard-coded list works; making it config-driven is P3 polish.
+
+### v1.0.0 Goals
+
+- All v0.7.0+ backlog items resolved or explicitly rejected
+- Stable plugin marketplace listing
+- Documented backwards-compatibility policy

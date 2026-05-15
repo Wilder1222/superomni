@@ -75,12 +75,11 @@ Use the following priority-ordered rules (first match wins):
 | Priority | Condition | Stage | Skill |
 |----------|-----------|-------|-------|
 | 1 | No artifacts at all | THINK | `brainstorm` |
-| 2 | `spec-*.md` exists but no `.approved-spec-*` marker | THINK | `brainstorm` (spec awaiting approval) |
-| 3 | `spec-*.md` + `.approved-spec-*` exist, no `plan-*.md` | PLAN | `writing-plans` - auto-advance |
-| 4 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
-| 5 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
-| 6 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `code-review` (`security` mode), `production-readiness` (required when change involves server-side code, a versioned release, DB migrations, or new external dependencies) - auto-advance |
-| 7 | Verified | RELEASE | `release` skill - auto-advance |
+| 2 | `spec-*.md` exists, no `plan-*.md` for the same session | THINK / PLAN | `brainstorm` STOPs at human gate; on user-approval reply, `writing-plans` auto-advances |
+| 3 | `plan-*.md` exists, no review doc matching its session | REVIEW | `plan-review` - auto-advance |
+| 4 | Plan reviewed + approved, has open items (`- [ ]`) | BUILD | `executing-plans` (+ `frontend-design` if UI steps detected) - auto-advance |
+| 5 | `plan-*.md` all checked | VERIFY | Required: `code-review` -> `qa` -> `verification`; Optional: `code-review` (`security` mode), `production-readiness` (required when change involves server-side code, a versioned release, DB migrations, or new external dependencies) - auto-advance |
+| 6 | Verified | RELEASE | `release` skill - auto-advance |
 
 Session matching for REVIEW detection: extract `[session]` from the plan filename. Example: `plan-main-auth-refactor-20260404.md` -> `auth-refactor`. A matching review doc must be a `plan-review-*.md` file containing the same session identifier.
 
@@ -102,7 +101,7 @@ Before advancing, verify at least one stage artifact exists for the current stag
 
 | Stage | Required artifact(s) |
 |-------|-----------------------|
-| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` + `docs/superomni/specs/.approved-spec-[branch]-[session]-[date]` |
+| THINK | `docs/superomni/specs/spec-[branch]-[session]-[date].md` (approval is the user's conversational reply, not a filesystem flag) |
 | PLAN | `docs/superomni/plans/plan-[branch]-[session]-[date].md` |
 | REVIEW | `docs/superomni/reviews/plan-review-[branch]-[session]-[date].md` |
 | BUILD | `docs/superomni/executions/execution-[branch]-[session]-[date].md` or `docs/superomni/subagents/subagent-[branch]-[session]-[date].md` |
@@ -165,7 +164,7 @@ Runs the full pipeline end-to-end. Only human gate is spec approval at THINK; ev
 
 **Protocol:**
 
-1. **If no spec exists** (THINK stage): dispatch `brainstorm` skill. It produces `spec-[branch]-[session]-[date].md` and stops at the approval gate. User reviews and approves (single human interaction). Once approved (marker file `.approved-spec-*` written), continue.
+1. **If no spec exists** (THINK stage): dispatch `brainstorm` skill. It produces `spec-[branch]-[session]-[date].md` and stops at the approval gate. User reviews and approves with a conversational reply (single human interaction). The user's reply IS the approval signal — no filesystem marker is written.
 2. **Chain the rest:** dispatch each stage's skill in order, passing the upstream artifact as context. After each `DONE`, check the next stage's `consumes:` (from the skill's frontmatter) is satisfied, then invoke the next skill.
 3. **Respect the status protocol strictly.** Any status other than `DONE` stops the chain:
    - `DONE_WITH_CONCERNS` → surface concerns, stop and wait for user decision
@@ -177,7 +176,7 @@ Runs the full pipeline end-to-end. Only human gate is spec approval at THINK; ev
 
 ```
 THINK    brainstorm
-         └─ STOP at approval gate, resume on marker .approved-spec-*
+         └─ STOP at approval gate; resume on user's conversational reply
 PLAN     writing-plans            (consumes spec, produces plan)
 REVIEW   plan-review              (consumes plan, produces review)
 BUILD    executing-plans          (consumes plan + review, produces execution)
@@ -217,7 +216,7 @@ Run stage detection from Phase 1 and display:
 ```
 Pipeline: THINK -> PLAN -> REVIEW -> BUILD -> VERIFY -> RELEASE
 Stage: [current] | Branch: [branch]
-Artifacts: spec-*.md [Y/N] | .approved-spec-* [Y/N] | plan-*.md [Y/N] | plan-review-*.md [Y/N] | executions [N] | code-reviews [N] | releases [N]
+Artifacts: spec-*.md [Y/N] | plan-*.md [Y/N] | plan-review-*.md [Y/N] | executions [N] | code-reviews [N] | releases [N]
 Next -> [skill-name]: [reason]
 ```
 

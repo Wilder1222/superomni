@@ -23,9 +23,8 @@ touch -d "@${_SESSION_TS}" "$_ref" 2>/dev/null || \
 
 # Detect all artifact types in current session using find -newer (no stat dependency)
 _HAS_SPEC=$(find docs/superomni/specs -name "spec-*.md" -newer "$_ref" 2>/dev/null | sort | tail -1)
-_HAS_SPEC_APPROVAL=$(find docs/superomni/specs -name ".approved-spec-*" -newer "$_ref" 2>/dev/null | head -1)
-# Also check non-session approval files (approval persists across sessions)
-[ -z "$_HAS_SPEC_APPROVAL" ] && _HAS_SPEC_APPROVAL=$(ls docs/superomni/specs/.approved-spec-* 2>/dev/null | head -1)
+# Note: spec approval is the user's conversational reply, not a filesystem flag.
+# The PLAN stage advances purely because plan-*.md exists (writing-plans only fires after user approval).
 _HAS_PLAN=$(find docs/superomni/plans -name "plan-*.md" -newer "$_ref" 2>/dev/null | sort | tail -1)
 _HAS_REVIEW=$(find docs/superomni/reviews -name "plan-review-*.md" -newer "$_ref" 2>/dev/null | head -1)
 _HAS_EXECUTIONS=$(find docs/superomni/executions -name "*.md" -newer "$_ref" 2>/dev/null | head -1)
@@ -71,7 +70,7 @@ Run this check before invoking the next skill:
 _verify_stage_artifact() {
   local from_stage="$1"
   case "$from_stage" in
-    THINK)   [ -n "$_HAS_SPEC" ] && [ -n "$_HAS_SPEC_APPROVAL" ] ;;
+    THINK)   [ -n "$_HAS_SPEC" ] ;;
     PLAN)    [ -n "$_HAS_PLAN" ] ;;
     REVIEW)  [ -n "$_HAS_MATCHING_REVIEW" ] ;;
     BUILD)   [ -n "$_HAS_EXECUTIONS" ] ;;

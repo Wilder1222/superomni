@@ -3,7 +3,7 @@
 #
 # Checks every SKILL.md.tmpl for required structural elements:
 #   1. YAML frontmatter (name, description, allowed-tools)
-#   2. {{PREAMBLE}} macro
+#   2. {{PREAMBLE_CORE}} + {{PREAMBLE_REF_LINK}} tokens (the legacy {{PREAMBLE}} alias is deprecated since v0.6.0)
 #   3. At least one Iron Law or governing principle (recommended)
 #   4. Status protocol usage (DONE / BLOCKED / etc.)
 #   5. SKILL.md is up to date with its .tmpl source (no stale builds)

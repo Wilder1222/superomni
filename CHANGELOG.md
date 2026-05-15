@@ -7,6 +7,190 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.9] — 2026-05-15
+
+### Fixed
+- **`docs/IMPLEMENTATION.md` (P0 user-facing doc bug)** — `**Version:** 0.3.0` (5 minor versions stale) → `0.6.9`. README links to this doc as "Implementation details and development guide"; new contributors now see accurate version + last-updated metadata.
+- **`docs/IMPLEMENTATION.md` Roadmap section** — replaced stale "v0.2.0 ✅ Completed" + "v0.3.0 [ ] backlog" + "v1.0.0 GitHub Actions CI" framing with accurate "Version History" (v0.2.0 → v0.6.9 summarized; defer to CHANGELOG for detail) + "Current Backlog (v0.7.0+)" (real deferred items from v0.6.x retros) + v1.0.0 goals.
+- **`docs/COMPARISON.md` § 7.2 (P0 factually-wrong public claims)** — corrected 4 false claims that became outdated after v0.6.0+:
+  - "❌ 无自动化测试套件" → "✅ 自动化 CI 测试套件 (v0.6.6 起)" — describes 9 CI gates running on ubuntu + windows
+  - "❌ GitHub Actions CI 缺失" → folded into the CI testing item above (was the same gap)
+  - "⚠️ SKILL.md.tmpl + SKILL.md 双文件维护负担" → "✅ 双文件已 CI 检查" — describes v0.6.0+ check-skill-docs.js drift detection + 3-generator parity
+  - "⚠️ 版本文档不同步" → "✅ 版本文档同步 CI 强制" — describes v0.6.5+ check-plugin-sync 5 invariants
+  - "❌ 无变更日志" → "✅ 完整 CHANGELOG.md" — describes v0.6.0+ structured changelog
+- The "❌ 缺少自动升级机制" item retained as legitimate v0.7.0+ gap.
+
+### Added
+- **`lib/check-plugin-sync.js` VERSION_DOCS extension** — added 5th entry for `docs/IMPLEMENTATION.md` `**Last updated:** vX.Y.Z` line. Bumping `package.json` version now requires bumping 5 doc anchors (README + COMPARISON + DESIGN + AGENTS + IMPLEMENTATION), all CI-enforced.
+- **`docs/IMPLEMENTATION.md` `**Last updated:**` version anchor** — explicit version line near top of doc, sync-checked by Invariant 4.
+
+### Why this matters
+
+After v0.6.0 transformed the project (agent consolidation, CI infrastructure, CHANGELOG maintenance), `docs/COMPARISON.md` § 7.2 still listed those very gaps as **current weaknesses**. A reader comparing superomni against alternatives saw a project description **8 minor versions out of date in the worst possible direction** (claiming gaps that had been closed). Same drift class as v0.6.5 (README) / v0.6.6 (COMPARISON header) / v0.6.8 (AGENTS) — but for **factually-wrong self-comparison claims** instead of version strings or inventory.
+
+`docs/IMPLEMENTATION.md` had similar drift: Roadmap listed v0.2.0 as the most recent achievement and v0.3.0 features as backlog, but we shipped through v0.6.8.
+
+### Verified
+
+- Negative demo 1 (new entry): change `docs/IMPLEMENTATION.md` `**Last updated:**` to v9.9.9 → check-plugin-sync exits 1 with diagnostic; restore → passes
+- Negative demo 2 (existing entry): change `docs/COMPARISON.md` header version to v9.9.9 → check-plugin-sync exits 1 with diagnostic; restore → passes (verifies post-Step-5 refactor didn't break Invariant 4 for existing docs)
+- Positive demo: clean state with all 5 docs (README + COMPARISON + DESIGN + AGENTS + IMPLEMENTATION) at v0.6.9 → "Plugin sync check passed: 5 invariants validated"
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- `context: fork` migration
+- `model:` / `effort:` per-skill overrides
+- `$ARGUMENTS` substitution adoption
+- `paths` glob auto-trigger (likely never)
+- Live `/vibe` E2E test (sandbox required)
+- CHANGELOG auto-generation from commits
+- Windows job fixture-parity
+- `bin/audit-repo-invariants` data-driven exclude list
+- Broader audit of `docs/COMPARISON.md` other sections (only § 7.2 + § 7.4's CHANGELOG item were in scope this sprint)
+
+---
+
+## [0.6.8] — 2026-05-15
+
+### Fixed
+- **`docs/AGENTS.md` (P0 user-facing doc bug)** — completely rewrote 265-line agent library reference. Pre-fix doc described 9 retired v0.5.x agents (`code-reviewer`, `planner`, `debugger`, `test-writer`, `security-auditor`, `architect`, `evaluator`, `ceo-advisor`, `designer`) with **zero mentions** of the 5 current agents. Post-fix doc accurately describes the 5 canonical agents (`doc-writer`, `explorer`, `frontend-designer`, `planner-reviewer`, `refactoring-agent`) with identity / iron law / tools / when-to-invoke / output format for each, plus a "Migration from v0.5.x" section mapping retired→current. README.md (lines 234, 390) links here as the canonical "agent library reference"; new contributors now get accurate information.
+
+### Added
+- **`lib/check-plugin-sync.js` Invariant 5** — `docs/AGENTS.md` agent-section headings (`### \`<name>\``) must equal `agents/*.md` filename set. Bidirectional intersection (heading must match an actual agent file) avoids false-positives on prose. When a new agent is added but not documented in `docs/AGENTS.md`, CI fails.
+- **`lib/check-plugin-sync.js` VERSION_DOCS extension** — added 4th entry for `docs/AGENTS.md` `**Last updated:** vX.Y.Z` line. Bumping `package.json` version now requires bumping AGENTS.md `Last updated` too (CI-enforced).
+- **`docs/AGENTS.md` `**Last updated:**` version anchor** — explicit version line at top of doc, sync-checked by Invariant 4.
+
+### Changed
+- `lib/check-plugin-sync.js` success message updated to `Plugin sync check passed: 5 invariants validated.` (was 4 invariants, now 5 logical groups).
+
+### Why this matters
+
+After v0.6.0 consolidated 9 agents into 5, every release (v0.6.0 through v0.6.7) shipped with `docs/AGENTS.md` describing the wrong architecture. README.md actively pointed contributors at this doc. The bug shipped for 8 minor versions before this audit caught it. Same drift class as v0.6.5 (README version stale) and v0.6.6 (docs/COMPARISON.md and docs/DESIGN.md version drift) — but for **agent inventory** instead of version strings. Invariant 5 prevents the recurrence pattern.
+
+### Verified
+
+- Negative demo (Invariant 5): rename `### \`explorer\`` heading → linter exits 1 with "1 agent(s) ... missing from docs/AGENTS.md: explorer"; restore → passes
+- Negative demo (Invariant 4 on AGENTS.md): change `**Last updated:** v0.6.8` → `v9.9.9` → linter exits 1 with version mismatch diagnostic; restore → passes
+- False-positive avoidance: prose mentions of `explorer` / `planner-reviewer` etc. throughout doc body do not trigger Invariant 5 (heading regex + bidirectional filter correctly limit detection to `### \`name\`` headings only)
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- `context: fork` migration (architectural; runtime evidence required).
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test (sandbox required).
+- CHANGELOG auto-generation from commits.
+- Windows job fixture-parity.
+- `bin/audit-repo-invariants` data-driven exclude list.
+- `docs/IMPLEMENTATION.md` version stale (separate audit; different drift profile).
+
+---
+
+## [0.6.7] — 2026-05-15
+
+### Added
+- **`lib/check-plan-content.js`** — CI hard-gate enforcing v0.6.3's Pre-Destructive Gate. Closes the v0.6.3-deferred plan-content-linter substantial feature.
+  - Scans `docs/superomni/plans/plan-*.md` (date >= 20260514; v0.6.0 plan exempt by historical-immutability convention).
+  - For each step whose `**How:**` subsection contains a destructive pattern (12 patterns: `git rm`, `git filter-branch`, `git reset --hard`, `git push --force`, `rm -rf`, `gh repo delete`, `gh release delete`, `DROP TABLE`, `DELETE FROM`, `TRUNCATE`, `npm publish`, `npm unpublish`), the immediately-preceding step in document order MUST contain the keyword `careful` (case-insensitive).
+  - Markdown-aware: skips fenced code blocks (multi-line ```...```; usually documentation), but does NOT strip inline-backticks (in plan How sections, `cmd` typically means "run this command", not "literal token reference" — opposite semantic from skill bodies).
+  - On violation: exit 1 with file path + step number + which pattern + which preceding step + remediation hint.
+- New npm scripts: `check:plan-content` (standalone) + included in `verify:skill-docs` umbrella.
+- 1 new step in `.github/workflows/validate.yml` ubuntu and windows jobs (after `Check plugin sync`).
+
+### Changed
+- **`skills/writing-plans/SKILL.md.tmpl` Pre-Destructive Gate section** — added 1-line CI-enforcement note pointing plan authors to `lib/check-plan-content.js`.
+
+### Why this matters
+
+v0.6.3 added the Pre-Destructive Gate as **template guidance** — plan authors were told "if your plan has destructive steps, insert a careful step first". Worked example used v0.6.0's reactive Step 14.5 amendment as cautionary tale. But the gate was honor-system: a plan author skipping the careful step wouldn't be caught until execution time (or by careful human review). v0.6.7 makes the gate CI-enforced. Future plans with `git rm` lacking a preceding careful step fail CI immediately, before any actual destructive op runs.
+
+### Verified
+
+- Positive demo (synthetic fixture): 2-step plan with `careful` in Step 1's title + body, `git rm` in Step 2's How → linter passes
+- Negative demo (synthetic fixture): same plan but Step 1 lacks `careful` keyword → linter exits 1 with clear diagnostic; restore → linter passes
+- False-positive avoidance (real plan: v0.6.3 plan-main-dynamic-context-and-careful-gate-20260515.md) — multiple `git rm` mentions in prose inside fenced code blocks (the gate teaches the pattern via worked example) → linter does NOT fire (fence-stripping correctly suppresses)
+
+### Architectural significance
+
+This is a CI hard-gate (architectural-level: enforces correctness invariants on plan authoring at build time), shipped as a single-purpose patch. The user requested architectural-level changes still follow patch cadence; this sprint demonstrates that pattern. ~200 LOC linter + 1 CI step + 1 line in writing-plans + version bump.
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- `context: fork` migration (still architectural-level, requires runtime evidence first; user could test by running `/investigate` outside this session).
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test (sandbox required).
+- CHANGELOG auto-generation from commits.
+- Windows job fixture-parity.
+- `bin/audit-repo-invariants` data-driven exclude list.
+
+---
+
+## [0.6.6] — 2026-05-15
+
+### Fixed
+- **CI gap (P1)** — `.github/workflows/validate.yml` did not run 3 gates added in v0.6.1-v0.6.5: `verify:fixture-parity` (3-generator parity), `test:generators` (multi-occurrence regression), `check:plugin-sync` (cross-manifest invariants). All 3 now run on both ubuntu and windows jobs (ubuntu adds all 3 after `Validate skill format`; windows adds the 2 cross-platform-safe ones after `Score workflow reports`).
+- **Doc version drift (P1)** — `docs/COMPARISON.md` header + footer said `superomni v0.3.0` (8 minor versions stale). Now reflects 0.6.6.
+- **Doc version drift (P2)** — `docs/DESIGN.md` `**Status:** Implemented (v0.5.7)` (7 patches stale). Now reflects 0.6.6.
+- **`package.json` `files` array missing `CHANGELOG.md`** — npm-published tarballs didn't carry version history. Now included.
+- **`lib/validate-skills.sh` comment stale** — line 6 still referenced the deprecated `{{PREAMBLE}}` macro. Updated to `{{PREAMBLE_CORE}}` + `{{PREAMBLE_REF_LINK}}`.
+
+### Changed
+- **`lib/check-plugin-sync.js` invariant 4 generalized** — was a single regex against README; now scans a configurable `VERSION_DOCS` list (3 entries: README, docs/COMPARISON.md, docs/DESIGN.md). Permissive on missing files (skip with warning), strict on regex-no-match (fail loudly — likely doc reformatting that needs human review).
+
+### Removed
+- **`.approved-spec-*` marker mechanism (P1, user-directed)** — eliminated entirely. The user's conversational reply to a spec-approval prompt IS the approval signal; no filesystem flag is written or read. Affected:
+  - `skills/brainstorm/SKILL.md.tmpl`: removed the `touch ".approved-${spec}"` bash block; rewrote prose to clarify approval is conversational.
+  - `skills/vibe/SKILL.md.tmpl`: collapsed stage-detection rows 1-2 (THINK/awaiting-approval and PLAN/approved-not-planned) into a single "spec exists, no plan yet" row keyed purely on `spec-*.md` existence; removed marker requirement from artifact contract; removed `.approved-spec-* [Y/N]` column from `/vibe status` display.
+  - `skills/vibe/reference/stage-detection.md`: removed `_HAS_SPEC_APPROVAL` variable and the helper case that depended on it.
+  - 7 pre-existing `.approved-spec-*` files in `docs/superomni/specs/` deleted.
+
+### Why this matters
+
+Each of v0.6.1-v0.6.5 added local CI gates that GitHub Actions never ran. After each merge to main, contributors saw "all checks passed" while in fact only the v0.6.0 subset was being checked. v0.6.6 closes the gap so the engineering invested over 5 sprints actually protects every PR.
+
+The `.approved-spec-*` removal is a smaller concern but nonetheless real: every sprint dropped a 0-byte hidden file in `docs/superomni/specs/` that served only to communicate state between two skill invocations within the same session. The conversation already carries that state. Removing the file system signal simplifies the model and matches user mental-model.
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- Plan-content auto-linter (CI hard-gate for v0.6.3 Pre-Destructive Gate).
+- `context: fork` migration.
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test.
+- CHANGELOG auto-generation from commits.
+- Windows job fixture-parity (after verifying bash availability on windows-latest).
+
+---
+
+## [0.6.5] — 2026-05-15
+
+### Fixed
+- **README.md** said `Current stable version: 0.6.0` (4 versions stale). Now reflects 0.6.5.
+- **`claude-skill.json`** `commands` array was missing `style-capture` (the file existed in `commands/` but plugin/marketplace and npm-install paths saw different command sets). Now matches the on-disk `commands/*.md` set exactly.
+
+### Added
+- **`lib/check-plugin-sync.js`** — new CI gate validating 4 cross-manifest invariants:
+  1. **Version sync**: `package.json` is canonical; `marketplace.json` (top-level + `plugins[0]`), `plugin.json`, `claude-skill.json` must all match.
+  2. **Commands sync**: filenames in `commands/*.md` must equal `claude-skill.json` `commands[].name` set (no missing, no extras).
+  3. **Keywords sync**: `plugin.json` keywords must equal `marketplace.json plugins[0].keywords`.
+  4. **README version**: `Current stable version: X.Y.Z` line must match `package.json` version.
+- New npm scripts: `check:plugin-sync` (standalone) and inclusion in the `verify:skill-docs` umbrella.
+- 4 inject-and-restore demos verified each invariant fires with a specific diagnostic.
+
+### Why this matters
+
+The v0.6.1-v0.6.4 series bumped versions across 4-5 surfaces by hand each time. Without a checker, the next bump is one missed file away from silent drift — exactly what happened with `claude-skill.json` missing `style-capture`. This gate catches the drift class proactively in `verify:skill-docs`.
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- Plan-content auto-linter (CI hard-gate for v0.6.3 Pre-Destructive Gate).
+- `context: fork` migration.
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test.
+
+---
+
 ## [0.6.4] — 2026-05-15
 
 ### Added

@@ -2,7 +2,7 @@
 
 ## superomni vs obra/superpowers vs garrytan/gstack
 
-**版本：** superomni v0.3.0 / superpowers latest / gstack latest  
+**版本：** superomni v0.6.6 / superpowers latest / gstack latest  
 **生成日期：** 2026-03-27  
 **作者：** superomni 项目分析
 
@@ -560,4 +560,4 @@ superomni 的计划评审深度接近 gstack，但缺少跨模型验证。
 
 ---
 
-*本文档基于 superomni v0.3.0、obra/superpowers 和 garrytan/gstack 的公开信息和代码库分析生成。*
+*本文档基于 superomni v0.6.6、obra/superpowers 和 garrytan/gstack 的公开信息和代码库分析生成。*

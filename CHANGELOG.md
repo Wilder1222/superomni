@@ -7,6 +7,43 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.6] — 2026-05-15
+
+### Fixed
+- **CI gap (P1)** — `.github/workflows/validate.yml` did not run 3 gates added in v0.6.1-v0.6.5: `verify:fixture-parity` (3-generator parity), `test:generators` (multi-occurrence regression), `check:plugin-sync` (cross-manifest invariants). All 3 now run on both ubuntu and windows jobs (ubuntu adds all 3 after `Validate skill format`; windows adds the 2 cross-platform-safe ones after `Score workflow reports`).
+- **Doc version drift (P1)** — `docs/COMPARISON.md` header + footer said `superomni v0.3.0` (8 minor versions stale). Now reflects 0.6.6.
+- **Doc version drift (P2)** — `docs/DESIGN.md` `**Status:** Implemented (v0.5.7)` (7 patches stale). Now reflects 0.6.6.
+- **`package.json` `files` array missing `CHANGELOG.md`** — npm-published tarballs didn't carry version history. Now included.
+- **`lib/validate-skills.sh` comment stale** — line 6 still referenced the deprecated `{{PREAMBLE}}` macro. Updated to `{{PREAMBLE_CORE}}` + `{{PREAMBLE_REF_LINK}}`.
+
+### Changed
+- **`lib/check-plugin-sync.js` invariant 4 generalized** — was a single regex against README; now scans a configurable `VERSION_DOCS` list (3 entries: README, docs/COMPARISON.md, docs/DESIGN.md). Permissive on missing files (skip with warning), strict on regex-no-match (fail loudly — likely doc reformatting that needs human review).
+
+### Removed
+- **`.approved-spec-*` marker mechanism (P1, user-directed)** — eliminated entirely. The user's conversational reply to a spec-approval prompt IS the approval signal; no filesystem flag is written or read. Affected:
+  - `skills/brainstorm/SKILL.md.tmpl`: removed the `touch ".approved-${spec}"` bash block; rewrote prose to clarify approval is conversational.
+  - `skills/vibe/SKILL.md.tmpl`: collapsed stage-detection rows 1-2 (THINK/awaiting-approval and PLAN/approved-not-planned) into a single "spec exists, no plan yet" row keyed purely on `spec-*.md` existence; removed marker requirement from artifact contract; removed `.approved-spec-* [Y/N]` column from `/vibe status` display.
+  - `skills/vibe/reference/stage-detection.md`: removed `_HAS_SPEC_APPROVAL` variable and the helper case that depended on it.
+  - 7 pre-existing `.approved-spec-*` files in `docs/superomni/specs/` deleted.
+
+### Why this matters
+
+Each of v0.6.1-v0.6.5 added local CI gates that GitHub Actions never ran. After each merge to main, contributors saw "all checks passed" while in fact only the v0.6.0 subset was being checked. v0.6.6 closes the gap so the engineering invested over 5 sprints actually protects every PR.
+
+The `.approved-spec-*` removal is a smaller concern but nonetheless real: every sprint dropped a 0-byte hidden file in `docs/superomni/specs/` that served only to communicate state between two skill invocations within the same session. The conversation already carries that state. Removing the file system signal simplifies the model and matches user mental-model.
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- Plan-content auto-linter (CI hard-gate for v0.6.3 Pre-Destructive Gate).
+- `context: fork` migration.
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test.
+- CHANGELOG auto-generation from commits.
+- Windows job fixture-parity (after verifying bash availability on windows-latest).
+
+---
+
 ## [0.6.5] — 2026-05-15
 
 ### Fixed

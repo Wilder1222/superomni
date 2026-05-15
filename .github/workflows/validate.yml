@@ -51,6 +51,15 @@ jobs:
       - name: Validate skill format
         run: bash lib/validate-skills.sh
 
+      - name: Verify fixture parity
+        run: npm run verify:fixture-parity
+
+      - name: Test generators
+        run: npm run test:generators
+
+      - name: Check plugin sync
+        run: npm run check:plugin-sync
+
   validate-windows:
     name: Workflow Contract Validation (Windows)
     runs-on: windows-latest
@@ -81,3 +90,9 @@ jobs:
 
       - name: Score workflow reports
         run: npm run score:workflow
+
+      - name: Test generators
+        run: npm run test:generators
+
+      - name: Check plugin sync
+        run: npm run check:plugin-sync

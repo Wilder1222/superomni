@@ -7,6 +7,48 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.9] — 2026-05-15
+
+### Fixed
+- **`docs/IMPLEMENTATION.md` (P0 user-facing doc bug)** — `**Version:** 0.3.0` (5 minor versions stale) → `0.6.9`. README links to this doc as "Implementation details and development guide"; new contributors now see accurate version + last-updated metadata.
+- **`docs/IMPLEMENTATION.md` Roadmap section** — replaced stale "v0.2.0 ✅ Completed" + "v0.3.0 [ ] backlog" + "v1.0.0 GitHub Actions CI" framing with accurate "Version History" (v0.2.0 → v0.6.9 summarized; defer to CHANGELOG for detail) + "Current Backlog (v0.7.0+)" (real deferred items from v0.6.x retros) + v1.0.0 goals.
+- **`docs/COMPARISON.md` § 7.2 (P0 factually-wrong public claims)** — corrected 4 false claims that became outdated after v0.6.0+:
+  - "❌ 无自动化测试套件" → "✅ 自动化 CI 测试套件 (v0.6.6 起)" — describes 9 CI gates running on ubuntu + windows
+  - "❌ GitHub Actions CI 缺失" → folded into the CI testing item above (was the same gap)
+  - "⚠️ SKILL.md.tmpl + SKILL.md 双文件维护负担" → "✅ 双文件已 CI 检查" — describes v0.6.0+ check-skill-docs.js drift detection + 3-generator parity
+  - "⚠️ 版本文档不同步" → "✅ 版本文档同步 CI 强制" — describes v0.6.5+ check-plugin-sync 5 invariants
+  - "❌ 无变更日志" → "✅ 完整 CHANGELOG.md" — describes v0.6.0+ structured changelog
+- The "❌ 缺少自动升级机制" item retained as legitimate v0.7.0+ gap.
+
+### Added
+- **`lib/check-plugin-sync.js` VERSION_DOCS extension** — added 5th entry for `docs/IMPLEMENTATION.md` `**Last updated:** vX.Y.Z` line. Bumping `package.json` version now requires bumping 5 doc anchors (README + COMPARISON + DESIGN + AGENTS + IMPLEMENTATION), all CI-enforced.
+- **`docs/IMPLEMENTATION.md` `**Last updated:**` version anchor** — explicit version line near top of doc, sync-checked by Invariant 4.
+
+### Why this matters
+
+After v0.6.0 transformed the project (agent consolidation, CI infrastructure, CHANGELOG maintenance), `docs/COMPARISON.md` § 7.2 still listed those very gaps as **current weaknesses**. A reader comparing superomni against alternatives saw a project description **8 minor versions out of date in the worst possible direction** (claiming gaps that had been closed). Same drift class as v0.6.5 (README) / v0.6.6 (COMPARISON header) / v0.6.8 (AGENTS) — but for **factually-wrong self-comparison claims** instead of version strings or inventory.
+
+`docs/IMPLEMENTATION.md` had similar drift: Roadmap listed v0.2.0 as the most recent achievement and v0.3.0 features as backlog, but we shipped through v0.6.8.
+
+### Verified
+
+- Negative demo 1 (new entry): change `docs/IMPLEMENTATION.md` `**Last updated:**` to v9.9.9 → check-plugin-sync exits 1 with diagnostic; restore → passes
+- Negative demo 2 (existing entry): change `docs/COMPARISON.md` header version to v9.9.9 → check-plugin-sync exits 1 with diagnostic; restore → passes (verifies post-Step-5 refactor didn't break Invariant 4 for existing docs)
+- Positive demo: clean state with all 5 docs (README + COMPARISON + DESIGN + AGENTS + IMPLEMENTATION) at v0.6.9 → "Plugin sync check passed: 5 invariants validated"
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- `context: fork` migration
+- `model:` / `effort:` per-skill overrides
+- `$ARGUMENTS` substitution adoption
+- `paths` glob auto-trigger (likely never)
+- Live `/vibe` E2E test (sandbox required)
+- CHANGELOG auto-generation from commits
+- Windows job fixture-parity
+- `bin/audit-repo-invariants` data-driven exclude list
+- Broader audit of `docs/COMPARISON.md` other sections (only § 7.2 + § 7.4's CHANGELOG item were in scope this sprint)
+
+---
+
 ## [0.6.8] — 2026-05-15
 
 ### Fixed

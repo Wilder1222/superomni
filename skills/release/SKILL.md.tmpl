@@ -29,6 +29,19 @@ Never mark RELEASE as DONE without both sections populated in the artifact.
 
 ## Phase 1: Pre-Release Assessment
 
+### Current State (auto-injected at skill-load)
+
+The `!`<command>`` syntax is Anthropic's dynamic context injection — runtime resolves each command before the skill body reaches the LLM.
+
+- Current version: !`grep '"version"' package.json | head -1`
+- Working tree: !`git status -s`
+- Recent commits since last tag: !`git log --oneline $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD~10)..HEAD 2>/dev/null | head -10`
+- Unpushed commits: !`git log --oneline @{u}..HEAD 2>/dev/null | wc -l`
+- CHANGELOG top entry: !`head -15 CHANGELOG.md 2>/dev/null | tail -12`
+- Latest evaluation path: !`ls -t docs/superomni/evaluations/evaluation-*.md 2>/dev/null | head -1`
+
+### Manual fallback (when not in dynamic-context mode)
+
 ```bash
 git status --short
 git log origin/main..HEAD --oneline

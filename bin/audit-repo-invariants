@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# bin/audit-repo-invariants - find all files referencing a pattern, grouped by directory.
+#
+# Usage:
+#   bin/audit-repo-invariants <pattern>
+#
+# Use this BEFORE migrating a repo-wide invariant (e.g., a token rename, a deprecated API).
+# It lists every file referencing the pattern, grouped by top-level directory, with
+# per-file occurrence counts. The user reads the output and classifies each match as
+# either a USAGE SITE (file uses the pattern operationally) or a SISTER-TOOL (file
+# reads/parses the pattern). Skipping this step is what made v0.6.0's {{PREAMBLE}}
+# migration miss `lib/validate-skills.sh` until the Phase 3 gate.
+#
+# Output to stdout; exit code 0 on success (whether matches found or not), 1 on usage error.
+
+set -euo pipefail
+
+if [ $# -lt 1 ] || [ -z "${1:-}" ]; then
+  cat >&2 <<'EOF'
+audit-repo-invariants: missing required pattern argument.
+
+Usage:
+  bin/audit-repo-invariants <pattern>
+  npm run audit:invariants -- <pattern>
+
+Examples:
+  bin/audit-repo-invariants '{{PREAMBLE}}'
+  bin/audit-repo-invariants 'old-agent-name'
+  bin/audit-repo-invariants 'deprecated-api-call'
+
+The pattern is treated as a literal string (case-sensitive). For regex, edit the
+script's `grep -F` flag to `grep -E`.
+EOF
+  exit 1
+fi
+
+PATTERN="$1"
+
+# Excluded dirs: node_modules, .git, and runtime artifact dirs that legitimately
+# reference retired patterns historically (specs, plans, reviews etc. are immutable
+# audit trails — they will mention old patterns even after migration).
+EXCLUDES=(
+  --exclude-dir=node_modules
+  --exclude-dir=.git
+  --exclude-dir=.claude
+  --exclude-dir=specs
+  --exclude-dir=plans
+  --exclude-dir=reviews
+  --exclude-dir=evaluations
+  --exclude-dir=executions
+  --exclude-dir=releases
+  --exclude-dir=improvements
+  --exclude-dir=subagents
+  --exclude-dir=production-readiness
+  --exclude-dir=harness-audits
+  --exclude-dir=retros
+  --exclude-dir=style-profiles
+)
+
+# Collect matching files (one per line, no line numbers).
+RAW_MATCHES=$(grep -rln -F "${EXCLUDES[@]}" "$PATTERN" . 2>/dev/null || true)
+
+if [ -z "$RAW_MATCHES" ]; then
+  echo "audit-repo-invariants: pattern '$PATTERN' - no matches"
+  exit 0
+fi
+
+# Build "file <count>" pairs: count occurrences of the pattern per file.
+declare -A FILES_TO_DIRS
+declare -A FILE_COUNTS
+
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  # Strip leading "./"
+  f="${f#./}"
+  # Top-level dir = first path component + trailing slash, or "(root)" if file at repo root
+  if [[ "$f" == */* ]]; then
+    top="${f%%/*}/"
+  else
+    top="(root)"
+  fi
+  count=$(grep -cF "$PATTERN" "$f" 2>/dev/null || echo 0)
+  FILES_TO_DIRS["$f"]="$top"
+  FILE_COUNTS["$f"]="$count"
+done <<< "$RAW_MATCHES"
+
+TOTAL_FILES=${#FILES_TO_DIRS[@]}
+TOTAL_MATCHES=0
+for f in "${!FILE_COUNTS[@]}"; do
+  TOTAL_MATCHES=$((TOTAL_MATCHES + FILE_COUNTS[$f]))
+done
+
+echo "audit-repo-invariants: pattern '$PATTERN'"
+echo "$TOTAL_MATCHES matches in $TOTAL_FILES files"
+echo ""
+echo "USAGE SITE = file uses the pattern operationally (rewrite during migration)."
+echo "SISTER-TOOL = file reads/parses the pattern (also update during migration)."
+echo "Read each match to classify."
+echo ""
+
+# Group + print: collect unique top-level dirs, sort, then list files under each.
+UNIQUE_DIRS=$(printf '%s\n' "${FILES_TO_DIRS[@]}" | sort -u)
+
+while IFS= read -r dir; do
+  [ -z "$dir" ] && continue
+  echo "-- $dir --"
+  for f in $(printf '%s\n' "${!FILES_TO_DIRS[@]}" | sort); do
+    if [ "${FILES_TO_DIRS[$f]}" = "$dir" ]; then
+      printf "  %s (%d)\n" "$f" "${FILE_COUNTS[$f]}"
+    fi
+  done
+done <<< "$UNIQUE_DIRS"

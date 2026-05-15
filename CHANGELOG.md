@@ -7,6 +7,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.3] — 2026-05-15
+
+### Added
+- **Anthropic `!`<command>`` dynamic context injection in `verification` and `release`** — extending the v0.6.2 pattern from `vibe`. `verification` Phase 1 pre-resolves branch / status / `git diff --stat main...HEAD` / latest plan path / unchecked-item count / latest evaluation. `release` Phase 1 pre-resolves current version / working tree / recent commits since last tag / unpushed-commit count / CHANGELOG top entry / latest evaluation. Saves 2-4 Bash round-trips per `/verify` or `/release` invocation. Plain-text fallback bash retained for runtimes that don't parse the bang-command syntax.
+- **`bin/audit-repo-invariants <pattern>`** — new bash tool that lists every file referencing a given pattern, grouped by top-level directory, with per-file occurrence counts. Use it BEFORE migrating a repo-wide invariant to classify usage sites vs sister-tools. Closes v0.6.0 retro ACTION 3 (the `lib/validate-skills.sh` miss during the `{{PREAMBLE}}` migration would have been caught by this tool). Wired as `npm run audit:invariants -- <pattern>`. Documented in `framework-management` § Supporting Files.
+- **Pre-Destructive Gate in `writing-plans`** — new sub-section under Phase 3 mandating that any plan step containing destructive operations (`git rm`, `rm -rf`, mass `mv`, `gh repo delete`, DB drops, `npm publish`, etc.) MUST be preceded by a step invoking the `careful` skill with explicit blast-radius enumeration. Includes the v0.6.0 Step 14.5 worked example. Closes v0.6.0 retro ACTION 2 (proactive instead of reactive). 1-line link-back note added to `careful/SKILL.md`.
+
+### Changed
+- **`framework-management/SKILL.md` Supporting Files section** — added 1-line pointer to the new audit tool with the v0.6.0 sister-tool-miss anecdote as motivation.
+
+### Fixed
+- Latent issue in `framework-management/SKILL.md.tmpl`: the literal text `{{PREAMBLE}}` (used in prose to reference the deprecated alias) was being expanded by the generator's deprecated-alias path, ballooning the body. Switched to the prose form "legacy single-token preamble" to avoid the escape ambiguity.
+
+### Deferred (v0.7.0+ backlog, unchanged from v0.6.2)
+- `context: fork` + `agent:` migration for the 7 dispatch-agent skills.
+- `$ARGUMENTS` / `$N` substitution in skill bodies.
+- `model:` / `effort:` per-skill overrides.
+- `paths` glob auto-trigger review (likely never).
+- Plan linter that auto-checks pre-destructive gate compliance in plan files (extension of v0.6.3's template-only enforcement).
+
+---
+
 ## [0.6.2] — 2026-05-14
 
 ### Added

@@ -137,6 +137,32 @@ The plan must follow this structure:
 - [ ] [Measurable criterion 2]
 ```
 
+### Pre-Destructive Gate
+
+**If any plan step contains a destructive operation, the immediately-prior step MUST invoke the `careful` skill with explicit blast-radius enumeration.**
+
+Destructive patterns that trigger the gate:
+- `git rm`, `git filter-branch`, `git reset --hard` on remote-tracked branches, force-push to protected branches
+- `rm -rf`, mass `mv` (renaming N>3 files at once), directory delete
+- `gh repo delete`, `gh release delete`, `gh pr close --delete-branch`
+- Database / migration drops: `DROP TABLE`, `DELETE FROM`, `TRUNCATE`
+- `npm publish` / `gh release create` to a registry the user did not explicitly authorize
+
+Required structure when a destructive step exists:
+
+```
+### Step N: careful pre-destructive assessment
+**What:** Enumerate every file/branch/resource the next step modifies or removes; identify rollback path; confirm no in-progress work would be lost.
+**Files:** <list every target verbatim>
+**How:** Invoke `careful` skill with the explicit blast-radius list.
+**Verification:** User has approved the scope OR `careful` returns DONE with no concerns.
+
+### Step N+1: <the destructive operation>
+...
+```
+
+**Worked example (v0.6.0 Step 14.5):** v0.6.0's `git rm agents/{ceo-advisor,...}.md` step was caught reactively — a `careful` invocation discovered 78 references across 13 skills (incl. `vibe`'s core routing table). Step 14.5 was inserted to remap all references BEFORE the deletes. With this gate, that careful step is upfront, not amended mid-execution.
+
 ## Phase 4: Apply the 6 Decision Principles
 
 Review the plan against each principle:

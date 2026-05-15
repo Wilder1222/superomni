@@ -52,6 +52,16 @@ Result: NOT ACCEPTABLE — "believe" and "should" are not evidence
 | "I followed the same pattern as module X" | Pattern match is not verification — show the output |
 | "Tests aren't set up for this area" | Then set them up — untestable claims cannot be verified |
 
+## Current State (auto-injected at skill-load)
+
+The `!`<command>`` syntax is Anthropic's dynamic context injection — runtime resolves each command before the skill body reaches the LLM.
+
+- Branch / status: !`git branch --show-current && git status -s`
+- Diff stat (since main): !`git diff --stat main...HEAD 2>/dev/null | tail -10`
+- Latest plan path: !`ls -t docs/superomni/plans/plan-*.md 2>/dev/null | head -1`
+- Plan unchecked count: !`p=$(ls -t docs/superomni/plans/plan-*.md 2>/dev/null | head -1); [ -n "$p" ] && grep -c '^- \[ \]' "$p" || echo 0`
+- Latest evaluation path: !`ls -t docs/superomni/evaluations/evaluation-*.md 2>/dev/null | head -1`
+
 ## The Verification Checklist
 
 Run through this before reporting any status:

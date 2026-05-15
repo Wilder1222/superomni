@@ -294,4 +294,6 @@ Single project-wide rule:
 
 Two advisory warnings in `lib/check-skill-docs.js` enforce this: (a) `SKILL.md ≥ 300 lines && no reference/ dir`, (b) any flat `reference.md` at a skill root.
 
+**Migration audit tool:** when migrating a repo-wide invariant (e.g., a token rename, a deprecated API), run `bin/audit-repo-invariants <pattern>` (or `npm run audit:invariants -- <pattern>`) first. It lists all files referencing the pattern grouped by directory so you can classify usage sites vs sister-tools before editing — this catches the v0.6.0-style miss where `lib/validate-skills.sh` was overlooked during the legacy single-token preamble migration.
+
 **Reference:** see [reference/supporting-files.md](${CLAUDE_SKILL_DIR}/reference/supporting-files.md) for the full convention, subdirectory semantics, and canonical examples from the 5 skills trimmed in sprint v3 (2026-05-14).

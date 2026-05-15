@@ -2,8 +2,8 @@
 
 ## superomni — Developer Reference
 
-**Version:** 0.6.9
-**Last updated:** v0.6.9
+**Version:** 0.6.10
+**Last updated:** v0.6.10
 
 ---
 

@@ -2,7 +2,7 @@
 
 > Specialized AI sub-agents for focused tasks — each runs in isolated context with a constrained tool whitelist and returns a structured report.
 
-**Last updated:** v0.6.9
+**Last updated:** v0.6.10
 
 ---
 

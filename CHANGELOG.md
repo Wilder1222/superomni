@@ -7,6 +7,55 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.10] — 2026-05-15
+
+### Added
+- **`lib/gen-changelog.js`** — CHANGELOG entry skeleton generator from Conventional Commits. Closes the v0.6.5-v0.6.9-deferred "CHANGELOG auto-generation" backlog item.
+  - CLI: `npm run gen:changelog -- [--from <ref>] [--to <ref>] [--version <X.Y.Z>]`
+  - Defaults: `--from` = last git tag (or root commit if no tags); `--to` = HEAD; `--version` = `package.json` version
+  - Maps Conventional Commits prefix (10 standard: feat/fix/chore/docs/refactor/test/perf/build/ci/style) → CHANGELOG sections (Added/Fixed/Changed)
+  - Skip patterns: merge commits, dependabot/bot author commits silently dropped
+  - Body extraction: first paragraph (until blank line), Co-Authored-By and Signed-off-by trailers stripped, truncated to 200 chars at last whitespace
+  - Output: stdout only (no file writes — `careful` skill compliant); skeleton ends with TODO comment prompting human to add Why-this-matters / Verified / Deferred subsections
+- **`gen:changelog` npm script** — discoverable via `npm run`. Standalone tool (NOT wired into `verify:skill-docs` umbrella because it's an authoring helper, not a CI gate).
+- **`framework-management/SKILL.md.tmpl` Supporting Files** — 1-line note documenting the tool so future authors find it.
+
+### Why this matters
+
+After 5 audit-driven sprints (v0.6.5-v0.6.9), each one wrote a manual CHANGELOG entry that took 5-10 minutes to compose from commit data. The entries are rich (Fixed/Added/Why this matters/Verified/Deferred), but the **first 60% of composition is mechanical**: extract Conventional Commits prefix, group by category, summarize body. The tool automates exactly that 60%, leaving the human to write the parts that require synthesis (impact framing, demo verification, deferred-item rationale).
+
+The tool is intentionally **not** a CI gate. CHANGELOG content is the canonical sprint record; making it CI-enforced would require defining "matches" semantics (textual? structural? semantic?) that the tool can't verify. Authoring helper > correctness checker for this domain.
+
+### Verified
+
+- Positive demo: ran on v0.6.5-v0.6.9 commit range (`e33d0f2..5f7d947`) → output had `## [0.6.10-test]` header + Added section (1 bullet for v0.6.7 feat) + Fixed section (4 bullets for v0.6.5/6/8/9 fix) + TODO comment + commit-hash trailers. Stderr summary: "generated 5 bullet(s) across 2 section(s)".
+- Negative demo: invalid `--from` ref → exit 1 with specific git-revision error message.
+- Edge case: empty range (HEAD..HEAD) → version header + TODO comment only (no section headers); matches Amendment B from REVIEW.
+- Edge case: invalid `--version` arg (not semver) → exit 1 with format-error message.
+- Edge case: `--help` flag → usage message + exit 0.
+- No-write check: post-run `git status` showed no file modifications by the tool itself (stdout-only design verified).
+- Conventional Commits parser handles 10 standard prefixes; non-matching commits go to "Other" section with stderr note.
+
+### Architectural notes
+
+This is the **first v0.7.0+ backlog item closed** since the v0.6.x audit-driven series concluded. Continues the v0.6.5-v0.6.9 patch cadence per user directive ("v0.6.10, not v0.7.0"). v0.7.0 minor remains reserved for future architectural changes (e.g., `context: fork` migration) when runtime evidence is available.
+
+The tool is a **first-time authoring helper, not a correctness checker**. It is the first non-CI-gate `lib/` script added since v0.6.4 — the lib/ family now has both validators (check-*.js, verify-*.js, test-*.js) and generators (gen-*.js, gen-changelog.js). Worth noting in framework-management as a category split: validators run in CI, generators run by humans on demand.
+
+### Deferred (v0.7.0+ backlog)
+
+1. `context: fork` migration (architectural; needs runtime evidence first)
+2. `model:` / `effort:` per-skill overrides
+3. `$ARGUMENTS` / `$N` substitution adoption (low signal; raise priority if observed)
+4. `paths` glob auto-trigger (likely never)
+5. Live `/vibe` E2E test (sandbox required)
+6. **Conventional Commits enforcement (pre-commit hook)** — newly relevant now that gen-changelog depends on the format. Could be a husky/pre-commit hook or a v0.6.x-style advisory in check-skill-docs.js.
+7. **CHANGELOG drift verification (Invariant 6 candidate)** — does the latest CHANGELOG entry's commit-hash trailers match git log of the corresponding range? Built on top of gen-changelog. Defer until the gen-changelog tool sees real-world use across 2-3 sprints.
+8. Windows job fixture-parity
+9. `bin/audit-repo-invariants` data-driven exclude list
+
+---
+
 ## [0.6.9] — 2026-05-15
 
 ### Fixed

@@ -7,6 +7,46 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.7] — 2026-05-15
+
+### Added
+- **`lib/check-plan-content.js`** — CI hard-gate enforcing v0.6.3's Pre-Destructive Gate. Closes the v0.6.3-deferred plan-content-linter substantial feature.
+  - Scans `docs/superomni/plans/plan-*.md` (date >= 20260514; v0.6.0 plan exempt by historical-immutability convention).
+  - For each step whose `**How:**` subsection contains a destructive pattern (12 patterns: `git rm`, `git filter-branch`, `git reset --hard`, `git push --force`, `rm -rf`, `gh repo delete`, `gh release delete`, `DROP TABLE`, `DELETE FROM`, `TRUNCATE`, `npm publish`, `npm unpublish`), the immediately-preceding step in document order MUST contain the keyword `careful` (case-insensitive).
+  - Markdown-aware: skips fenced code blocks (multi-line ```...```; usually documentation), but does NOT strip inline-backticks (in plan How sections, `cmd` typically means "run this command", not "literal token reference" — opposite semantic from skill bodies).
+  - On violation: exit 1 with file path + step number + which pattern + which preceding step + remediation hint.
+- New npm scripts: `check:plan-content` (standalone) + included in `verify:skill-docs` umbrella.
+- 1 new step in `.github/workflows/validate.yml` ubuntu and windows jobs (after `Check plugin sync`).
+
+### Changed
+- **`skills/writing-plans/SKILL.md.tmpl` Pre-Destructive Gate section** — added 1-line CI-enforcement note pointing plan authors to `lib/check-plan-content.js`.
+
+### Why this matters
+
+v0.6.3 added the Pre-Destructive Gate as **template guidance** — plan authors were told "if your plan has destructive steps, insert a careful step first". Worked example used v0.6.0's reactive Step 14.5 amendment as cautionary tale. But the gate was honor-system: a plan author skipping the careful step wouldn't be caught until execution time (or by careful human review). v0.6.7 makes the gate CI-enforced. Future plans with `git rm` lacking a preceding careful step fail CI immediately, before any actual destructive op runs.
+
+### Verified
+
+- Positive demo (synthetic fixture): 2-step plan with `careful` in Step 1's title + body, `git rm` in Step 2's How → linter passes
+- Negative demo (synthetic fixture): same plan but Step 1 lacks `careful` keyword → linter exits 1 with clear diagnostic; restore → linter passes
+- False-positive avoidance (real plan: v0.6.3 plan-main-dynamic-context-and-careful-gate-20260515.md) — multiple `git rm` mentions in prose inside fenced code blocks (the gate teaches the pattern via worked example) → linter does NOT fire (fence-stripping correctly suppresses)
+
+### Architectural significance
+
+This is a CI hard-gate (architectural-level: enforces correctness invariants on plan authoring at build time), shipped as a single-purpose patch. The user requested architectural-level changes still follow patch cadence; this sprint demonstrates that pattern. ~200 LOC linter + 1 CI step + 1 line in writing-plans + version bump.
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- `context: fork` migration (still architectural-level, requires runtime evidence first; user could test by running `/investigate` outside this session).
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test (sandbox required).
+- CHANGELOG auto-generation from commits.
+- Windows job fixture-parity.
+- `bin/audit-repo-invariants` data-driven exclude list.
+
+---
+
 ## [0.6.6] — 2026-05-15
 
 ### Fixed

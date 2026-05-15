@@ -60,6 +60,9 @@ jobs:
       - name: Check plugin sync
         run: npm run check:plugin-sync
 
+      - name: Check plan content
+        run: npm run check:plan-content
+
   validate-windows:
     name: Workflow Contract Validation (Windows)
     runs-on: windows-latest
@@ -96,3 +99,6 @@ jobs:
 
       - name: Check plugin sync
         run: npm run check:plugin-sync
+
+      - name: Check plan content
+        run: npm run check:plan-content

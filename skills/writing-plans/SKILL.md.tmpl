@@ -127,6 +127,8 @@ The plan must follow this structure:
 
 **If any plan step contains a destructive operation, the immediately-prior step MUST invoke the `careful` skill with explicit blast-radius enumeration.**
 
+> **CI-enforced since v0.6.7** via `npm run check:plan-content` (see [`lib/check-plan-content.js`](${CLAUDE_SKILL_DIR}/../../lib/check-plan-content.js)). Plans that violate this gate fail CI before reaching execution. The linter scans each plan's `**How:**` subsections, ignoring fenced code blocks, and verifies the immediately-preceding step (in document order) contains the keyword `careful`.
+
 Destructive patterns that trigger the gate:
 - `git rm`, `git filter-branch`, `git reset --hard` on remote-tracked branches, force-push to protected branches
 - `rm -rf`, mass `mv` (renaming N>3 files at once), directory delete

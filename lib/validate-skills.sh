@@ -119,13 +119,25 @@ validate_tmpl() {
   fi
 
   # 9. Iron Law example blocks (recommended for core skills)
+  # Post-v0.6.1: examples may be extracted to skills/<name>/reference/<topic>.md per the
+  # progressive-disclosure convention. The check passes if EITHER inline example blocks
+  # exist OR the skill has a `reference/` subdirectory with at least one .md file.
   if grep -q '## Iron Law' "$tmpl"; then
-    if ! grep -qE '### .*(Good|Bad|Correct|Incorrect|Compliant|Violat|Example)' "$tmpl"; then
-      if requires_iron_law_examples "$rel_tmpl"; then
-        warn "$rel_tmpl: Iron Law present but no example blocks found (recommended: add good/bad examples)"
-      fi
+    skill_dir="$(dirname "$tmpl")"
+    has_inline_examples=false
+    has_reference_dir=false
+    if grep -qE '### .*(Good|Bad|Correct|Incorrect|Compliant|Violat|Example)' "$tmpl"; then
+      has_inline_examples=true
+    fi
+    if [ -d "$skill_dir/reference" ] && [ -n "$(find "$skill_dir/reference" -maxdepth 1 -name '*.md' -print -quit 2>/dev/null)" ]; then
+      has_reference_dir=true
+    fi
+    if [ "$has_inline_examples" = "true" ] || [ "$has_reference_dir" = "true" ]; then
+      pass "Iron Law example blocks present (inline or reference/)"
     else
-      pass "Iron Law example blocks present"
+      if requires_iron_law_examples "$rel_tmpl"; then
+        warn "$rel_tmpl: Iron Law present but no example blocks (inline or reference/) found"
+      fi
     fi
   fi
 

@@ -22,87 +22,17 @@ consumes: ~
 
 ### Iron Law 1: Test First
 
-If you can write the code, you can write the test first.
-Exceptions are rare: pure UI layout, one-off scripts, throwaway prototypes.
-If you're not sure — write the test first anyway.
-
-#### Good Example (Test First)
-```
-Need: calculateTotal() for empty cart returns 0
-Agent:
-  1. Write test: assert Cart().calculate_total() == 0
-  2. Run test -> RED (Cart class doesn't exist yet)
-  3. Implement Cart with calculate_total()
-  4. Run test -> GREEN
-```
-
-#### Bad Example (AVOID)
-```
-Need: calculateTotal() for empty cart returns 0
-Agent:
-  1. Write Cart class with calculate_total() method
-  2. Then write test that calls it
-  3. Test passes immediately
-  [VIOLATED: Code written before test — test was never RED]
-```
+If you can write the code, you can write the test first. Exceptions are rare: pure UI layout, one-off scripts, throwaway prototypes. If you're not sure — write the test first anyway.
 
 ### Iron Law 2: Delete Untested Code
 
-**Code written before its test MUST be deleted.**
-
-If you wrote implementation code before writing a test for it:
-1. Delete the implementation code
-2. Write the failing test
-3. Rewrite the implementation to pass the test
-
-There are no exceptions. This rule prevents gradual test-last erosion.
-
-#### Good Example (Delete Untested Code)
-```
-Accidentally wrote validateEmail() before its test.
-Agent:
-  1. Recognize violation — code exists without a preceding test
-  2. Delete validateEmail() implementation
-  3. Write failing test: assert validate_email("bad") == False
-  4. Run test -> RED (function doesn't exist)
-  5. Rewrite validateEmail() to pass test
-  6. Run test -> GREEN
-```
-
-#### Bad Example (AVOID)
-```
-Wrote validateEmail() before its test.
-Agent:
-  1. Write test after the fact
-  2. Test passes immediately
-  3. Move on
-  [VIOLATED: Code was never deleted and rewritten — test was never RED]
-```
+Code written before its test MUST be deleted. Delete → write failing test → rewrite implementation to pass. No exceptions; this rule prevents gradual test-last erosion.
 
 ### Iron Law 3: Red Before Green
 
-A test that was never red proves nothing. Before implementing, run the test and
-confirm it FAILS for the right reason. A test that passes without implementation
-is either testing the wrong thing or the behavior is already implemented.
+A test that was never red proves nothing. Before implementing, run the test and confirm it FAILS for the right reason. A test that passes without implementation is either testing the wrong thing or the behavior is already implemented.
 
-#### Good Example (Red Before Green)
-```
-Agent:
-  1. Write test for new parseCurrency("$1,234.56") -> 1234.56
-  2. Run test -> RED: "parseCurrency is not defined"
-  3. Confirm: failing for the RIGHT reason (function missing, not test broken)
-  4. Implement parseCurrency
-  5. Run test -> GREEN
-```
-
-#### Bad Example (AVOID)
-```
-Agent:
-  1. Write test for existing utility function
-  2. Run test -> GREEN immediately
-  3. Assume test is correct and move on
-  [VIOLATED: Test was never red — it may be testing the wrong thing or behavior already exists]
-```
+**Reference:** see [reference/red-green-refactor.md](${CLAUDE_SKILL_DIR}/reference/red-green-refactor.md) for the canonical Good/Bad worked examples for all 3 Iron Laws.
 
 ## The Red-Green-Refactor Cycle
 
@@ -220,50 +150,9 @@ Iron Law 2 (Delete Untested Code): OBSERVED | N/A [if no untested code was writt
 ────────────────────────────────
 ```
 
-## Anti-Patterns to Avoid
+## Anti-Patterns, What to Test, Test Organization
 
-See `testing-anti-patterns.md` for the full list. Key ones:
-
-| Anti-pattern | Problem |
-|--------------|---------|
-| Testing implementation (not behavior) | Tests break on refactor even when behavior is correct |
-| Mocking the thing you're testing | Test proves nothing |
-| Tests that always pass | Worse than no tests — gives false confidence |
-| No assertions | Syntactically a test, semantically useless |
-| Order-dependent tests | Hides bugs, hard to debug |
-| Testing private methods directly | Brittle, couples to internals |
-| Writing code before the test | Violates Iron Law 2 — delete and rewrite |
-
-## What to Test
-
-**Test these:**
-- Public API and behavior contracts
-- Edge cases (empty input, max values, null/nil)
-- Error conditions and error messages
-- State transitions
-- Integration points (with real or contract-verified doubles)
-
-**Don't test these:**
-- Framework code (assume it works)
-- Private implementation details
-- Third-party libraries
-- One-line delegations
-
-## Test Organization
-
-```
-# Unit test: one function/class in isolation
-def test_calculate_total_with_empty_cart():
-    cart = Cart()
-    assert cart.calculate_total() == 0
-
-# Integration test: multiple real components
-def test_checkout_flow_persists_order():
-    cart = Cart()
-    cart.add_item(Item(id=1, price=9.99))
-    order = checkout(cart, user=test_user)
-    assert Order.find(order.id).total == 9.99
-```
+**Reference:** see [reference/anti-patterns.md](${CLAUDE_SKILL_DIR}/reference/anti-patterns.md) for the canonical anti-patterns table, what-to-test/what-not-to-test heuristics, and unit-vs-integration test examples.
 
 ## When Tests Already Exist
 

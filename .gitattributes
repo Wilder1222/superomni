@@ -4,3 +4,12 @@ lib/*.sh text eol=lf
 *.md text
 *.js text
 *.json text
+
+# Generator-touched files: keep LF unconditionally so cross-platform `sha256sum`
+# parity (`npm run verify:fixture-parity`) holds regardless of autocrlf settings.
+skills/**/SKILL.md text eol=lf
+skills/**/SKILL.md.tmpl text eol=lf
+skills/**/reference/*.md text eol=lf
+lib/templates/*.tmpl text eol=lf
+lib/templates/*.md text eol=lf
+lib/preamble*.md text eol=lf

@@ -5,6 +5,7 @@ description: |
   Always active. Read this first.
 when_to_use: |
   Always active — the meta-skill that teaches the framework. Read first on session start. Not invoked explicitly.
+user-invocable: false
 produces: ~
 consumes: ~
 ---
@@ -143,6 +144,8 @@ All outputs go in `docs/superomni/` for agent indexing and self-improvement:
 | Harness audits | `docs/superomni/harness-audits/harness-audit-[branch]-[session]-[date].md` |
 
 **`[session]` naming rule:** Auto-generate a short, descriptive session identifier from the conversation context (e.g., `vibe-skill`, `auth-refactor`, `fix-login-bug`). Use kebab-case, max 30 chars. This enables agents to search and retrieve relevant prior sessions.
+
+**Skill supporting files:** when authoring a skill whose body grows large, extract reference material into `skills/<name>/reference/<topic>.md` (subdirectory always; flat `reference.md` is non-conforming). See `framework-management` skill § Supporting Files for the canonical pattern.
 
 ## Status Protocol
 

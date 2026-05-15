@@ -7,6 +7,7 @@ description: |
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
 when_to_use: |
   Use when a feature branch is complete and ready to merge: final cleanup, sync with main, squash, and PR creation. NOT for authoring the full release — use release for that.
+disable-model-invocation: true
 produces: ~
 consumes:
   - "docs/superomni/evaluations/evaluation-[branch]-[session]-[date].md"

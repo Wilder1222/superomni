@@ -26,6 +26,8 @@ consumes: ~
 
 Never execute a destructive, irreversible, or security-sensitive operation without explicit user approval. "I assumed it was fine" is never an acceptable justification for data loss or a security incident.
 
+**Auto-invocation:** the `writing-plans` skill's Pre-Destructive Gate requires authors to invoke `careful` immediately before any plan step containing destructive operations. See `writing-plans/SKILL.md` § Pre-Destructive Gate for the pattern and the v0.6.0 worked example.
+
 ## Trigger Conditions
 
 This skill activates automatically when any of the following are detected:

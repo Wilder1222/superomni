@@ -1,6 +1,6 @@
 {
     "name": "superomni",
-    "version": "0.6.0",
+    "version": "0.6.4",
     "description": "superomni — A fused AI coding skill framework combining methodology-driven practices with engineering completeness. Plan Lean, Execute Complete.",
     "license": "MIT",
     "author": "Wilder1222",
@@ -27,7 +27,10 @@
         "check:skill-docs": "node lib/check-skill-docs.js",
         "check:workflow-contract": "node lib/check-workflow-contract.js",
         "score:workflow": "node lib/score-workflow.js",
-        "verify:skill-docs": "npm run gen-skills && npm run check:skill-docs",
+        "verify:fixture-parity": "node lib/verify-fixture-parity.js",
+        "test:generators": "node lib/test-generators.js",
+        "audit:invariants": "bash bin/audit-repo-invariants",
+        "verify:skill-docs": "npm run gen-skills && npm run check:skill-docs && npm run verify:fixture-parity && npm run test:generators",
         "ensure:lf": "node lib/ensure-setup-lf.js",
         "test": "bash lib/validate-skills.sh",
         "setup": "node lib/setup.js"

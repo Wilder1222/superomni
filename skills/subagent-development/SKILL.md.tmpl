@@ -180,163 +180,20 @@ Merge sub-agent outputs carefully:
 3. Resolve any conflicts between parallel agents
 4. Dispatch next wave with all newly unblocked tasks
 
-## Parallel Execution Pattern
+## Parallel Execution & Wave Planning
 
-When using multiple sub-agents simultaneously:
+When using multiple sub-agents simultaneously, follow the wave-execution model: independent tasks run in parallel within a wave; dependent tasks across waves. For task lists with 6+ items, draft a formal Wave Execution Plan.
 
-```
-PARALLEL WAVE EXECUTION
-═══════════════════════════════════════
-Wave 1 (8 agents):
-  Agent 1: [implementer] — [task A]
-  Agent 2: [implementer] — [task B]
-  Agent 3: [spec-reviewer] — [spec for task C]
-  Agent 4: [implementer] — [task D] (independent of A, B)
-  Agent 5: [implementer] — [task E]
-  Agent 6: [planner-reviewer] — [review module X]
-  Agent 7: [implementer] — [task F]
-  Agent 8: [implementer + TDD] — [tests for module Y]
+**Reference:** see [reference/wave-planning.md](${CLAUDE_SKILL_DIR}/reference/wave-planning.md) for: parallel-wave template, formal wave-plan template, per-agent output contracts, conflict detection, agent failure handling, and integration verification.
 
-Synchronization point: After all Wave 1 agents report DONE
-Wave 2 tasks (unblocked by Wave 1): [list]
-═══════════════════════════════════════
-```
+## Consensus Protocol & Model Selection
 
-Rule: Only run truly independent tasks in parallel.
-If task B depends on task A's output, run them sequentially (in different waves).
+For critical decisions, optionally run two agents on the same task; agreement → proceed, disagreement → surface as TASTE decision. Match model cost to task complexity.
 
-## Wave Planning for Large Task Sets
-
-For task lists with 6+ items, create a formal wave execution plan:
-
-```
-WAVE EXECUTION PLAN
-════════════════════════════════════════
-Total tasks:     [N]
-Total waves:     [W]
-Max wave size:   [target: 5-10 agents]
-Est. time saved: [sequential time] → [parallel time with waves]
-
-Wave 1 ([N] agents in parallel):
-  Agent 1 → [Task A]
-  Agent 2 → [Task B]
-  Agent 3 → [Task C]
-  ...
-
-Wave 2 ([M] agents in parallel, after Wave 1 complete):
-  Agent 1 → [Task D]
-  Agent 2 → [Task E]
-  ...
-════════════════════════════════════════
-```
-
-### Output Contracts per Agent
-
-Before dispatching each wave, define a clear output contract for every agent:
-
-```
-Agent 1 — Task A
-  Input:  [what it reads]
-  Output: [exactly what it produces, file name, format]
-  Scope:  [files it may touch]
-  NOT allowed: [what to avoid]
-
-Agent 2 — Task B
-  Input:  [what it reads]
-  Output: [exactly what it produces, file name, format]
-  Scope:  [files it may touch]
-  NOT allowed: [what to avoid]
-```
-
-### Conflict Detection
-
-Before integrating parallel outputs:
-1. Check if any agents modified the same files
-2. If conflict exists → do NOT auto-merge; bring to user
-
-```bash
-# Check for conflicts in parallel outputs
-git diff agent-1/feature agent-2/feature -- shared-file.js
-```
-
-### Agent Failure Handling
-
-If an agent reports BLOCKED:
-1. Check if the block affects other agents
-2. If independent: let others continue, fix the blocked one separately
-3. If dependent: pause the dependent agents, resolve the block
-
-### Integration Verification
-
-After all agents in a wave report DONE:
-
-1. **Review each output independently** — don't integrate until you've reviewed
-2. **Integrate in dependency order** — sequential dependencies first
-3. **Run tests after each integration** — catch conflicts early
-4. **Proceed to next wave** — unblock agents waiting on this wave's output
-5. **Final integration test** — run full test suite after all waves complete
-
-```bash
-# Integration verification after each wave
-npm test 2>&1 | tail -10
-git diff HEAD --stat
-```
-
-## Consensus Protocol (Optional)
-
-For critical decisions, run two agents with the same task and compare outputs:
-- If they agree → proceed
-- If they disagree → surface disagreement to user as TASTE decision
-
-## Model Selection Strategy
-
-Match model cost to task complexity. Signals:
-
-| Signal | Model tier |
-|--------|-----------|
-| 1–2 files, complete spec, no ambiguity | Lightweight / fast model |
-| Multi-file, integration concerns, pattern matching | Standard model |
-| Architecture decisions, broad codebase understanding, review tasks | Strongest model |
-
-Rules:
-- Default to the **cheapest model that can reliably complete the task**.
-- Upgrade when a sub-agent reports BLOCKED due to reasoning limits (not context gaps).
-- Never downgrade mid-task; finish the task at the assigned tier.
-- For Spec Compliance Review and Code Quality Review agents: use standard model minimum.
+**Reference:** see [reference/consensus-protocol.md](${CLAUDE_SKILL_DIR}/reference/consensus-protocol.md) for the consensus protocol and the model-tier selection table.
 
 ## Save Sub-Agent Session Document
 
-After the sub-agent session is complete, save the full session record as a Markdown document:
+After the session ends, write the full session record (agents dispatched, wave breakdown, outputs, integration summary, final status) to `docs/superomni/subagents/subagent-[branch]-[session]-[date].md`. This is the permanent record the user audits.
 
-```bash
-_SA_DATE=$(date +%Y%m%d-%H%M%S)
-_SA_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-' || echo "unknown")
-_SA_FILE="subagent-${_SA_BRANCH}-${_SA_DATE}.md"
-mkdir -p docs/superomni/subagents
-cat > "docs/superomni/subagents/${_SA_FILE}" << EOF
-# Sub-Agent Session: ${_SA_BRANCH}
-
-**Date:** ${_SA_DATE}
-**Branch:** ${_SA_BRANCH}
-
-## Agents Dispatched
-
-[List each agent, its type, task, wave, and reported status]
-
-## Wave Summary
-
-[Wave 1: N agents, duration. Wave 2: M agents, duration. Total elapsed vs sequential estimate.]
-
-## Integration Summary
-
-[What was merged, any conflicts resolved, final state]
-
-## Status
-
-[DONE | DONE_WITH_CONCERNS | BLOCKED]
-[Any concerns or issues]
-EOF
-echo "Sub-agent session saved to docs/superomni/subagents/${_SA_FILE}"
-```
-
-Write the full session record (agents dispatched, wave breakdown, outputs, integration summary, and final status, formatted as Markdown) to `docs/superomni/subagents/subagent-[branch]-[session]-[date].md`. This file serves as the permanent record for the user to audit the sub-agent session.
+**Reference:** see [reference/report-templates.md](${CLAUDE_SKILL_DIR}/reference/report-templates.md) for the save script and file template.

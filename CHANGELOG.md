@@ -7,6 +7,35 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.5] — 2026-05-15
+
+### Fixed
+- **README.md** said `Current stable version: 0.6.0` (4 versions stale). Now reflects 0.6.5.
+- **`claude-skill.json`** `commands` array was missing `style-capture` (the file existed in `commands/` but plugin/marketplace and npm-install paths saw different command sets). Now matches the on-disk `commands/*.md` set exactly.
+
+### Added
+- **`lib/check-plugin-sync.js`** — new CI gate validating 4 cross-manifest invariants:
+  1. **Version sync**: `package.json` is canonical; `marketplace.json` (top-level + `plugins[0]`), `plugin.json`, `claude-skill.json` must all match.
+  2. **Commands sync**: filenames in `commands/*.md` must equal `claude-skill.json` `commands[].name` set (no missing, no extras).
+  3. **Keywords sync**: `plugin.json` keywords must equal `marketplace.json plugins[0].keywords`.
+  4. **README version**: `Current stable version: X.Y.Z` line must match `package.json` version.
+- New npm scripts: `check:plugin-sync` (standalone) and inclusion in the `verify:skill-docs` umbrella.
+- 4 inject-and-restore demos verified each invariant fires with a specific diagnostic.
+
+### Why this matters
+
+The v0.6.1-v0.6.4 series bumped versions across 4-5 surfaces by hand each time. Without a checker, the next bump is one missed file away from silent drift — exactly what happened with `claude-skill.json` missing `style-capture`. This gate catches the drift class proactively in `verify:skill-docs`.
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- Plan-content auto-linter (CI hard-gate for v0.6.3 Pre-Destructive Gate).
+- `context: fork` migration.
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test.
+
+---
+
 ## [0.6.4] — 2026-05-15
 
 ### Added

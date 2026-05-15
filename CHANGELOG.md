@@ -5,6 +5,50 @@ All notable changes to superomni are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
+**Authoring helper:** run `npm run gen:changelog -- --version <X.Y.Z>` to scaffold a new entry from Conventional Commits in `last-tag..HEAD`.
+
+---
+
+## [0.6.11] — 2026-05-15
+
+### Added
+- **Discovery sync** — `lib/gen-changelog.js` (shipped in v0.6.10) is now wired into the skills that close sprints, so the tool actually gets used.
+  - `skills/release/SKILL.md.tmpl` § Changelog: 1-line `npm run gen:changelog` hint above the existing manual fallback template (the manual template stays — fallback when tool is unavailable)
+  - `skills/document-release/SKILL.md.tmpl` § Phase 4 (Update CHANGELOG): same hint
+  - `CHANGELOG.md` preamble: 1-line tool pointer for new contributors
+- **Structural defense** — `lib/check-skill-docs.js` gains a 6th advisory: any skill `.tmpl` mentioning `CHANGELOG.md` must also mention `gen:changelog`. Catches future drift when new skills are added that touch CHANGELOG without the discovery pointer. `framework-management` skill exempted (it teaches the rules abstractly via examples).
+
+### Changed
+- `docs/IMPLEMENTATION.md` "Deferred / out of scope" list: ~~CHANGELOG auto-generation from commits~~ marked **closed by v0.6.10** (preserves audit trail of how backlog items get closed).
+
+### Why this matters
+
+v0.6.10 shipped the tool but **the skills that should use it had no pointer to it** — `release` and `document-release` had hand-written CHANGELOG templates with no mention of `gen:changelog`. Classic staleness pattern: ship a tool in one sprint, wire it into discovery in the next. Without this patch, future sprints would keep hand-writing CHANGELOG entries because the agent invoking the release skill never sees the tool reference.
+
+The new advisory is the **structural defense** — it ensures any future skill that touches CHANGELOG.md also points at the tool, preventing the same staleness pattern from recurring at v0.7.x.
+
+This sprint also marks the **first real dogfood** of `gen:changelog`. v0.6.10's CHANGELOG entry was written manually because the v0.6.10 commit didn't exist yet (chicken-and-egg). v0.6.11 closes the loop: tool ran against `e819a69` and produced the `### Added` bullet for this entry.
+
+### Verified
+
+- All 8 CI gates green (`gen-skills`, `check:skill-docs`, `verify:fixture-parity`, `test:generators`, `check:plugin-sync` 5-invariants, `check:plan-content`, `check:workflow-contract`, `validate-skills`)
+- **Negative test for new advisory**: temporarily removed the `gen:changelog` hint from `skills/release/SKILL.md.tmpl`, regenerated, ran `check-skill-docs` — advisory fired with exact expected message `skills/release/SKILL.md.tmpl: mentions CHANGELOG.md without 'gen:changelog' pointer`. Restored backup; advisory cleared. Confirms the gate works (not just that current state happens to satisfy it).
+- **Dogfood**: `npm run gen:changelog -- --from 5f7d947 --to HEAD --version 0.6.11` produced exactly 1 bullet under `### Added` referencing `e819a69` (the v0.6.10 commit), with the TODO comment for manual subsections — exactly as v0.6.10's design specified.
+- All global invariants preserved: skills=28, agents=5, EnterPlanMode-mentions=5, flat-reference.md=0, `${CLAUDE_SKILL_DIR}`-tokens=15, design-md-library entries=9, `.approved-spec-*`-markers=0
+- Skill body lines: 6,247 → 6,255 (+8). Slight overage of plan's ≤+5 budget — accepted as low-impact narrative additions to release/document-release skill prose. Documented in execution artifact.
+
+### Architectural notes
+
+- Pattern: **ship tool → wire into discovery → defend with advisory**. v0.6.10 (ship) + v0.6.11 (wire + defend) is now the canonical 2-sprint sequence for adding any authoring helper. Future `lib/gen-*.js` tools should follow it.
+- The `/gen[:-]changelog/` regex matches both forms (`gen:changelog` npm script invocation, `gen-changelog` file/directory ref). Verified no false positives across 96 corpus matches.
+
+### Deferred (v0.6.12+ backlog)
+
+- **Conventional Commits enforcement** (P2 — carry-forward from v0.6.10) — husky / pre-commit hook OR advisory in `check-skill-docs.js` scanning recent commits. Becomes increasingly important now that `gen:changelog` depends on the format.
+- **`lib/` category split documentation** (P3 — carry-forward from v0.6.10) — `framework-management` should explicitly document: `check-*.js` / `verify-*.js` / `test-*.js` = CI gates (in umbrella); `gen-*.js` = authoring helpers (NOT in umbrella).
+- **`bin/audit-repo-invariants` data-driven exclude list** (P3 — carry-forward from v0.6.3) — config-driven exclude list for the audit tool.
+- **Live `/vibe` E2E test** (deferred from v0.6.2) — sandbox required.
+
 ---
 
 ## [0.6.10] — 2026-05-15

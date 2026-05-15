@@ -81,7 +81,13 @@ Determine next version (semver: MAJOR.MINOR.PATCH).
 
 ### Changelog
 
-Update `CHANGELOG.md`:
+Update `CHANGELOG.md`. First scaffold the entry from Conventional Commits in the range `last-tag..HEAD`:
+
+```bash
+npm run gen:changelog -- --version <X.Y.Z> > /tmp/changelog-draft.md
+```
+
+Then paste the draft into `CHANGELOG.md` and complete the *Why this matters*, *Verified*, and *Deferred* subsections manually (the human-synthesis 40%). Manual fallback template (when the tool is unavailable):
 
 ```markdown
 ## [vX.Y.Z] — YYYY-MM-DD

@@ -7,6 +7,42 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.8] — 2026-05-15
+
+### Fixed
+- **`docs/AGENTS.md` (P0 user-facing doc bug)** — completely rewrote 265-line agent library reference. Pre-fix doc described 9 retired v0.5.x agents (`code-reviewer`, `planner`, `debugger`, `test-writer`, `security-auditor`, `architect`, `evaluator`, `ceo-advisor`, `designer`) with **zero mentions** of the 5 current agents. Post-fix doc accurately describes the 5 canonical agents (`doc-writer`, `explorer`, `frontend-designer`, `planner-reviewer`, `refactoring-agent`) with identity / iron law / tools / when-to-invoke / output format for each, plus a "Migration from v0.5.x" section mapping retired→current. README.md (lines 234, 390) links here as the canonical "agent library reference"; new contributors now get accurate information.
+
+### Added
+- **`lib/check-plugin-sync.js` Invariant 5** — `docs/AGENTS.md` agent-section headings (`### \`<name>\``) must equal `agents/*.md` filename set. Bidirectional intersection (heading must match an actual agent file) avoids false-positives on prose. When a new agent is added but not documented in `docs/AGENTS.md`, CI fails.
+- **`lib/check-plugin-sync.js` VERSION_DOCS extension** — added 4th entry for `docs/AGENTS.md` `**Last updated:** vX.Y.Z` line. Bumping `package.json` version now requires bumping AGENTS.md `Last updated` too (CI-enforced).
+- **`docs/AGENTS.md` `**Last updated:**` version anchor** — explicit version line at top of doc, sync-checked by Invariant 4.
+
+### Changed
+- `lib/check-plugin-sync.js` success message updated to `Plugin sync check passed: 5 invariants validated.` (was 4 invariants, now 5 logical groups).
+
+### Why this matters
+
+After v0.6.0 consolidated 9 agents into 5, every release (v0.6.0 through v0.6.7) shipped with `docs/AGENTS.md` describing the wrong architecture. README.md actively pointed contributors at this doc. The bug shipped for 8 minor versions before this audit caught it. Same drift class as v0.6.5 (README version stale) and v0.6.6 (docs/COMPARISON.md and docs/DESIGN.md version drift) — but for **agent inventory** instead of version strings. Invariant 5 prevents the recurrence pattern.
+
+### Verified
+
+- Negative demo (Invariant 5): rename `### \`explorer\`` heading → linter exits 1 with "1 agent(s) ... missing from docs/AGENTS.md: explorer"; restore → passes
+- Negative demo (Invariant 4 on AGENTS.md): change `**Last updated:** v0.6.8` → `v9.9.9` → linter exits 1 with version mismatch diagnostic; restore → passes
+- False-positive avoidance: prose mentions of `explorer` / `planner-reviewer` etc. throughout doc body do not trigger Invariant 5 (heading regex + bidirectional filter correctly limit detection to `### \`name\`` headings only)
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- `context: fork` migration (architectural; runtime evidence required).
+- `model:` / `effort:` per-skill overrides.
+- `$ARGUMENTS` substitution adoption.
+- `paths` glob auto-trigger (likely never).
+- Live `/vibe` E2E test (sandbox required).
+- CHANGELOG auto-generation from commits.
+- Windows job fixture-parity.
+- `bin/audit-repo-invariants` data-driven exclude list.
+- `docs/IMPLEMENTATION.md` version stale (separate audit; different drift profile).
+
+---
+
 ## [0.6.7] — 2026-05-15
 
 ### Added

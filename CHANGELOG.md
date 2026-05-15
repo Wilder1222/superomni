@@ -7,6 +7,26 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.4] — 2026-05-15
+
+### Added
+- **Token-literal advisory in `lib/check-skill-docs.js`** — 4th advisory in the existing series (≥300-line / flat-reference / CRLF / token-literal). Warns (stderr; exit 0) when a `SKILL.md.tmpl` contains `{{PREAMBLE}}`, `{{PREAMBLE_CORE}}`, or `{{PREAMBLE_REF_LINK}}` in raw prose (outside both fenced code blocks AND inline-backtick spans), after the canonical first-occurrence position. Catches the v0.6.3 framework-management self-expansion bug class proactively. Closes v0.6.3 retro ACTION 2.
+
+### Verified
+- Positive demo: literal token in raw prose → advisory fires with `file:line` and remediation hint.
+- Negative demo: token inside `\`\`\`` fence → no advisory.
+- Inline-backtick edge case: `` `{{PREAMBLE_CORE}}` `` → no advisory (markdown renders as inline code; generator first-occurrence-only protects it).
+
+### Deferred (v0.7.0+ backlog, unchanged)
+- `context: fork` + `agent:` migration (architectural minor; needs design sprint — not 1:1 with current dispatch model).
+- `$ARGUMENTS` / `$N` substitution adoption.
+- `model:` / `effort:` per-skill overrides.
+- `paths` glob auto-trigger (likely never).
+- Plan-content auto-linter (CI hard-gate for v0.6.3's Pre-Destructive Gate).
+- Live `/vibe` E2E test (deferred from v0.6.2 retro).
+
+---
+
 ## [0.6.3] — 2026-05-15
 
 ### Added

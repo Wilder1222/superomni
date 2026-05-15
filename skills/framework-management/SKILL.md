@@ -292,8 +292,10 @@ Single project-wide rule:
 - **Scripts**: `scripts/<name>.{py,sh,js}` (executable code Claude runs; never loaded as text).
 - **Linking**: use `${CLAUDE_SKILL_DIR}/reference/<topic>.md` in URLs — runtime-resolved.
 
-Two advisory warnings in `lib/check-skill-docs.js` enforce this: (a) `SKILL.md ≥ 300 lines && no reference/ dir`, (b) any flat `reference.md` at a skill root.
+Five advisory warnings in `lib/check-skill-docs.js` enforce skill-doc hygiene: (a) `SKILL.md ≥ 300 lines && no reference/ dir`, (b) any flat `reference.md` at a skill root, (c) generated `SKILL.md` with CRLF line endings, (d) literal `{{PREAMBLE*}}` token in raw prose (post-canonical occurrence), (e) any `.tmpl` mentioning `CHANGELOG.md` without a `gen:changelog` pointer (v0.6.11+). A separate hard-error scan catches deprecated phrases from v0.6.0.
 
 **Migration audit tool:** when migrating a repo-wide invariant (e.g., a token rename, a deprecated API), run `bin/audit-repo-invariants <pattern>` (or `npm run audit:invariants -- <pattern>`) first. It lists all files referencing the pattern grouped by directory so you can classify usage sites vs sister-tools before editing — this catches the v0.6.0-style miss where `lib/validate-skills.sh` was overlooked during the legacy single-token preamble migration.
+
+**CHANGELOG draft generator (v0.6.10+):** for new sprints, run `npm run gen:changelog -- --version <X.Y.Z>` to scaffold the CHANGELOG entry from Conventional Commits in the range `last-tag..HEAD`. The tool prints a skeleton draft to stdout (Added / Fixed / Changed / Removed sections + commit hash trailers); manually complete the *Why this matters*, *Verified*, and *Deferred (v0.X.Y+ backlog)* subsections before pasting into `CHANGELOG.md`. Uses `lib/gen-changelog.js`.
 
 **Reference:** see [reference/supporting-files.md](${CLAUDE_SKILL_DIR}/reference/supporting-files.md) for the full convention, subdirectory semantics, and canonical examples from the 5 skills trimmed in sprint v3 (2026-05-14).

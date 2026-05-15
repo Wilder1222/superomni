@@ -2,8 +2,8 @@
 
 ## superomni — Developer Reference
 
-**Version:** 0.6.9
-**Last updated:** v0.6.9
+**Version:** 0.6.11
+**Last updated:** v0.6.11
 
 ---
 
@@ -489,7 +489,7 @@ These are the items consistently deferred by v0.6.x sprint retros, awaiting futu
 - **`$ARGUMENTS` / `$N` substitution adoption** — argument-hint frontmatter exists since v0.6.2 but skill bodies don't yet use the substitution. Low signal so far (no observed argument usage); raise priority if signal changes.
 - **`paths` glob auto-trigger** — likely never; superomni skills are stage-triggered, not file-pattern-triggered.
 - **Live `/vibe` E2E test** — sandbox required to validate `!\`<command>\`` runtime resolution end-to-end.
-- **CHANGELOG auto-generation from commits** — currently manual; could template-extract `feat:`/`fix:`/etc.
+- ~~**CHANGELOG auto-generation from commits**~~ — **closed by v0.6.10** (`lib/gen-changelog.js`); wired into `release` and `document-release` skills in v0.6.11.
 - **Windows job fixture-parity** — currently ubuntu-only; verify bash-via-Git availability on `windows-latest` runners.
 - **`bin/audit-repo-invariants` data-driven exclude list** — hard-coded list works; making it config-driven is P3 polish.
 

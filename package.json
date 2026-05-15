@@ -1,6 +1,6 @@
 {
     "name": "superomni",
-    "version": "0.6.9",
+    "version": "0.6.11",
     "description": "superomni — A fused AI coding skill framework combining methodology-driven practices with engineering completeness. Plan Lean, Execute Complete.",
     "license": "MIT",
     "author": "Wilder1222",
@@ -24,6 +24,7 @@
         "gen-skills": "node lib/gen-skill-docs.js",
         "gen-skills:bash": "bash lib/gen-skill-docs.sh",
         "gen-skills:ps": "pwsh -NoProfile -ExecutionPolicy Bypass -File lib/gen-skill-docs.ps1",
+        "gen:changelog": "node lib/gen-changelog.js",
         "check:skill-docs": "node lib/check-skill-docs.js",
         "check:workflow-contract": "node lib/check-workflow-contract.js",
         "check:plugin-sync": "node lib/check-plugin-sync.js",

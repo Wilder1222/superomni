@@ -75,7 +75,7 @@ if [ -d "${SKILLS_DIR}/skills" ]; then
   _SKILLS_COUNT=$(find "${SKILLS_DIR}/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 fi
 
-echo "superomni v0.5.8 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | session=${_SESSION_ID:0:8}"
+echo "superomni v0.6.11 | ${_PROJECT}@${_BRANCH} | ${_SKILLS_COUNT} skills | session=${_SESSION_ID:0:8}"
 
 
 # ── Log session start ────────────────────────────────────────────────────────

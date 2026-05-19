@@ -5,7 +5,8 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "bash \"$HOME/.claude/hooks/session-start.sh\""
+                        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh",
+                        "args": []
                     }
                 ]
             }

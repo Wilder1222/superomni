@@ -1,14 +1,14 @@
 {
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$HOME/.claude/hooks/superomni-session-start.sh\""
-          }
+    "hooks": {
+        "SessionStart": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash \"$HOME/.claude/hooks/superomni-session-start.sh\""
+                    }
+                ]
+            }
         ]
-      }
-    ]
-  }
+    }
 }

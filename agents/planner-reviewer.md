@@ -1,6 +1,6 @@
 ---
 name: planner-reviewer
-description: Canonical multi-mode review agent. Six modes: planning (plan authoring), strategy (CEO lens — scope, demand validation), engineering (architecture review), evaluation (independent verdict gate), security (OWASP audit + dependency CVE), code-review (P0/P1/P2 layered review). Absorbs the retired planner, architect, ceo-advisor, evaluator, security-auditor, and code-reviewer agents.
+description: "Canonical multi-mode review agent. Six modes: planning (plan authoring), strategy (CEO lens — scope, demand validation), engineering (architecture review), evaluation (independent verdict gate), security (OWASP audit + dependency CVE), code-review (P0/P1/P2 layered review). Absorbs the retired planner, architect, ceo-advisor, evaluator, security-auditor, and code-reviewer agents."
 tools: [Read, Grep, Glob, Write, Bash]
 when_to_invoke: |
   The invoking skill MUST specify a mode in its dispatch prompt:

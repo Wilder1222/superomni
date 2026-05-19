@@ -5,8 +5,10 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh",
-                        "args": []
+                        "command": "node",
+                        "args": [
+                            "${CLAUDE_PLUGIN_ROOT}/hooks/launcher.js"
+                        ]
                     }
                 ]
             }

@@ -7,8 +7,7 @@
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const script = path.join(__dirname, 'session-start.sh');
 const bash = process.platform === 'win32' ? 'bash.exe' : 'bash';
 
-const result = spawnSync(bash, [script], { stdio: 'inherit' });
+const result = spawnSync(bash, ['./session-start.sh'], { stdio: 'inherit', cwd: __dirname });
 process.exit(result.status ?? 0);

@@ -2,6 +2,8 @@
 
 > Specialized AI sub-agents for focused tasks — each runs in isolated context with a constrained tool whitelist and returns a structured report.
 
+> **Note:** This file is the agent library reference, **not** a mirror of `CLAUDE.md`. `CLAUDE.md` is the sole project configuration; this document describes the available sub-agents.
+
 **Last updated:** v0.6.11
 
 ---

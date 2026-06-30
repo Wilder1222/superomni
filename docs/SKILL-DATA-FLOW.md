@@ -33,6 +33,34 @@ docs/superomni/
 > **Note:** `retros/` was removed in v0.5.8. The retrospective is now written as `## Retrospective`
 > inside `docs/superomni/releases/release-[branch]-[session]-[date].md` by the `release` skill.
 
+## Convention: Declaration Precedence & Doc-Alignment Discipline
+
+These three disciplines govern any claim about "what the code has" and any
+doc-alignment task. They are the single source of truth; skills that need them
+reference this section by pointer rather than duplicating the text.
+
+1. **Declaration precedence** — Produce paths are authoritative from skill
+   frontmatter `produces:`; a disk directory may be retired legacy or
+   not-yet-bootstrapped. Any claim about "what code has" must check three
+   sources: (a) disk existence, (b) the skill's `produces:`/`consumes:`
+   frontmatter declaration, (c) the CHANGELOG retirement/migration record. On
+   conflict, **the code declaration wins** over the disk state. (This is what
+   bit the feishu-doc-align spec phase: the disk still had `retros/`, but the
+   code declared `harness-audits/` as the live path.)
+
+2. **Quantitative claims pin scope** — Any "N occurrences / X items" claim must
+   pin the grep command and scope on the spot, e.g. "`workflow` is referenced 9
+   times in `skills/vibe/SKILL.md` = `grep -c workflow skills/vibe/SKILL.md`".
+   Do not write a bare count without a reproducible command; downstream re-checks
+   otherwise produce divergent numbers.
+
+3. **Forbidden-token = drifted expression** — Forbidden-token lists for
+   doc-alignment tasks ban the **drifted expression**, not the bare word. Ban
+   "AGENTS.md mirror" (the wrong claim) not "AGENTS.md" (a legitimate file
+   reference); ban "build-skills byte-identical drift phrasing" not
+   "build-skills" (a legitimate legacy script name). Banning bare words
+   collateral-damages legitimate references and triggers false positives.
+
 ## Per-Skill Contracts
 
 ### `brainstorm` → `writing-plans`

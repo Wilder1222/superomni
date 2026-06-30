@@ -32,6 +32,7 @@
         "score:workflow": "node lib/score-workflow.js",
         "verify:fixture-parity": "node lib/verify-fixture-parity.js",
         "test:generators": "node lib/test-generators.js",
+        "test:contract": "node lib/test-contract.js",
         "audit:invariants": "bash bin/audit-repo-invariants",
         "verify:skill-docs": "npm run gen-skills && npm run check:skill-docs && npm run verify:fixture-parity && npm run test:generators && npm run check:plugin-sync && npm run check:plan-content",
         "ensure:lf": "node lib/ensure-setup-lf.js",

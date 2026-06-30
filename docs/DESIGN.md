@@ -88,7 +88,7 @@ The distinction is in the _starting state_, not the methods.
 - Git log analysis (works in any git project)
 - Session detection from commit timestamps (45-min gap threshold)
 - No dependency on gstack-specific state
-- Save reports to `docs/superomni/retros/` (project artifact contract)
+- Save reports to `docs/superomni/retros/` (project artifact contract) — NOTE: `retros/` retired in v0.5.8; retrospective content now lives in `docs/superomni/releases/release-*.md`.
 
 ### Decision 6: Multi-Platform Support Strategy
 
